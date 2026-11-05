@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_bulk_edit": 1,
+ "creation": "2026-11-05 17:47:12.325512",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "stock_threshold",
+  "fallback_supplier",
+  "demo_secret"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Watch stock"
+  },
+  {
+   "default": "10",
+   "fieldname": "stock_threshold",
+   "fieldtype": "Float",
+   "label": "Ask for a purchase when the quantity in a warehouse is below",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "fallback_supplier",
+   "fieldtype": "Link",
+   "label": "Supplier to use when an item has none",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "demo_secret",
+   "fieldtype": "Password",
+   "label": "A secret (spike: tests how a Password field is stored)"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-05 17:47:12.325512",
+ "modified_by": "Administrator",
+ "module": "AI Munimji",
+ "name": "AI Munimji Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "read": 1,
+   "role": "Munimji Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

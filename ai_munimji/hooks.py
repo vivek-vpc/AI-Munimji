@@ -95,13 +95,22 @@ required_apps = ["erpnext"]
 # Installation
 # ------------
 
-# before_install = "ai_munimji.install.before_install"
+# the roles must exist before the DocTypes are synced (their permission rows name them), so they are made before the install
+before_install = "ai_munimji.install.before_install"
 # after_install = "ai_munimji.install.after_install"
+
+# the two fields this app adds to Purchase Order (exported with `bench export-fixtures --app ai_munimji`)
+fixtures = [
+	{
+		"dt": "Custom Field",
+		"filters": [["name", "in", ["Purchase Order-custom_agent_ref", "Purchase Order-custom_agent_approver"]]],
+	}
+]
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "ai_munimji.uninstall.before_uninstall"
+before_uninstall = "ai_munimji.uninstall.before_uninstall"
 # after_uninstall = "ai_munimji.uninstall.after_uninstall"
 
 # Integration Setup
@@ -151,9 +160,10 @@ required_apps = ["erpnext"]
 # 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+# A controller hook can only DENY (frappe/permissions.py: has_controller_permissions). It is called with the keywords doc, ptype, user, debug.
+has_permission = {
+	"Munimji Approval Request": "ai_munimji.permissions.has_permission",
+}
 
 # Document Events
 # ---------------
@@ -170,23 +180,14 @@ required_apps = ["erpnext"]
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"ai_munimji.tasks.all"
-# 	],
-# 	"daily": [
-# 		"ai_munimji.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"ai_munimji.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"ai_munimji.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"ai_munimji.tasks.monthly"
-# 	],
-# }
+# Frappe runs scheduled work at its scheduler tick (240 seconds unless the bench sets another), so nothing here can run more often than that.
+scheduler_events = {
+	"cron": {
+		"*/5 * * * *": [
+			"ai_munimji.jobs.check_stock",
+		],
+	},
+}
 
 # Testing
 # -------

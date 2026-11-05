@@ -1,0 +1,10 @@
+{
+ "creation": "2026-11-05 17:47:13.275358",
+ "doc_type": "Munimji Approval Request",
+ "doctype": "Permission Type",
+ "modified": "2026-11-05 17:47:13.275358",
+ "modified_by": "Administrator",
+ "name": "munimji_approval_request_approve",
+ "owner": "Administrator",
+ "perm_type": "approve"
+}
