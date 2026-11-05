@@ -1,0 +1,8 @@
+# Everything is checked out with LF line endings, on Windows too: the scripts run inside a Linux container
+# and a CRLF shell script fails there with "no such file or directory" (see frappe_docker, docs "Fix CRLF scripts on Windows").
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.svg text
