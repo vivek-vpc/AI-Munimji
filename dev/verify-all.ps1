@@ -3,7 +3,8 @@
 #   .\dev\verify-all.ps1 -Fresh      # without -Fresh it keeps what exists and only runs the steps
 # It removes the containers and volumes of the compose project "munimji-dev" ONLY when you pass -Fresh. Images stay on the machine.
 param([switch]$Fresh)
-$ErrorActionPreference = "Stop"
+# "Continue": docker and bench write progress to stderr; every step is judged by its exit code, not by what it prints
+$ErrorActionPreference = "Continue"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $exec = Join-Path $here "exec.ps1"
 $results = New-Object System.Collections.ArrayList
@@ -12,6 +13,7 @@ function Step($name, [scriptblock]$body) {
     $clock = [Diagnostics.Stopwatch]::StartNew()
     Write-Host "==> $name"
     $ok = $true
+    $global:LASTEXITCODE = 0
     try { & $body; if ($LASTEXITCODE -ne 0 -and $null -ne $LASTEXITCODE) { $ok = $false } } catch { $ok = $false; Write-Host $_.Exception.Message -ForegroundColor Red }
     $clock.Stop()
     [void]$results.Add([pscustomobject]@{ Step = $name; Seconds = [int]$clock.Elapsed.TotalSeconds; Result = $(if ($ok) { "ok" } else { "FAILED" }) })

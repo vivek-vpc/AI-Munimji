@@ -5,7 +5,8 @@
 #     mariadb:11.8 is used from your machine if it is already there;
 #   - it creates one network and two named volumes (mariadb-data, bench) that belong to the project "munimji-dev".
 # It does not touch any other Docker project (for example your ERPNext one). To remove everything it made: .\dev\destroy.ps1
-$ErrorActionPreference = "Stop"
+# "Continue", not "Stop": docker writes its progress to stderr, which Stop would turn into an error when the output is redirected; the exit codes are checked below
+$ErrorActionPreference = "Continue"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $compose = Join-Path $here "compose.yml"
 
