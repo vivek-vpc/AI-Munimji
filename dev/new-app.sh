@@ -25,8 +25,8 @@ answers() {
 }
 
 step "bench new-app ai_munimji (Frappe's template)" bash -c "$(declare -f answers); answers | bench new-app --no-git ai_munimji"
-# -n: never overwrite a file this repository already has (README.md, .gitignore)
-step "copy the skeleton into the repository" cp -an apps/ai_munimji/. "$REPO"/
+# -n: never overwrite a file this repository already has (README.md, .gitignore). Not -a: preserving the time of the bind-mount root fails ("Operation not permitted").
+step "copy the skeleton into the repository" cp -rn apps/ai_munimji/. "$REPO"/
 step "remove the generated copy from the bench" bench remove-app ai_munimji --force --no-backup
-step "get-app ai_munimji (soft link)" bench get-app --soft-link "$REPO"
-step "install-app ai_munimji" bench --site "$SITE" install-app ai_munimji
+# bootstrap.sh then soft-links the repository and installs the app on the site (every step of it is skipped when already done)
+exec bash "$REPO/dev/bootstrap.sh"
