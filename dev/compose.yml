@@ -1,0 +1,55 @@
+# Development containers for AI Munimji: Frappe's official dev-container example (frappe_docker, devcontainer-example, head fbf76ed of 3 Nov 2026),
+# run from the command line, with two changes for Windows:
+#   1. the bench lives in a named volume ("bench"), not in a bind mount of a Windows folder (much faster for node_modules and the asset build);
+#      only this repository is bind-mounted, at /workspace/ai_munimji, and soft-linked into the bench with `bench get-app --soft-link`;
+#   2. the ports are published on 127.0.0.1 only.
+# It is its own compose project ("munimji-dev"): its own network, volumes and container names. It does not touch any other Docker project.
+name: munimji-dev
+
+services:
+  mariadb:
+    image: docker.io/mariadb:11.8
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --innodb-snapshot-isolation=OFF
+    environment:
+      # a throw-away development password; the database is not published outside the compose network
+      MYSQL_ROOT_PASSWORD: "123"
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis-cache:
+    image: docker.io/redis:alpine
+
+  redis-queue:
+    image: docker.io/redis:alpine
+
+  frappe:
+    # pinned by digest: the `latest` tag was last updated on 5 Nov 2026 and changes
+    image: docker.io/frappe/bench@sha256:d91d852c907d00eca86faf98702c6600683ba7aa2ca7d81cb3bf654cb8c6874b
+    command: sleep infinity
+    environment:
+      - SHELL=/bin/bash
+      - FRAPPE_BIND_ADDR=0.0.0.0
+    working_dir: /home/frappe/dev
+    volumes:
+      - bench:/home/frappe/dev
+      - ..:/workspace/ai_munimji
+    ports:
+      - "127.0.0.1:8000-8005:8000-8005"
+      - "127.0.0.1:9000-9005:9000-9005"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+volumes:
+  mariadb-data:
+  bench:
