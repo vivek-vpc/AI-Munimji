@@ -36,6 +36,8 @@ if [ ! -d "sites/$SITE" ]; then
   step "install-app erpnext" bench --site "$SITE" install-app erpnext
   step "developer mode on" bash -c "bench --site $SITE set-config developer_mode 1 && bench --site $SITE clear-cache"
 fi
+# plain http://localhost:8000 then serves the dev site: Windows itself cannot resolve *.localhost names (browsers can), and this needs no hosts-file change
+step "default site" bench set-config -g default_site "$SITE"
 
 # the app of this repository, soft-linked so that edits made on Windows show up at once
 if [ -f "$REPO/pyproject.toml" ] && [ ! -e apps/ai_munimji ]; then
