@@ -1,5 +1,4 @@
 import frappe
-from frappe.utils import now_datetime
 
 LOG = "ai_munimji"
 
@@ -40,14 +39,10 @@ def check_stock() -> int:
 		).insert()
 		created += 1
 
+	# NB: Frappe's default log level is WARNING on a dev server and ERROR elsewhere, so this INFO line is written only if the level is raised
 	frappe.logger(LOG).info(f"check_stock ran as {frappe.session.user}: {len(low)} below the threshold, {created} request(s) created")
 	return created
 
 
 def _supplier_for(item_code: str) -> str | None:
 	return frappe.db.get_value("Item Default", {"parent": item_code}, "default_supplier")
-
-
-def tick_probe() -> None:
-	"""Measurement only (added to the hooks for one experiment, then removed): writes the time it ran, to see how often the scheduler really calls a per-minute cron job."""
-	frappe.logger(LOG).info(f"tick_probe {now_datetime().isoformat(timespec='seconds')} user={frappe.session.user}")
