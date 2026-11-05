@@ -12,13 +12,13 @@ if [ -f "$REPO/pyproject.toml" ]; then
 fi
 
 # the answers to the template's questions, in order: title, description, publisher, contact, licence, CI workflow (y/n), branch.
-# The contact is a placeholder: replace it with the real publisher contact before anything is published.
+# The contact is the publisher's own address, chosen by the owner on 5 Nov 2026; it will be public.
 answers() {
   printf '%s\n' \
     "AI Munimji" \
     "Stock monitoring and purchase requests for ERPNext (early spike, not released)" \
     "AI Munimji project" \
-    "contact@example.com" \
+    "vivek.vpc1985@gmail.com" \
     "gpl-3.0" \
     "y" \
     "main"

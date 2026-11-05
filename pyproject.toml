@@ -1,7 +1,7 @@
 [project]
 name = "ai_munimji"
 authors = [
-    { name = "AI Munimji project", email = "contact@example.com"}
+    { name = "AI Munimji project", email = "vivek.vpc1985@gmail.com"}
 ]
 description = "Stock monitoring and purchase requests for ERPNext (early spike, not released)"
 requires-python = ">=3.14"

@@ -2,7 +2,7 @@ app_name = "ai_munimji"
 app_title = "AI Munimji"
 app_publisher = "AI Munimji project"
 app_description = "Stock monitoring and purchase requests for ERPNext (early spike, not released)"
-app_email = "contact@example.com"
+app_email = "vivek.vpc1985@gmail.com"
 app_license = "GPL-3.0-or-later"
 
 # Apps
