@@ -13,6 +13,18 @@ docker version --format "Docker server {{.Server.Version}}" | Write-Host
 if ($LASTEXITCODE -ne 0) { throw "Docker does not answer. Start Docker Desktop and run this again." }
 
 $clock = [Diagnostics.Stopwatch]::StartNew()
+
+# Pull first, with up to 3 tries: a download of about 0.9 GB over a slow or unstable link can fail on a name lookup
+# (seen on the first run: "lookup auth.docker.io: no such host"), and a new try continues from the layers already downloaded.
+# --policy missing: only images you do not have yet are pulled, so mariadb:11.8 is not downloaded again.
+foreach ($attempt in 1..3) {
+    docker compose -p munimji-dev -f $compose pull --policy missing
+    if ($LASTEXITCODE -eq 0) { break }
+    if ($attempt -eq 3) { throw "docker compose pull failed 3 times. Check your internet connection (DNS), then run this again." }
+    Write-Host ("Pull failed (try {0} of 3). Trying again in 15 seconds..." -f $attempt)
+    Start-Sleep -Seconds 15
+}
+
 docker compose -p munimji-dev -f $compose up -d --wait
 if ($LASTEXITCODE -ne 0) { throw "docker compose up failed (exit code $LASTEXITCODE)" }
 $clock.Stop()
