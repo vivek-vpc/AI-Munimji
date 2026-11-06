@@ -1,6 +1,6 @@
 # Installing AI Munimji, and who needs which role
 
-AI Munimji is **not released**. It is not on the Frappe Marketplace and you cannot install it from there. These notes are for people who run the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; the checks of 5 November were on ERPNext 16.53.0 and the permission results below were measured again on 16.54.0 and are the same).
+AI Munimji is **not released**. It is not on the Frappe Marketplace and you cannot install it from there. These notes are for people who run the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
 
 ## What you need first
 
