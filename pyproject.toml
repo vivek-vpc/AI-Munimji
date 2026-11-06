@@ -19,7 +19,7 @@ requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
 
 # Frappe Cloud makes this section mandatory (docs.frappe.io, Cloud, "Versioning", updated 2026-08-05); Frappe's own app template does not write it.
-# Only versions this app has been run on: Frappe 16.55.2 and ERPNext 16.53.0 (5 Nov 2026).
+# Only versions this app has been run on: Frappe 16.55.2, with ERPNext 16.53.0 (5 Nov 2026) and 16.54.0 (6 Nov 2026).
 [tool.bench.frappe-dependencies]
 frappe = ">=16.55.0,<17.0.0"
 erpnext = ">=16.53.0,<17.0.0"
