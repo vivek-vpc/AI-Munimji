@@ -17,7 +17,12 @@ class InProcessWriter:
 		self.stats = Counter()
 
 	def find(self, doctype, filters, fields=None, limit=1000):
-		return [dict(r) for r in frappe.get_all(doctype, filters=filters, fields=fields or ["name"], limit_page_length=limit)]
+		return [
+			dict(r)
+			for r in frappe.get_all(
+				doctype, filters=filters, fields=fields or ["name"], limit_page_length=limit
+			)
+		]
 
 	def get(self, doctype, name):
 		return json.loads(frappe.as_json(frappe.get_doc(doctype, name).as_dict()))

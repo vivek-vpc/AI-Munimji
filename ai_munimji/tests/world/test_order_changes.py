@@ -5,11 +5,11 @@ role adds nothing to that. Purchase Manager is not a substitute for Purchase Use
 company, which that role does not open."""
 
 import frappe
+from ai_munimji_engine.packs.stock_procurement.erp import PurchaseOrderDraft
 
 from ai_munimji.erp_client import FrappeERPClient
 from ai_munimji.tests.helpers import make_user
 from ai_munimji.tests.world import WorldCase, as_user, submit
-from ai_munimji_engine.packs.stock_procurement.erp import PurchaseOrderDraft
 
 ROLE_SETS = {
 	"purchase_user": ("Purchase User",),
@@ -27,7 +27,16 @@ class TestChangingAndCancellingAnOrderFromARequest(WorldCase):
 			cls.users[key] = make_user(f"world.{key}@example.com".replace("_", "."), roles)
 
 	def draft(self, ref: str) -> PurchaseOrderDraft:
-		return PurchaseOrderDraft(supplier=self.names["s1"], item_code=self.names["writes"], qty=3, rate=12.0, uom="Nos", required_by=self.required_by(), reference=ref, approved_by="x via desk")
+		return PurchaseOrderDraft(
+			supplier=self.names["s1"],
+			item_code=self.names["writes"],
+			qty=3,
+			rate=12.0,
+			uom="Nos",
+			required_by=self.required_by(),
+			reference=ref,
+			approved_by="x via desk",
+		)
 
 	def test_a_purchase_user_is_enough_and_purchase_manager_adds_nothing(self):
 		item = self.names["writes"]
@@ -41,7 +50,9 @@ class TestChangingAndCancellingAnOrderFromARequest(WorldCase):
 					self.remember("Purchase Order", made.name)
 					changed = c.update_purchase_order_qty(made.name, ref, item, 5.0)
 					self.assertTrue(changed.ok and not changed.submitted, changed)
-					self.assertEqual(frappe.db.get_value("Purchase Order Item", {"parent": made.name}, "qty"), 5)
+					self.assertEqual(
+						frappe.db.get_value("Purchase Order Item", {"parent": made.name}, "qty"), 5
+					)
 					deleted = c.cancel_purchase_order(made.name, ref)
 					self.assertTrue(deleted.ok and "deleted" in deleted.note, deleted)
 					self.assertFalse(frappe.db.exists("Purchase Order", made.name))
@@ -51,7 +62,11 @@ class TestChangingAndCancellingAnOrderFromARequest(WorldCase):
 				with as_user(self.person(key)):
 					changed = c.update_purchase_order_qty(again.name, ref + "-2", item, 6.0)
 					self.assertTrue(changed.ok and changed.submitted, changed)
-					self.assertEqual(frappe.db.get_value("Purchase Order Item", {"parent": again.name}, "qty"), 6, "the submitted order was changed through Update Items")
+					self.assertEqual(
+						frappe.db.get_value("Purchase Order Item", {"parent": again.name}, "qty"),
+						6,
+						"the submitted order was changed through Update Items",
+					)
 					cancelled = c.cancel_purchase_order(again.name, ref + "-2")
 					self.assertTrue(cancelled.ok and "cancelled" in cancelled.note, cancelled)
 					self.assertEqual(frappe.db.get_value("Purchase Order", again.name, "docstatus"), 2)
@@ -62,4 +77,6 @@ class TestChangingAndCancellingAnOrderFromARequest(WorldCase):
 			result = FrappeERPClient().create_purchase_order(self.draft(ref))
 		self.assertFalse(result.ok, result)
 		self.assertIn("may not read", result.error)
-		self.assertFalse(frappe.db.exists("Purchase Order", {"custom_agent_ref": ref}), "and nothing was created")
+		self.assertFalse(
+			frappe.db.exists("Purchase Order", {"custom_agent_ref": ref}), "and nothing was created"
+		)

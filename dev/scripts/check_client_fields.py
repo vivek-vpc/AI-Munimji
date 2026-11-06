@@ -6,11 +6,23 @@ import re
 from pathlib import Path
 
 import frappe
-
 from ai_munimji_engine.packs.stock_procurement.erp import STOCK_COLUMNS
 
-folder = Path(args[0] if args else "dev/tmp_reads")  # the folder list_client_reads.py wrote, as seen from where this runs
-STANDARD = {"name", "owner", "creation", "modified", "modified_by", "docstatus", "idx", "parent", "parentfield", "parenttype"}
+folder = Path(
+	args[0] if args else "dev/tmp_reads"
+)  # the folder list_client_reads.py wrote, as seen from where this runs
+STANDARD = {
+	"name",
+	"owner",
+	"creation",
+	"modified",
+	"modified_by",
+	"docstatus",
+	"idx",
+	"parent",
+	"parentfield",
+	"parenttype",
+}
 reads = {n: json.loads((folder / f"reads_{n}.json").read_text(encoding="utf-8")) for n in ("rest", "frappe")}
 
 
@@ -33,13 +45,22 @@ for client, rows in reads.items():
 		for field in [x for f in r["fields"] for x in plain(f)] + r["filters"]:
 			if not exists(r["doctype"], field):
 				missing.append((client, r["method"], r["doctype"], field))
-print("Fields that do not exist on this site:" if missing else "Every field either client reads exists on this site (the ones built at run time are listed below).")
+print(
+	"Fields that do not exist on this site:"
+	if missing
+	else "Every field either client reads exists on this site (the ones built at run time are listed below)."
+)
 for m in missing:
 	print("  ", m)
 
 bin_columns = [c for c in STOCK_COLUMNS if c != "item_code"]
 print("\nBin columns the Frappe client asks for (the engine's STOCK_COLUMNS, those this site has):")
-print("  ", [c for c in STOCK_COLUMNS if exists("Bin", c)], "| missing:", [c for c in STOCK_COLUMNS if not exists("Bin", c)])
+print(
+	"  ",
+	[c for c in STOCK_COLUMNS if exists("Bin", c)],
+	"| missing:",
+	[c for c in STOCK_COLUMNS if not exists("Bin", c)],
+)
 
 
 def sets(client: str) -> set[tuple[str, str]]:
@@ -49,7 +70,7 @@ def sets(client: str) -> set[tuple[str, str]]:
 			if f in ("<computed>", "*"):
 				continue
 			for x in plain(f):
-				out.add((r["parent"] and f"{r['doctype']} (of {r['parent']})" or r["doctype"], x))
+				out.add(((r["parent"] and f"{r['doctype']} (of {r['parent']})") or r["doctype"], x))
 	return out
 
 

@@ -12,9 +12,18 @@ if str(root) not in sys.path:
 	sys.path.insert(0, str(root))
 
 loader = unittest.defaultTestLoader
-suite = loader.loadTestsFromNames(list(args)) if args else loader.discover(str(root / "ai_munimji" / "tests" / "world"), pattern="test_*.py", top_level_dir=str(root))
+suite = (
+	loader.loadTestsFromNames(list(args))
+	if args
+	else loader.discover(
+		str(root / "ai_munimji" / "tests" / "world"), pattern="test_*.py", top_level_dir=str(root)
+	)
+)
 result = unittest.TextTestRunner(verbosity=2, stream=sys.stdout).run(suite)
 no_world = [str(test) for test, why in result.skipped if "contract world" in why]
-print(f"\n{result.testsRun} run, {len(result.failures)} failed, {len(result.errors)} errors, {len(result.skipped)} skipped" + (f" ({len(no_world)} because the contract world is not loaded on this site)" if no_world else ""))
+print(
+	f"\n{result.testsRun} run, {len(result.failures)} failed, {len(result.errors)} errors, {len(result.skipped)} skipped"
+	+ (f" ({len(no_world)} because the contract world is not loaded on this site)" if no_world else "")
+)
 frappe.db.rollback()
 sys.exit(0 if result.wasSuccessful() and not no_world else 1)

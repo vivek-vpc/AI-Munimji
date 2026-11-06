@@ -3,9 +3,10 @@
 As Administrator every check must pass: the Frappe client gives the same answers as the other two on the same data. For a restricted person a check may fail only because the ERP
 refuses that person something; test_permissions.py pins which person gets what, and the report in docs/ERP_CLIENT_COMPARISON.md lists the checks one by one."""
 
+from ai_munimji_engine.testkit import contract
+
 from ai_munimji.erp_client import FrappeERPClient
 from ai_munimji.tests.world import WorldCase, as_user, discard, submit
-from ai_munimji_engine.testkit import contract
 
 
 class TestSharedChecks(WorldCase):
@@ -29,4 +30,8 @@ class TestSharedChecks(WorldCase):
 		results = self.run_checks("approver")
 		failed = {r.name for r in results if r.status != "pass"}
 		# the approver (Purchase User + Stock User) reads stock and purchasing; what fails is only what needs a right they do not have (see test_permissions.py for which)
-		self.assertTrue(failed <= {r.name for r in results if "ermission" in r.detail or "not permitted" in r.detail.lower()}, failed)
+		self.assertTrue(
+			failed
+			<= {r.name for r in results if "ermission" in r.detail or "not permitted" in r.detail.lower()},
+			failed,
+		)

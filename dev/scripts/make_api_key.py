@@ -9,5 +9,7 @@ from frappe.core.doctype.user.user import generate_keys
 
 secret = generate_keys("Administrator")["api_secret"]
 key = frappe.db.get_value("User", "Administrator", "api_key")
-Path(os.environ.get("MUNIMJI_REPO", "/workspace/ai_munimji"), "dev", "contract-key.json").write_text(json.dumps({"key": key, "secret": secret}), encoding="utf-8")
+Path(os.environ.get("MUNIMJI_REPO", "/workspace/ai_munimji"), "dev", "contract-key.json").write_text(
+	json.dumps({"key": key, "secret": secret}), encoding="utf-8"
+)
 print("API key for Administrator written to dev/contract-key.json")
