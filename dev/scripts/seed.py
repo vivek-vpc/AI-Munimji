@@ -11,6 +11,7 @@ ITEMS = {"MD-BOLT-M8": ("Bolt M8 x 40", 3), "MD-NUT-M8": ("Nut M8", 50), "MD-WAS
 USERS = {
 	"munimji.approver@example.com": ("Approver", ("Munimji Approver", "Purchase User", "Purchase Manager", "Stock User")),
 	"munimji.viewer@example.com": ("Viewer", ("Munimji Viewer",)),
+	"munimji.manager@example.com": ("Manager", ("Munimji Manager",)),
 }
 PASSWORD = "Munimji-dev-1!"
 

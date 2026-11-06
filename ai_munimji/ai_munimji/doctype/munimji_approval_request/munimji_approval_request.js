@@ -1,6 +1,7 @@
 // Copyright (c) 2026, AI Munimji project and contributors
 // For license information, please see license.txt
 
+// PLACEHOLDER, replaced in Phase 5: this form, its button and the method behind it are the spike's, kept so that the app can be tried end to end (dev/README.md).
 frappe.ui.form.on("Munimji Approval Request", {
 	refresh(frm) {
 		if (frm.is_new() || frm.doc.status !== "Pending") {

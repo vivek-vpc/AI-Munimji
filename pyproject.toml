@@ -3,7 +3,7 @@ name = "ai_munimji"
 authors = [
     { name = "AI Munimji project", email = "vivek.vpc1985@gmail.com"}
 ]
-description = "Stock monitoring and purchase requests for ERPNext (early spike, not released)"
+description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
 requires-python = ">=3.14"
 readme = "README.md"
 dynamic = ["version"]

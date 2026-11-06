@@ -1,3 +1,4 @@
+# PLACEHOLDER, replaced in Phase 5 together with the Munimji Approval Request DocType and its button (dev/README.md). The tests of who may approve (the hook) stay in some form.
 # Copyright (c) 2026, AI Munimji project and Contributors
 # See license.txt
 

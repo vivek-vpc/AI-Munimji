@@ -72,6 +72,22 @@ async function clickButton(page, label) {
 		check(/not permitted|permission/i.test(text), "the viewer is told they are not permitted");
 		const still = await viewer.evaluate(async (name) => (await (await fetch(`/api/resource/Munimji Approval Request/${name}`)).json()).data.status, second.name);
 		check(still === "Pending", `the request is still ${still}`);
+
+		console.log("3. A Munimji Manager opens AI Munimji Settings, and the viewer is refused");
+		const manager = await signIn(browser, "munimji.manager@example.com");
+		await manager.goto(`${BASE}/app/ai-munimji-settings`, { waitUntil: "networkidle0" });
+		await manager.waitForSelector(".form-layout", { timeout: 20000 }).catch(() => {});
+		const settingsText = await manager.evaluate(() => document.body.innerText);
+		check(/Watch stock/.test(settingsText) && /When to ask for a purchase/.test(settingsText), "the manager sees the settings page: Watch stock, When to ask for a purchase");
+		check(/Demand calendar/.test(settingsText) && /Requests waiting for an answer/.test(settingsText), "with its demand calendar and the time requests wait");
+		const stored = await manager.evaluate(async () => (await (await fetch("/api/resource/AI Munimji Settings/AI Munimji Settings")).json()).data);
+		check(stored && stored.name === "AI Munimji Settings", "and can read the page's values over the API");
+		await viewer.goto(`${BASE}/app/ai-munimji-settings`, { waitUntil: "networkidle0" });
+		await new Promise((r) => setTimeout(r, 2000));
+		const refusedText = await viewer.evaluate(() => document.body.innerText);
+		check(!/Watch stock/.test(refusedText) && /not permitted|permission|Insufficient/i.test(refusedText), "the viewer is told they are not permitted, and sees none of the values");
+		const viewerApi = await viewer.evaluate(async () => (await fetch("/api/resource/AI Munimji Settings/AI Munimji Settings")).status);
+		check(viewerApi === 403, `and the API says 403 to the viewer (${viewerApi})`);
 	} catch (error) {
 		console.log("  FAIL  " + error.message);
 		failed++;

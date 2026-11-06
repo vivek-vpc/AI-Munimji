@@ -1,3 +1,4 @@
+# PLACEHOLDER, replaced in Phase 5 together with ai_munimji/jobs.py (dev/README.md).
 import frappe
 
 from erpnext.stock.doctype.item.test_item import make_item

@@ -3,103 +3,22 @@ from ai_munimji import custom_fields
 app_name = "ai_munimji"
 app_title = "AI Munimji"
 app_publisher = "AI Munimji project"
-app_description = "Stock monitoring and purchase requests for ERPNext (early spike, not released)"
+app_description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
 app_email = "vivek.vpc1985@gmail.com"
 app_license = "GPL-3.0-or-later"
+
+# Only the hooks this app uses are here. The template's list of the others is in Frappe's documentation ("Hooks").
 
 # Apps
 # ------------------
 
 required_apps = ["erpnext"]
 
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "ai_munimji",
-# 		"logo": "/assets/ai_munimji/logo.png",
-# 		"title": "AI Munimji",
-# 		"route": "/ai_munimji",
-# 		"has_permission": "ai_munimji.api.permission.has_app_permission",
-# 	}
-# ]
-
-# The dock, the rail down the left of the desk, is a document rather than a hook. Author it in
-# Manage Dock on a developer-mode site and press Export to App, and it is written to
-# `ai_munimji/dock/ai_munimji/ai_munimji.json` for git to carry. An app that ships none has no
-# rail: its sidebar gets a switcher in the header instead.
-#
-# A companion app, one that extends a host app rather than standing on its own, says so with
-# `mount_on` on that same record, and its entries are appended to the host's rail. Mounting keeps
-# the companion off the apps screen, so it takes precedence over any add_to_apps_screen above.
-
-# Includes in <head>
-# ------------------
-
-# include js, css files in header of desk.html
-# app_include_css = "/assets/ai_munimji/css/ai_munimji.css"
-# app_include_js = "/assets/ai_munimji/js/ai_munimji.js"
-
-# include js, css files in header of web template
-# web_include_css = "/assets/ai_munimji/css/ai_munimji.css"
-# web_include_js = "/assets/ai_munimji/js/ai_munimji.js"
-
-# include custom scss in every website theme (without file extension ".scss")
-# website_theme_scss = "ai_munimji/public/scss/website"
-
-# include js, css files in header of web form
-# webform_include_js = {"doctype": "public/js/doctype.js"}
-# webform_include_css = {"doctype": "public/css/doctype.css"}
-
-# include js in page
-# page_js = {"page" : "public/js/file.js"}
-
-# include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_kanban_js = {"doctype" : "public/js/doctype_kanban.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
-# doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-
-# Svg Icons
-# ------------------
-# include app icons in desk
-# app_include_icons = "ai_munimji/public/icons.svg"
-
-# Home Pages
-# ----------
-
-# application home page (will override Website Settings)
-# home_page = "login"
-
-# website user home page (by Role)
-# role_home_page = {
-# 	"Role": "home_page"
-# }
-
-# Generators
-# ----------
-
-# automatically create page for each record of this doctype
-# website_generators = ["Web Page"]
-
-# automatically load and sync documents of this doctype from downstream apps
-# importable_doctypes = [doctype_1]
-
-# Jinja
-# ----------
-
-# add methods and filters to jinja environment
-# jinja = {
-# 	"methods": "ai_munimji.utils.jinja_methods",
-# 	"filters": "ai_munimji.utils.jinja_filters"
-# }
-
 # Installation
 # ------------
 
 # the roles must exist before the DocTypes are synced (their permission rows name them), so they are made before the install
 before_install = "ai_munimji.install.before_install"
-# after_install = "ai_munimji.install.after_install"
 
 # the seven fields this app adds to Purchase Order, Material Request and Stock Entry (ai_munimji/custom_fields.py), written by `bench export-fixtures --app ai_munimji`
 # and filtered by name so that no other Custom Field of the site is exported with them
@@ -113,76 +32,21 @@ fixtures = [
 # Uninstallation
 # ------------
 
+# removes what the install added outside the app's own DocTypes and says what stays (docs/UNINSTALL.md)
 before_uninstall = "ai_munimji.uninstall.before_uninstall"
-# after_uninstall = "ai_munimji.uninstall.after_uninstall"
-
-# Integration Setup
-# ------------------
-# To set up dependencies/integrations with other apps
-# Name of the app being installed is passed as an argument
-
-# before_app_install = "ai_munimji.utils.before_app_install"
-# after_app_install = "ai_munimji.utils.after_app_install"
-
-# Integration Cleanup
-# -------------------
-# To clean up dependencies/integrations with other apps
-# Name of the app being uninstalled is passed as an argument
-
-# before_app_uninstall = "ai_munimji.utils.before_app_uninstall"
-# after_app_uninstall = "ai_munimji.utils.after_app_uninstall"
-
-# Build
-# ------------------
-# To hook into the build process
-
-# after_build = "ai_munimji.build.after_build"
-
-# To hook into the build process of other apps
-# The list of apps being built is passed as an argument
-
-# after_app_build = "ai_munimji.build.after_app_build"
-
-# Desk Notifications
-# ------------------
-# See frappe.core.notifications.get_notification_config
-
-# notification_config = "ai_munimji.notifications.get_notification_config"
-
-# Awesome Bar
-# -----------
-# Extra search results: list of dicts with label, description, route, index.
-# route: ["List", "ToDo"], "/desk/docs/some/page", or "https://example.com"
-# awesomebar_search = ["ai_munimji.search.awesomebar_results"]
 
 # Permissions
 # -----------
-# Permissions evaluated in scripted ways
 
-# permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
-#
 # A controller hook can only DENY (frappe/permissions.py: has_controller_permissions). It is called with the keywords doc, ptype, user, debug.
 has_permission = {
 	"Munimji Approval Request": "ai_munimji.permissions.has_permission",
 }
 
-# Document Events
-# ---------------
-# Hook on document methods and events
-
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
-
 # Scheduled Tasks
 # ---------------
 
+# PLACEHOLDER, replaced in Phase 5 (ai_munimji/jobs.py).
 # Frappe runs scheduled work at its scheduler tick (240 seconds unless the bench sets another), so nothing here can run more often than that.
 scheduler_events = {
 	"cron": {
@@ -191,95 +55,3 @@ scheduler_events = {
 		],
 	},
 }
-
-# Testing
-# -------
-
-# before_tests = "ai_munimji.install.before_tests"
-
-# Extend DocType Class
-# ------------------------------
-#
-# Specify custom mixins to extend the standard doctype controller.
-# extend_doctype_class = {
-# 	"Task": "ai_munimji.custom.task.CustomTaskMixin"
-# }
-
-# Overriding Methods
-# ------------------------------
-#
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "ai_munimji.event.get_events"
-# }
-#
-# each overriding function accepts a `data` argument;
-# generated from the base implementation of the doctype dashboard,
-# along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "ai_munimji.task.get_dashboard_data"
-# }
-
-# exempt linked doctypes from being automatically cancelled
-#
-# auto_cancel_exempted_doctypes = ["Auto Repeat"]
-
-# Ignore links to specified DocTypes when deleting documents
-# -----------------------------------------------------------
-
-# ignore_links_on_delete = ["Communication", "ToDo"]
-
-# Request Events
-# ----------------
-# before_request = ["ai_munimji.utils.before_request"]
-# after_request = ["ai_munimji.utils.after_request"]
-
-# Job Events
-# ----------
-# before_job = ["ai_munimji.utils.before_job"]
-# after_job = ["ai_munimji.utils.after_job"]
-
-# User Data Protection
-# --------------------
-
-# user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
-# ]
-
-# Authentication and authorization
-# --------------------------------
-
-# auth_hooks = [
-# 	"ai_munimji.auth.validate"
-# ]
-
-# on_social_login = "ai_munimji.auth.on_social_login"
-
-# Automatically update python controller files with type annotations for this app.
-# export_python_type_annotations = True
-
-# default_log_clearing_doctypes = {
-# 	"Logging DocType Name": 30  # days to retain logs
-# }
-
-# Translation
-# ------------
-# List of apps whose translatable strings should be excluded from this app's translations.
-# ignore_translatable_strings_from = []
-
