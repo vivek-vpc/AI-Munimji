@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-06 12:26+0000\n"
-"PO-Revision-Date: 2026-11-06 12:26+0000\n"
+"POT-Creation-Date: 2026-11-06 13:26+0000\n"
+"PO-Revision-Date: 2026-11-06 13:26+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -230,6 +230,33 @@ msgstr ""
 msgid "If the standalone service (erp-agents) also works on this site, it needs the seven fields that were just removed. Run erp-agents erp-setup again; it makes them again and finds the columns in place."
 msgstr ""
 
+#: ai_munimji/erp_client.py:749
+#, python-brace-format
+msgid "It could not be {0}: {1}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:697
+msgid "It has been cancelled."
+msgstr ""
+
+#: ai_munimji/erp_client.py:702
+#, python-brace-format
+msgid "It has {0} lines for {1}, so change it in the form."
+msgstr ""
+
+#: ai_munimji/erp_client.py:695
+msgid "It is no longer there."
+msgstr ""
+
+#: ai_munimji/erp_client.py:699
+#, python-brace-format
+msgid "It is {0}; reopen it first."
+msgstr ""
+
+#: ai_munimji/erp_client.py:686
+msgid "It was not created by AI Munimji for this request, so it is left alone."
+msgstr ""
+
 #. Label of the item_code (Link) field in DocType 'Munimji Approval Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:27
 msgid "Item"
@@ -305,6 +332,11 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
+#: ai_munimji/erp_client.py:583
+#, python-brace-format
+msgid "Nothing was created: the supplier's currency could not be worked out ({0})."
+msgstr ""
+
 #. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:35
@@ -322,6 +354,10 @@ msgstr ""
 msgid "Ordered"
 msgstr ""
 
+#: ai_munimji/erp_client.py:297
+msgid "Payment terms"
+msgstr ""
+
 #. Option for the 'Status' (Select) field in DocType 'Munimji Approval Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:69
 msgid "Pending"
@@ -335,6 +371,35 @@ msgstr ""
 #. Label of the history_days (Int) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:113
 msgid "Read this many days of history"
+msgstr ""
+
+#: ai_munimji/erp_client.py:787
+msgid "Reading a supplier's contact details"
+msgstr ""
+
+#: ai_munimji/erp_client.py:772
+msgid "Reading goods receipts for the delivery and invoice checks"
+msgstr ""
+
+#: ai_munimji/erp_client.py:784
+msgid "Reading item alternatives"
+msgstr ""
+
+#: ai_munimji/erp_client.py:775
+msgid "Reading stock counts"
+msgstr ""
+
+#: ai_munimji/erp_client.py:778
+msgid "Reading the value of stock"
+msgstr ""
+
+#: ai_munimji/erp_client.py:781
+msgid "Reading when each item was last bought"
+msgstr ""
+
+#: ai_munimji/erp_client.py:487
+#, python-brace-format
+msgid "Reading {0}"
 msgstr ""
 
 #. Label of the recent_window_days (Int) field in DocType 'AI Munimji Settings'
@@ -376,6 +441,10 @@ msgstr ""
 msgid "Send stock alerts"
 msgstr ""
 
+#: ai_munimji/erp_client.py:790
+msgid "Sending e-mail"
+msgstr ""
+
 #. Description of the 'Munimji request' (Data) field in DocType 'Purchase
 #. Order'
 #: ai_munimji/fixtures/custom_field.json:142
@@ -413,6 +482,14 @@ msgstr ""
 msgid "Supplier"
 msgstr ""
 
+#: ai_munimji/erp_client.py:293
+msgid "Supplier details"
+msgstr ""
+
+#: ai_munimji/erp_client.py:359
+msgid "Supplier quotations"
+msgstr ""
+
 #. Label of the fallback_supplier (Link) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:187
 msgid "Supplier to use when an item has none"
@@ -430,12 +507,25 @@ msgstr ""
 msgid "System Manager"
 msgstr ""
 
+#: ai_munimji/erp_client.py:723
+#, python-brace-format
+msgid "The change was refused: {0}"
+msgstr ""
+
 #: ai_munimji/uninstall.py:13
 msgid "The database columns custom_agent_ref, custom_agent_approved_by and custom_agent_note on Purchase Order, Material Request and Stock Entry stay, with their values and the index on custom_agent_ref. Frappe never drops a column when a field is deleted, so that no data is lost."
 msgstr ""
 
+#: ai_munimji/erp_client.py:345
+msgid "The delivery record"
+msgstr ""
+
 #: ai_munimji/uninstall.py:15
 msgid "The empty column approve stays in the tables DocPerm, Custom DocPerm and DocShare, where the permission type approve put it. Frappe does not drop it when the permission type is deleted, and it is shared by name with any other permission type called approve, so it is left alone. Installing again reuses it."
+msgstr ""
+
+#: ai_munimji/erp_client.py:273
+msgid "The item's supplier list"
 msgstr ""
 
 #. Description of the 'Recent use: look back this many days' (Int) field in
@@ -462,8 +552,39 @@ msgstr ""
 msgid "The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
 msgstr ""
 
+#: ai_munimji/erp_client.py:531
+msgid "The scheduled job reads and proposes; a document is made only as the person who approved it."
+msgstr ""
+
+#: ai_munimji/erp_client.py:117
+msgid "The system mode of the ERP client is only for the scheduled job, which runs as Administrator."
+msgstr ""
+
+#: ai_munimji/erp_client.py:604
+msgid "The two warehouses are the same."
+msgstr ""
+
+#: ai_munimji/erp_client.py:575
+#, python-brace-format
+msgid "The {0} could not be made: {1}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:573
+#, python-brace-format
+msgid "The {0} was refused: {1}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:554
+msgid "There are several companies and no default company is set, so nothing was created: it would land in whichever company the signed-in user has."
+msgstr ""
+
 #: ai_munimji/settings_map.py:207
 msgid "These settings cannot be saved"
+msgstr ""
+
+#: ai_munimji/erp_client.py:533
+#, python-brace-format
+msgid "This client makes documents as the person signed in, {0}; it cannot act for {1}."
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.py:31
@@ -497,6 +618,14 @@ msgstr ""
 msgid "What it is"
 msgstr ""
 
+#: ai_munimji/erp_client.py:234
+msgid "When an order on its way is due"
+msgstr ""
+
+#: ai_munimji/erp_client.py:178
+msgid "When each item's stock history begins"
+msgstr ""
+
 #. Label of the rules_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:44
@@ -507,6 +636,10 @@ msgstr ""
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:85
 msgid "When to check, and what history to look at"
+msgstr ""
+
+#: ai_munimji/erp_client.py:224
+msgid "Which warehouses are for stock in transit"
 msgstr ""
 
 #. Description of the 'Approved by (Munimji)' (Data) field in DocType 'Stock
@@ -530,9 +663,30 @@ msgstr ""
 msgid "Worked out from how much of the item you have been using. Leave 0 to not use this rule."
 msgstr ""
 
+#: ai_munimji/erp_client.py:749
+msgid "cancelled"
+msgstr ""
+
+#: ai_munimji/erp_client.py:749
+msgid "deleted"
+msgstr ""
+
 #. Option for the 'Kind' (Select) field in DocType 'Munimji Calendar Event'
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:30
 msgid "festival"
+msgstr ""
+
+#: ai_munimji/erp_client.py:796
+msgid "insufficient permission"
+msgstr ""
+
+#: ai_munimji/erp_client.py:627
+#, python-brace-format
+msgid "no exchange rate from {0} to {1} is set up"
+msgstr ""
+
+#: ai_munimji/erp_client.py:796
+msgid "no reason was given"
 msgstr ""
 
 #. Option for the 'Kind' (Select) field in DocType 'Munimji Calendar Event'
@@ -543,6 +697,68 @@ msgstr ""
 #. Option for the 'Kind' (Select) field in DocType 'Munimji Calendar Event'
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:30
 msgid "promotion"
+msgstr ""
+
+#: ai_munimji/erp_client.py:591
+msgid "purchase order"
+msgstr ""
+
+#: ai_munimji/erp_client.py:600
+msgid "purchase requisition"
+msgstr ""
+
+#: ai_munimji/erp_client.py:609
+msgid "stock transfer"
+msgstr ""
+
+#: ai_munimji/erp_client.py:143
+#, python-brace-format
+msgid "{0} could not be read: {1} is not open to this user."
+msgstr ""
+
+#: ai_munimji/erp_client.py:707
+#, python-brace-format
+msgid "{0} has already been invoiced against it, so it cannot be for less than that."
+msgstr ""
+
+#: ai_munimji/erp_client.py:705
+#, python-brace-format
+msgid "{0} have already been received against it, so it cannot be for less than that."
+msgstr ""
+
+#: ai_munimji/erp_client.py:72
+#, python-brace-format
+msgid "{0} is not supported in this version of AI Munimji."
+msgstr ""
+
+#: ai_munimji/erp_client.py:721
+#, python-brace-format
+msgid "{0} may not change a purchase order: {1}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:571
+#, python-brace-format
+msgid "{0} may not create a {1}: {2}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:127
+#, python-brace-format
+msgid "{0} may not read {1}."
+msgstr ""
+
+#: ai_munimji/erp_client.py:679
+#, python-brace-format
+msgid "{0} may not see purchase orders ({1})."
+msgstr ""
+
+#: ai_munimji/erp_client.py:747
+#, python-brace-format
+msgid "{0} may not {1} a purchase order: {2}"
+msgstr ""
+
+#: ai_munimji/erp_client.py:738
+#, python-brace-format, python-format
+msgid "{0}% of it has been received and {1}% billed, so it has to be dealt with in ERPNext (cancel the receipt or invoice first)."
 msgstr ""
 
 #: ai_munimji/settings_map.py:185
