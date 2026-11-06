@@ -1,6 +1,14 @@
 import frappe
 
+from ai_munimji.erp_client import FrappeERPClient
+
 LOG = "ai_munimji"
+
+
+def system_erp(company: str | None = None) -> FrappeERPClient:
+	"""The ERP client in its named system mode, for the scheduled job: Frappe runs a job as Administrator, which may read what a person may not (the Tax Rules, to keep the tax
+	figures with a proposal). The mode reads only and never makes a document. This is the one place it is built: tests/test_rules.py fails if it is built anywhere else."""
+	return FrappeERPClient(system=True, company=company)
 
 
 def check_stock() -> int:
