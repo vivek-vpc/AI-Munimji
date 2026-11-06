@@ -17,7 +17,7 @@ def declared_engine_requirements() -> list[Requirement]:
 	dependencies = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"][
 		"dependencies"
 	]
-	return [r for r in map(Requirement, dependencies) if r.name == DISTRIBUTION]
+	return [r for r in (Requirement(line) for line in dependencies) if r.name == DISTRIBUTION]
 
 
 class TestTheEngineInTheBench(unittest.TestCase):
