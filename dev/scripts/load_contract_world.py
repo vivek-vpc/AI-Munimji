@@ -8,9 +8,8 @@ from pathlib import Path
 
 REPO = Path(os.environ.get("MUNIMJI_REPO", "/workspace/ai_munimji"))
 sys.path.insert(0, str(REPO / "dev" / "scripts"))
-from inprocess_writer import InProcessWriter
-
 from ai_munimji_engine.testkit.loader import run
+from inprocess_writer import InProcessWriter
 
 OUT = REPO / "dev" / "contract-site.json"
 writer = InProcessWriter()

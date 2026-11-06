@@ -46,10 +46,21 @@ class TestWhatIsLeftOut(unittest.TestCase):
 		raising = set()
 		for node in ast.walk(tree):
 			if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
-				if any(isinstance(n, ast.Raise) and isinstance(n.exc, ast.Call) and getattr(n.exc.func, "id", "") == "not_supported" for n in ast.walk(node)):
+				if any(
+					isinstance(n, ast.Raise)
+					and isinstance(n.exc, ast.Call)
+					and getattr(n.exc.func, "id", "") == "not_supported"
+					for n in ast.walk(node)
+				):
 					raising.add(node.name)
-		raising.discard("get_documents")  # refuses document types it does not read; it is listed in the document as such
-		self.assertEqual(raising, set(LEFT_OUT), "a method that raises 'not supported' is missing here, or one listed here no longer does")
+		raising.discard(
+			"get_documents"
+		)  # refuses document types it does not read; it is listed in the document as such
+		self.assertEqual(
+			raising,
+			set(LEFT_OUT),
+			"a method that raises 'not supported' is missing here, or one listed here no longer does",
+		)
 		text = LIMITATIONS.read_text(encoding="utf-8")
 		for method in LEFT_OUT:
 			self.assertIn(f"`{method}`", text, f"docs/KNOWN_LIMITATIONS.md does not list {method}")

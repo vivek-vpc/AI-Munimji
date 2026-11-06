@@ -39,12 +39,19 @@ def reads(path: Path) -> list[dict]:
 		if not isinstance(fn, ast.FunctionDef):
 			continue
 		for node in ast.walk(fn):
-			if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name) and node.func.value.id == "self"):
+			if not (
+				isinstance(node, ast.Call)
+				and isinstance(node.func, ast.Attribute)
+				and isinstance(node.func.value, ast.Name)
+				and node.func.value.id == "self"
+			):
 				continue
 			kind = node.func.attr
 			if kind not in ("_list", "_optional", "_doc"):
 				continue
-			args = node.args[1:] if kind == "_optional" else node.args  # _optional(what, doctype, fields, filters)
+			args = (
+				node.args[1:] if kind == "_optional" else node.args
+			)  # _optional(what, doctype, fields, filters)
 			doctype = const(args[0]) if args else None
 			if doctype is None:
 				continue

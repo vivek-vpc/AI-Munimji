@@ -1,7 +1,7 @@
 """The engine's order-preparing agent, on the engine's own in-memory stores, with whatever ERP client a test gives it. The Frappe app keeps its proposals in DocTypes later (Phase 4b);
 until then this is how the tests let the real agent, and not a copy of its logic, read the real site through the real client."""
 
-from datetime import datetime, time, timezone
+from datetime import UTC, datetime, time, timezone
 
 from ai_munimji_engine.core.approvals.router import ApprovalRouter
 from ai_munimji_engine.core.approvals.service import ApprovalService
@@ -20,17 +20,32 @@ COST_ONLY = {"weight_cost": 100, "weight_delivery": 0, "weight_reliability": 0, 
 
 class Kit:
 	def __init__(self, erp, today, **procurement):
-		noon = datetime.combine(today, time(12, 0), tzinfo=timezone.utc)
+		noon = datetime.combine(today, time(12, 0), tzinfo=UTC)
 		self.clock = lambda: noon
 		self.core = memory_core_stores()
 		self.stock = memory_stock_stores(self.core.backend)
 		self.settings = SettingsStore(self.core.settings, clock=self.clock)
 		attach_settings(self.settings)
 		self.settings.update_procurement(OWNER, {**COST_ONLY, **procurement})
-		self.approvals = ApprovalService(self.core.approvals, ApprovalRouter({}, []), system_settings=self.settings.system, clock=self.clock, inbound=self.core.inbound)
+		self.approvals = ApprovalService(
+			self.core.approvals,
+			ApprovalRouter({}, []),
+			system_settings=self.settings.system,
+			clock=self.clock,
+			inbound=self.core.inbound,
+		)
 		self.workorders = WorkOrderQueue(self.core.workorders, self.clock)
 		self.proposals = ProposalRepo(self.stock.proposals, self.clock)
-		self.agent = ProcurementAgent(erp, self.settings, self.proposals, self.approvals, self.workorders, self.stock.runs, self.core.transaction, self.clock)
+		self.agent = ProcurementAgent(
+			erp,
+			self.settings,
+			self.proposals,
+			self.approvals,
+			self.workorders,
+			self.stock.runs,
+			self.core.transaction,
+			self.clock,
+		)
 
 	def propose(self, item_code: str, qty: float, uom: str = "Nos"):
 		"""One reorder for the item, as the stock monitor would raise it; returns the request waiting for an answer."""

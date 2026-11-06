@@ -59,11 +59,15 @@ class WorldCase(unittest.TestCase):
 	def setUpClass(cls):
 		info = described()
 		if info is None:
-			raise unittest.SkipTest("the contract world is not described here (dev/contract-site.json): load it with dev/scripts/load_contract_world.py")
+			raise unittest.SkipTest(
+				"the contract world is not described here (dev/contract-site.json): load it with dev/scripts/load_contract_world.py"
+			)
 		cls.names, cls.today = info["names"], date.fromisoformat(info["today"])
 		cls.company, cls.abbr = info["company"], info["abbr"]
 		if not frappe.db.exists("Item", cls.names["steady"]):
-			raise unittest.SkipTest(f"the contract world is not loaded on {frappe.local.site}: load it with dev/scripts/load_contract_world.py")
+			raise unittest.SkipTest(
+				f"the contract world is not loaded on {frappe.local.site}: load it with dev/scripts/load_contract_world.py"
+			)
 		frappe.set_user("Administrator")
 		cls.users = {key: make_user(email, roles) for key, (email, roles) in PEOPLE.items()}
 		cls.made = []  # (doctype, name) of what the tests created, removed in tearDownClass
