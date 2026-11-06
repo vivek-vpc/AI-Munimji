@@ -74,7 +74,7 @@ def models():
 		from ai_munimji_engine.packs.stock_procurement.settings import CalendarSettings, Policy, StockSystemSettings
 	except ImportError:
 		frappe.throw(
-			_("The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the README, \"The engine\") and try again.")
+			_("The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again.")
 		)
 	return {"policy": Policy, "system": StockSystemSettings, "calendar": CalendarSettings}
 
