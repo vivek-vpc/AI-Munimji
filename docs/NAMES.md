@@ -14,6 +14,14 @@ The names of the app and of what it adds to a site, written down once. A name th
 | The rules package | `ai-munimji-engine` (import name `ai_munimji_engine`) |
 | The standalone service it shares rules with | `erpnext-ai-agents` (command `erp-agents`, package `erp_agents`) |
 
+## Where the app deliberately differs from the standalone service
+
+One setting only: **Watch stock (`enabled`) is off by default in the app**, and on by default in the standalone service (the stock pack's manifest, `engine/src/ai_munimji_engine/packs/stock_procurement/manifest.yaml`, says `enabled_by_default: true`).
+
+Why: the service is switched on by the person who installs and configures it. The app is installed into a site that already holds a customer's live stock, and the thresholds on first install are the engine's defaults, not that customer's. If the monitor were on, requests for purchases would start to appear for real stock before anyone had looked at the thresholds. So the app starts with the monitor off, the Settings page says so in a yellow note at the top ("Stock monitoring is off. Review the thresholds below, then switch on Watch stock."), and the scheduled job does nothing while it is off, including on a site where the page has never been saved. A test pins both defaults, so that the difference is the app's decision and cannot come about by accident (`ai_munimji/tests/test_settings.py`, `test_jobs.py`).
+
+Every other setting has the engine's default, which is the standalone service's default.
+
 ## The fields added to ERPNext's documents
 
 | DocType | Field | Type | Holds |

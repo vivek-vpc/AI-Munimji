@@ -13,8 +13,16 @@ class TestTheInstallNotes(unittest.TestCase):
 		self.text = (DOCS / "INSTALL.md").read_text(encoding="utf-8")
 
 	def test_they_name_the_munimji_roles_and_the_erpnext_roles_a_person_needs(self):
-		for role in (*ROLES, "Stock User", "Purchase User", "Purchase Manager"):
+		for role in (*ROLES, "Stock User", "Purchase User"):
 			self.assertIn(role, self.text, f"docs/INSTALL.md does not name {role}")
+
+	def test_they_say_what_was_measured_about_purchase_user(self):
+		self.assertIn("Purchase User is enough to create a Purchase Order", self.text)
+		self.assertIn("ERPNext 16.53.0", self.text)
+		self.assertIn("service account", self.text, "the standalone service's wider list of roles is said to be a service-account matter")
+
+	def test_they_say_the_monitor_starts_off(self):
+		self.assertIn("the stock monitor is off", self.text)
 
 	def test_they_say_the_app_adds_no_permission_rows_to_erpnext(self):
 		self.assertIn("no permission rows to any ERPNext DocType", self.text)

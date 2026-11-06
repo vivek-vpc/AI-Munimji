@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-06 04:51+0000\n"
-"PO-Revision-Date: 2026-11-06 04:51+0000\n"
+"POT-Creation-Date: 2026-11-06 12:26+0000\n"
+"PO-Revision-Date: 2026-11-06 12:26+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -124,11 +124,11 @@ msgstr ""
 msgid "Ask when stock will last this many days or fewer (0 = not used)"
 msgstr ""
 
-#: ai_munimji/settings_map.py:167
+#: ai_munimji/settings_map.py:170
 msgid "Calendar events"
 msgstr ""
 
-#: ai_munimji/settings_map.py:167
+#: ai_munimji/settings_map.py:170
 #, python-brace-format
 msgid "Calendar events, row {0}"
 msgstr ""
@@ -305,6 +305,12 @@ msgstr ""
 msgid "Note"
 msgstr ""
 
+#. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:35
+msgid "Off until you switch it on. Review the thresholds below first: once it is on, requests for purchases start to appear for your real stock. Switching it off again stops that; requests that are already waiting stay as they are."
+msgstr ""
+
 #. Description of the 'Remind after (hours)' (Int) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:148
@@ -398,6 +404,10 @@ msgstr ""
 msgid "Stock alerts"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:18
+msgid "Stock monitoring is off. Review the thresholds below, then switch on Watch stock."
+msgstr ""
+
 #. Label of the supplier (Link) field in DocType 'Munimji Approval Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:50
 msgid "Supplier"
@@ -412,12 +422,6 @@ msgstr ""
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:181
 msgid "Suppliers"
-msgstr ""
-
-#. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
-#. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:35
-msgid "Switch this off to stop watching stock. Requests that are already waiting stay as they are."
 msgstr ""
 
 #. Name of a role
@@ -454,11 +458,11 @@ msgstr ""
 msgid "The quantity must be more than zero."
 msgstr ""
 
-#: ai_munimji/settings_map.py:77
+#: ai_munimji/settings_map.py:80
 msgid "The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
 msgstr ""
 
-#: ai_munimji/settings_map.py:204
+#: ai_munimji/settings_map.py:207
 msgid "These settings cannot be saved"
 msgstr ""
 
@@ -541,7 +545,7 @@ msgstr ""
 msgid "promotion"
 msgstr ""
 
-#: ai_munimji/settings_map.py:182
+#: ai_munimji/settings_map.py:185
 #, python-brace-format
 msgid "{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
 msgstr ""

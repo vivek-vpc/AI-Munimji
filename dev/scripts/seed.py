@@ -63,9 +63,11 @@ for email, (first_name, roles) in USERS.items():
 		user.new_password = PASSWORD
 		user.insert(ignore_permissions=True)
 
-# The placeholder job (jobs.py, replaced in Phase 5) asks for a purchase where stock is at or below min_qty, and a new site has 0 there ("not used").
+# The placeholder job (jobs.py, replaced in Phase 5) asks for a purchase where stock is at or below min_qty, and a new site has 0 there ("not used") and the monitor OFF.
+# For the demo both are set, as a person would after reviewing the thresholds.
 settings = frappe.get_doc("AI Munimji Settings")
 settings.min_qty = 10
+settings.enabled = 1
 settings.save()
 
 print("items and stock:", frappe.db.sql("SELECT item_code, warehouse, actual_qty FROM tabBin WHERE item_code LIKE 'MD-%%' ORDER BY item_code"))

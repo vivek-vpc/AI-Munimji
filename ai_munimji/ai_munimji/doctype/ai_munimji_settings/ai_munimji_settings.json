@@ -31,8 +31,8 @@
  ],
  "fields": [
   {
-   "default": "1",
-   "description": "Switch this off to stop watching stock. Requests that are already waiting stay as they are.",
+   "default": "0",
+   "description": "Off until you switch it on. Review the thresholds below first: once it is on, requests for purchases start to appear for your real stock. Switching it off again stops that; requests that are already waiting stay as they are.",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Watch stock"

@@ -117,7 +117,12 @@ def _strip_js_comments(source: str) -> str:
 def scan_javascript(source: str, filename: str) -> tuple[list[str], list[str]]:
 	"""(problems, the messages inside __())"""
 	text = _strip_js_comments(source)
-	problems = [f"{filename}:{text.count(chr(10), 0, m.start()) + 1}: words for a person outside __(): {m.group(0).strip()}" for m in JS_BARE.finditer(text)]
+	# an empty literal ("" clears a note) holds no words
+	problems = [
+		f"{filename}:{text.count(chr(10), 0, m.start()) + 1}: words for a person outside __(): {m.group(0).strip()}"
+		for m in JS_BARE.finditer(text)
+		if text[m.end() : m.end() + 1] != text[m.end() - 1 : m.end()]
+	]
 	return problems, [m.group("text") for m in JS_TRANSLATED.finditer(text)]
 
 
@@ -166,6 +171,8 @@ class TestNoWordIsLeftUntranslated(unittest.TestCase):
 		for source in ('frappe.msgprint("Bare");', "frappe.show_alert({message: 'Bare', indicator: 'green'});", 'frm.add_custom_button("Bare", () => {});', "frappe.confirm(`Bare`)"):
 			self.assertTrue(scan_javascript(source, "bad.js")[0], source)
 		self.assertEqual(scan_javascript('frappe.show_alert({message: __("Fine {0}", [x]), indicator: "green"}); // a "comment"', "good.js")[0], [])
+		self.assertEqual(scan_javascript('frm.set_intro("");', "empty.js")[0], [], "an empty literal holds no words")
+		self.assertTrue(scan_javascript('frm.set_intro("x");', "one.js")[0], "one character is a word")
 
 
 class TestTheTemplateHoldsEveryWord(unittest.TestCase):

@@ -1,4 +1,5 @@
 import typing
+from pathlib import Path
 
 import frappe
 from frappe.tests import IntegrationTestCase
@@ -8,6 +9,7 @@ from ai_munimji import settings_map
 from ai_munimji.settings_map import APP_ONLY, BY_FIELD, EVENT_FIELDS, EVENTS_FIELD, MAPPED, engine_name
 
 DOCTYPE = "AI Munimji Settings"
+ROOT = Path(__file__).resolve().parents[2]
 LAYOUT = ("Section Break", "Column Break", "Tab Break")
 
 
@@ -229,6 +231,27 @@ class TestTheSettingsAreTheEnginesSettings(IntegrationTestCase):
 		stored = frappe.db.get_singles_dict(DOCTYPE)
 		self.assertEqual((int(stored["approval_expiry_hours"]), int(stored["max_reminders"]), float(stored["min_days_cover"]), stored["check_cron"]), (72, 2, 7.0, "0 6 * * *"))
 		self.assertEqual(frappe.get_doc(DOCTYPE).validate(), None)
+
+	def test_the_stock_monitor_is_off_by_default_on_purpose_and_the_standalone_keeps_its_own_default(self):
+		from ai_munimji_engine.packs.stock_procurement.manifest import manifest
+
+		self.assertEqual(frappe.get_meta(DOCTYPE).get_field("enabled").default, "0")
+		self.assertEqual(settings_map.ENABLED_DEFAULT, 0)
+		self.assertEqual(new_page().enabled, 0, "a new page shows Watch stock unchecked")
+		self.assertTrue(manifest().enabled_by_default, "the standalone service keeps its default, which is on: the app differs on purpose")
+		names = (ROOT / "docs" / "NAMES.md").read_text(encoding="utf-8")
+		self.assertIn("deliberately differs", names, "docs/NAMES.md must say that the app differs from the manifest here, and why")
+		self.assertIn("live stock", names)
+
+	def test_a_site_that_never_stored_the_switch_has_it_off(self):
+		self.addCleanup(frappe.db.rollback)
+		frappe.get_doc(DOCTYPE).save()
+		frappe.db.delete("Singles", {"doctype": DOCTYPE, "field": "enabled"})  # a page saved before the switch existed
+		frappe.clear_document_cache(DOCTYPE, DOCTYPE)
+		doc = frappe.get_doc(DOCTYPE)
+		self.assertFalse(doc.enabled, "nothing stored reads as off")
+		doc.save()
+		self.assertEqual(int(frappe.db.get_singles_dict(DOCTYPE)["enabled"]), 0, "saving the page must not switch the monitor on")
 
 	def test_the_page_holds_no_secret(self):
 		# Version 0.1 has none. A Password field would need the proof that its value is neither in the table nor in the version log (the spike did it once, in the report);

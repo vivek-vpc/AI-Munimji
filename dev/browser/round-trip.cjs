@@ -82,6 +82,29 @@ async function clickButton(page, label) {
 		check(/Demand calendar/.test(settingsText) && /Requests waiting for an answer/.test(settingsText), "with its demand calendar and the time requests wait");
 		const stored = await manager.evaluate(async () => (await (await fetch("/api/resource/AI Munimji Settings/AI Munimji Settings")).json()).data);
 		check(stored && stored.name === "AI Munimji Settings", "and can read the page's values over the API");
+		// the stock monitor starts off, and the page says so while it is off (the demo has it on, as a person would after reviewing the thresholds)
+		const setSwitch = (value) =>
+			manager.evaluate(
+				async (v) =>
+					(
+						await fetch("/api/resource/AI Munimji Settings/AI Munimji Settings", {
+							method: "PUT",
+							headers: { "Content-Type": "application/json", "X-Frappe-CSRF-Token": frappe.csrf_token },
+							body: JSON.stringify({ enabled: v }),
+						})
+					).status,
+				value
+			);
+		const intro = /Stock monitoring is off\. Review the thresholds below, then switch on Watch stock\./;
+		check(!intro.test(settingsText), "while Watch stock is ticked the page carries no 'monitoring is off' note");
+		check((await setSwitch(0)) === 200, "the manager switches Watch stock off");
+		await manager.reload({ waitUntil: "networkidle0" });
+		await manager.waitForSelector(".form-layout", { timeout: 20000 }).catch(() => {});
+		check(intro.test(await manager.evaluate(() => document.body.innerText)), "and the page now says: Stock monitoring is off. Review the thresholds below, then switch on Watch stock.");
+		check((await setSwitch(1)) === 200, "the manager switches it on again (the demo needs it on)");
+		await manager.reload({ waitUntil: "networkidle0" });
+		await manager.waitForSelector(".form-layout", { timeout: 20000 }).catch(() => {});
+		check(!intro.test(await manager.evaluate(() => document.body.innerText)), "and the note is gone");
 		await viewer.goto(`${BASE}/app/ai-munimji-settings`, { waitUntil: "networkidle0" });
 		await new Promise((r) => setTimeout(r, 2000));
 		const refusedText = await viewer.evaluate(() => document.body.innerText);

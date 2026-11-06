@@ -51,6 +51,18 @@ class TestCheckStock(ERPNextTestSuite):
 		self.assertEqual(check_stock(), 0)
 		self.assertEqual(self.pending(), [])
 
+	def test_the_job_does_nothing_on_a_site_where_nobody_has_switched_the_monitor_on(self):
+		# a new install is off by default (docs/NAMES.md): a warehouse far below the quantity gets no request, whatever else is set
+		make_stock_entry(item_code=self.item, qty=3, to_warehouse=WAREHOUSE, rate=10)
+		for rows_left in ("no page at all", "a page with the threshold but no switch"):
+			frappe.db.delete("Singles", {"doctype": "AI Munimji Settings"})
+			frappe.clear_document_cache("AI Munimji Settings", "AI Munimji Settings")
+			if rows_left != "no page at all":
+				frappe.db.set_single_value("AI Munimji Settings", "min_qty", 10)
+			self.assertFalse(frappe.get_cached_doc("AI Munimji Settings").enabled, rows_left)
+			self.assertEqual(check_stock(), 0, rows_left)
+			self.assertEqual(self.pending(), [], rows_left)
+
 	def test_the_job_does_nothing_when_it_is_switched_off(self):
 		make_stock_entry(item_code=self.item, qty=3, to_warehouse=WAREHOUSE, rate=10)
 		settings = frappe.get_doc("AI Munimji Settings")

@@ -30,13 +30,17 @@ The app adds **no permission rows to any ERPNext DocType**. What a person may se
 | A person who... | Munimji role | ERPNext roles they also need |
 |---|---|---|
 | looks at the requests | Munimji Viewer | **Stock User**, to see the stock the requests are about (Item, Bin, Stock Ledger Entry, Warehouse) |
-| answers a request, which makes a **draft** Purchase Order under their own login | Munimji Approver | **Stock User**, and **Purchase User** to create the draft. The service's README also names Purchase Manager; on ERPNext 16.53.0 Purchase User alone is enough to create a Purchase Order (tested), so Purchase Manager is needed only if your own setup asks for it |
+| answers a request, which makes a **draft** Purchase Order under their own login | Munimji Approver | **Stock User** to read stock, and **Purchase User** to create the draft: measured on ERPNext 16.53.0, Purchase User is enough to create a Purchase Order. (The standalone service's list of roles is wider; that is a matter of its service account, not of the people who use this app.) |
 | changes the settings, and may delete requests | Munimji Manager | the same as an approver if they also answer requests |
 | everything | System Manager | none |
 
 A person with only a Munimji role reads nothing of ERPNext's (no Item, Bin, Stock Ledger Entry or Purchase Order). That is intended.
 
 Approving needs two things at once: the Munimji "approve" right, and the right to create a Purchase Order in ERPNext. Someone who has one without the other is refused, and nothing is created.
+
+## Switching the stock monitor on
+
+**After installing, the stock monitor is off.** Nothing creates requests for your stock until a person has looked at the thresholds and switched it on: open AI Munimji Settings, review the thresholds, then tick Watch stock. While it is off the page says so at the top, and the scheduled job does nothing. (The standalone service starts with its monitor on; the app deliberately does not, see [NAMES.md](NAMES.md).)
 
 ## Settings
 
