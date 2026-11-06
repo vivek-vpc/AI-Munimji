@@ -28,17 +28,23 @@ class MunimjiApprovalRequest(Document):
 		# SELECT ... FOR UPDATE: a concurrent second call blocks here until the first commits, then reads the new status
 		status = frappe.db.get_value(self.doctype, self.name, "status", for_update=True)
 		if status != "Pending":
-			frappe.throw(_("This request is already {0}; it cannot be turned into an order again.").format(status))
+			frappe.throw(
+				_("This request is already {0}; it cannot be turned into an order again.").format(status)
+			)
 		# the same question the standalone asks: a cancelled order does not count, so that a request whose order was cancelled can be answered again
 		if frappe.db.exists("Purchase Order", {"custom_agent_ref": self.name, "docstatus": ["<", 2]}):
 			frappe.throw(_("A Purchase Order for this request already exists."))
 
 		supplier = self.supplier or frappe.db.get_single_value("AI Munimji Settings", "fallback_supplier")
 		if not supplier:
-			frappe.throw(_("Choose a supplier on the request, or set a fallback supplier in AI Munimji Settings."))
+			frappe.throw(
+				_("Choose a supplier on the request, or set a fallback supplier in AI Munimji Settings.")
+			)
 
 		po = frappe.new_doc("Purchase Order")
-		po.company = frappe.db.get_value("Warehouse", self.warehouse, "company")  # a warehouse belongs to one company: no guessing from user defaults
+		po.company = frappe.db.get_value(
+			"Warehouse", self.warehouse, "company"
+		)  # a warehouse belongs to one company: no guessing from user defaults
 		po.supplier = supplier
 		po.transaction_date = nowdate()
 		po.schedule_date = add_days(nowdate(), 7)
@@ -65,5 +71,7 @@ class MunimjiApprovalRequest(Document):
 
 
 def _last_rate(item_code: str) -> float:
-	last_purchase_rate, standard_rate = frappe.db.get_value("Item", item_code, ["last_purchase_rate", "standard_rate"]) or (0, 0)
+	last_purchase_rate, standard_rate = frappe.db.get_value(
+		"Item", item_code, ["last_purchase_rate", "standard_rate"]
+	) or (0, 0)
 	return last_purchase_rate or standard_rate or 0

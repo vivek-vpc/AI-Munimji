@@ -28,7 +28,8 @@ def check_stock() -> int:
 	created = 0
 	for row in low:
 		if frappe.db.exists(
-			"Munimji Approval Request", {"item_code": row.item_code, "warehouse": row.warehouse, "status": "Pending"}
+			"Munimji Approval Request",
+			{"item_code": row.item_code, "warehouse": row.warehouse, "status": "Pending"},
 		):
 			continue
 		frappe.get_doc(
@@ -44,7 +45,9 @@ def check_stock() -> int:
 		created += 1
 
 	# NB: Frappe's default log level is WARNING on a dev server and ERROR elsewhere, so this INFO line is written only if the level is raised
-	frappe.logger(LOG).info(f"check_stock ran as {frappe.session.user}: {len(low)} at or below the quantity, {created} request(s) created")
+	frappe.logger(LOG).info(
+		f"check_stock ran as {frappe.session.user}: {len(low)} at or below the quantity, {created} request(s) created"
+	)
 	return created
 
 

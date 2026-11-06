@@ -74,10 +74,16 @@ def engine_name(fieldname: str) -> str:
 def models():
 	"""The engine's models, imported on use so that the app can be loaded (migrated, uninstalled) in a bench where the engine has been removed."""
 	try:
-		from ai_munimji_engine.packs.stock_procurement.settings import CalendarSettings, Policy, StockSystemSettings
+		from ai_munimji_engine.packs.stock_procurement.settings import (
+			CalendarSettings,
+			Policy,
+			StockSystemSettings,
+		)
 	except ImportError:
 		frappe.throw(
-			_("The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again.")
+			_(
+				"The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
+			)
 		)
 	return {"policy": Policy, "system": StockSystemSettings, "calendar": CalendarSettings}
 
@@ -134,7 +140,10 @@ def from_engine(values: dict[str, dict]) -> dict[str, object]:
 	for m in MAPPED:
 		value = values[m.model][engine_name(m.fieldname)]
 		page[m.fieldname] = 0 if value is None and m.zero_is_none else value
-	page[EVENTS_FIELD] = [{fieldname: event.get(engine_field) for engine_field, fieldname in EVENT_FIELDS.items()} for event in values["calendar"].get("events", [])]
+	page[EVENTS_FIELD] = [
+		{fieldname: event.get(engine_field) for engine_field, fieldname in EVENT_FIELDS.items()}
+		for event in values["calendar"].get("events", [])
+	]
 	return page
 
 
@@ -143,14 +152,19 @@ def label_of(fieldname: str) -> str:
 
 
 def _event_label(engine_field: str) -> str:
-	return _(frappe.get_meta("Munimji Calendar Event").get_label(EVENT_FIELDS.get(engine_field, engine_field)) or engine_field)
+	return _(
+		frappe.get_meta("Munimji Calendar Event").get_label(EVENT_FIELDS.get(engine_field, engine_field))
+		or engine_field
+	)
 
 
 def _plain(message: str) -> str:
 	"""An engine message in the page's words: the engine's own prefix removed and its field names replaced by the labels the person sees."""
 	message = message.removeprefix("Value error, ")
 	for fieldname in sorted(BY_FIELD, key=len, reverse=True):
-		if engine_name(fieldname) == fieldname:  # `calendar_enabled` is the engine's plain `enabled`: replacing that word would damage other messages
+		if (
+			engine_name(fieldname) == fieldname
+		):  # `calendar_enabled` is the engine's plain `enabled`: replacing that word would damage other messages
 			message = message.replace(fieldname, f"“{label_of(fieldname)}”")
 	return message
 
@@ -167,11 +181,17 @@ def problems(values: dict[str, dict]) -> list[str]:
 			for error in exc.errors():
 				where = error["loc"]
 				if where and where[0] == "events":
-					row = _("Calendar events, row {0}").format(where[1] + 1) if len(where) > 1 else _("Calendar events")
+					row = (
+						_("Calendar events, row {0}").format(where[1] + 1)
+						if len(where) > 1
+						else _("Calendar events")
+					)
 					field = f", {_event_label(where[2])}" if len(where) > 2 else ""
 					found.append(f"{row}{field}: {_plain(error['msg'])}")
 				elif where:
-					found.append(f"{label_of(next((f for f in BY_FIELD if engine_name(f) == where[0]), where[0]))}: {_plain(error['msg'])}")
+					found.append(
+						f"{label_of(next((f for f in BY_FIELD if engine_name(f) == where[0]), where[0]))}: {_plain(error['msg'])}"
+					)
 				else:
 					found.append(_plain(error["msg"]))
 	return found
@@ -182,7 +202,9 @@ def cron_problem(expression: str) -> str | None:
 	from croniter import croniter
 
 	if not croniter.is_valid(expression):
-		return _("{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)").format(label_of("check_cron"), expression)
+		return _(
+			"{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
+		).format(label_of("check_cron"), expression)
 	return None
 
 
@@ -199,7 +221,9 @@ def validate(doc) -> None:
 	fill_missing(doc)
 	values = to_engine(doc)
 	found = problems(values)
-	if not any(p.startswith(label_of("check_cron")) for p in found):  # the engine has not already complained about it
+	if not any(
+		p.startswith(label_of("check_cron")) for p in found
+	):  # the engine has not already complained about it
 		bad_cron = cron_problem(values["system"]["check_cron"])
 		if bad_cron:
 			found.append(bad_cron)

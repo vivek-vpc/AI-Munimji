@@ -40,8 +40,14 @@ for key in sorted(set(a) | set(b)):
 		unexpected += 1
 	if isinstance(va, list) and isinstance(vb, list):
 		as_text = lambda items: {json.dumps(i, sort_keys=True) for i in items}  # noqa: E731 - the items may themselves be lists
-		print(f"  {key}: removed {sorted(as_text(va) - as_text(vb))} | added {sorted(as_text(vb) - as_text(va))}{mark}")
+		print(
+			f"  {key}: removed {sorted(as_text(va) - as_text(vb))} | added {sorted(as_text(vb) - as_text(va))}{mark}"
+		)
 	else:
 		print(f"  {key}: {va!r} -> {vb!r}{mark}")
-print("same" if not (a != b) else ("only allowed differences" if not unexpected else f"{unexpected} unexpected difference(s)"))
+print(
+	"same"
+	if not (a != b)
+	else ("only allowed differences" if not unexpected else f"{unexpected} unexpected difference(s)")
+)
 sys.exit(1 if unexpected else 0)

@@ -15,6 +15,11 @@ function show_whether_it_is_on(frm) {
 	if (frm.doc.enabled) {
 		frm.set_intro("");
 	} else {
-		frm.set_intro(__("Stock monitoring is off. Review the thresholds below, then switch on Watch stock."), "yellow");
+		frm.set_intro(
+			__(
+				"Stock monitoring is off. Review the thresholds below, then switch on Watch stock."
+			),
+			"yellow"
+		);
 	}
 }

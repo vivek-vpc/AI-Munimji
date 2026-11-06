@@ -2,6 +2,7 @@
 pip-audit reads this list: the app's own dependency line names the engine, which is not on PyPI, so auditing the project folder fails; auditing the installed set does not.
     env/bin/python dev/scripts/engine_requirements.py
 """
+
 import importlib.metadata as metadata
 import re
 import sys

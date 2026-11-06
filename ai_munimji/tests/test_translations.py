@@ -71,28 +71,48 @@ class _Scan(ast.NodeVisitor):
 
 	def _check_words(self, call: ast.Call, name: str) -> None:
 		self.calls_seen += 1
-		expressions = ([call.args[0]] if call.args else []) + [k.value for k in call.keywords if k.arg in TEXT_KEYWORDS]
+		expressions = ([call.args[0]] if call.args else []) + [
+			k.value for k in call.keywords if k.arg in TEXT_KEYWORDS
+		]
 		for expression in expressions:
 			for literal in words_outside_translation(expression):
 				self._report(literal, f"words for a person outside _() in {name}(...)")
 
 	def visit_Call(self, node: ast.Call):
 		function = node.func
-		name = function.attr if isinstance(function, ast.Attribute) else function.id if isinstance(function, ast.Name) else ""
-		from_frappe = isinstance(function, ast.Name) or (isinstance(function, ast.Attribute) and isinstance(function.value, ast.Name) and function.value.id == "frappe")
+		name = (
+			function.attr
+			if isinstance(function, ast.Attribute)
+			else function.id
+			if isinstance(function, ast.Name)
+			else ""
+		)
+		from_frappe = isinstance(function, ast.Name) or (
+			isinstance(function, ast.Attribute)
+			and isinstance(function.value, ast.Name)
+			and function.value.id == "frappe"
+		)
 		if name in USER_FACING and from_frappe:
 			self._check_words(node, name)
 		if _is_translation(node):
 			argument = node.args[0] if node.args else None
 			if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
 				self.messages.append(argument.value)
-			elif not (self.filename, self.function_stack[-1] if self.function_stack else "") in DYNAMIC_ALLOWED:
+			elif (
+				self.filename,
+				self.function_stack[-1] if self.function_stack else "",
+			) not in DYNAMIC_ALLOWED:
 				self._report(node, "_() with something that is not a string literal cannot be extracted")
 		self.generic_visit(node)
 
 	def visit_Raise(self, node: ast.Raise):
 		call = node.exc
-		if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name) and call.func.value.id == "frappe":
+		if (
+			isinstance(call, ast.Call)
+			and isinstance(call.func, ast.Attribute)
+			and isinstance(call.func.value, ast.Name)
+			and call.func.value.id == "frappe"
+		):
 			if call.func.attr.endswith(("Error", "Exception")):
 				self._check_words(call, f"raise frappe.{call.func.attr}")
 		self.generic_visit(node)
@@ -106,7 +126,9 @@ def scan_python(source: str, filename: str) -> _Scan:
 
 # JavaScript: a literal where words belong, found without a parser. The calls and keys below take words; a quote straight after the opening bracket or the colon is a bare literal.
 JS_CALLS = r"(?:frappe\.(?:msgprint|throw|show_alert|confirm|prompt)|add_custom_button|set_intro|add_comment)"
-JS_BARE = re.compile(rf"{JS_CALLS}\(\s*[\"'`]|\b(?:message|title|label|description|freeze_message|primary_action_label)\s*:\s*[\"'`]")
+JS_BARE = re.compile(
+	rf"{JS_CALLS}\(\s*[\"'`]|\b(?:message|title|label|description|freeze_message|primary_action_label)\s*:\s*[\"'`]"
+)
 JS_TRANSLATED = re.compile(r"__\(\s*(?P<q>[\"'`])(?P<text>(?:\\.|(?!(?P=q)).)*)(?P=q)", re.S)
 
 
@@ -135,8 +157,12 @@ class TestNoWordIsLeftUntranslated(unittest.TestCase):
 			seen += scanner.calls_seen
 			messages += scanner.messages
 		self.assertEqual(problems, [])
-		self.assertGreaterEqual(seen, 3, "the scan found almost no throw/msgprint calls: it is looking in the wrong place")
-		self.assertGreaterEqual(len(messages), 8, "the scan found almost no _() calls: it is looking in the wrong place")
+		self.assertGreaterEqual(
+			seen, 3, "the scan found almost no throw/msgprint calls: it is looking in the wrong place"
+		)
+		self.assertGreaterEqual(
+			len(messages), 8, "the scan found almost no _() calls: it is looking in the wrong place"
+		)
 
 	def test_javascript_every_text_to_a_person_is_translated(self):
 		problems, translated = [], []
@@ -145,7 +171,9 @@ class TestNoWordIsLeftUntranslated(unittest.TestCase):
 			problems += found
 			translated += messages
 		self.assertEqual(problems, [])
-		self.assertGreaterEqual(len(translated), 3, "the scan found almost no __() calls: it is looking in the wrong place")
+		self.assertGreaterEqual(
+			len(translated), 3, "the scan found almost no __() calls: it is looking in the wrong place"
+		)
 
 	def test_the_scan_does_notice_a_bare_message(self):
 		# negative controls: the same scanner, on code that breaks the rule
@@ -156,7 +184,7 @@ class TestNoWordIsLeftUntranslated(unittest.TestCase):
 			'import frappe\nfrom frappe import _\nfrappe.throw("a bare " + _("and a translated one"))\n',
 			'import frappe\nraise frappe.ValidationError("Bare")\n',
 			'import frappe\nfrom frappe import _\nfrappe.throw(_(f"Hello {name}"))\n',
-			'from frappe import _\ndef f(text):\n\treturn _(text)\n',
+			"from frappe import _\ndef f(text):\n\treturn _(text)\n",
 			'from frappe import throw\nthrow("Bare")\n',
 		)
 		for source in bad:
@@ -168,10 +196,23 @@ class TestNoWordIsLeftUntranslated(unittest.TestCase):
 		)
 		for source in good:
 			self.assertEqual(scan_python(source, "good.py").problems, [], source)
-		for source in ('frappe.msgprint("Bare");', "frappe.show_alert({message: 'Bare', indicator: 'green'});", 'frm.add_custom_button("Bare", () => {});', "frappe.confirm(`Bare`)"):
+		for source in (
+			'frappe.msgprint("Bare");',
+			"frappe.show_alert({message: 'Bare', indicator: 'green'});",
+			'frm.add_custom_button("Bare", () => {});',
+			"frappe.confirm(`Bare`)",
+		):
 			self.assertTrue(scan_javascript(source, "bad.js")[0], source)
-		self.assertEqual(scan_javascript('frappe.show_alert({message: __("Fine {0}", [x]), indicator: "green"}); // a "comment"', "good.js")[0], [])
-		self.assertEqual(scan_javascript('frm.set_intro("");', "empty.js")[0], [], "an empty literal holds no words")
+		self.assertEqual(
+			scan_javascript(
+				'frappe.show_alert({message: __("Fine {0}", [x]), indicator: "green"}); // a "comment"',
+				"good.js",
+			)[0],
+			[],
+		)
+		self.assertEqual(
+			scan_javascript('frm.set_intro("");', "empty.js")[0], [], "an empty literal holds no words"
+		)
 		self.assertTrue(scan_javascript('frm.set_intro("x");', "one.js")[0], "one character is a word")
 
 
@@ -181,7 +222,9 @@ class TestTheTemplateHoldsEveryWord(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		if not POT.exists():
-			raise unittest.SkipTest("locale/main.pot has not been made yet: bench --site <site> generate-pot-file --app ai_munimji")
+			raise unittest.SkipTest(
+				"locale/main.pot has not been made yet: bench --site <site> generate-pot-file --app ai_munimji"
+			)
 		with POT.open("rb") as handle:
 			cls.catalog = read_po(handle)
 		cls.in_template = {m.id if isinstance(m.id, str) else m.id[0] for m in cls.catalog if m.id}
@@ -192,7 +235,9 @@ class TestTheTemplateHoldsEveryWord(unittest.TestCase):
 			for message in scan_python(path.read_text(encoding="utf-8"), scan.relative(path)).messages:
 				if message not in self.in_template:
 					missing.append(f"{scan.relative(path)}: {message[:70]}")
-		self.assertEqual(missing, [], "run bench generate-pot-file --app ai_munimji and commit locale/main.pot")
+		self.assertEqual(
+			missing, [], "run bench generate-pot-file --app ai_munimji and commit locale/main.pot"
+		)
 
 	def test_every_javascript_message_is_in_the_template(self):
 		missing = []
@@ -210,4 +255,8 @@ class TestTheTemplateHoldsEveryWord(unittest.TestCase):
 			for field in data.get("fields", []):
 				texts += [field.get("label", ""), field.get("description", "")]
 			missing += [f"{path.stem}: {t[:60]}" for t in texts if t and t not in self.in_template]
-		self.assertEqual(missing, [], "the extractor reads DocType files; a missing text here means the template is out of date")
+		self.assertEqual(
+			missing,
+			[],
+			"the extractor reads DocType files; a missing text here means the template is out of date",
+		)

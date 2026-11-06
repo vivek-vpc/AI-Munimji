@@ -21,7 +21,9 @@ def javascript_files() -> list[Path]:
 
 
 def doctype_files() -> list[Path]:
-	return [p for p in sorted((PACKAGE / "ai_munimji" / "doctype").glob("*/*.json")) if p.stem == p.parent.name]
+	return [
+		p for p in sorted((PACKAGE / "ai_munimji" / "doctype").glob("*/*.json")) if p.stem == p.parent.name
+	]
 
 
 def relative(path: Path) -> str:

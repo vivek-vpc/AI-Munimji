@@ -1,6 +1,5 @@
 # PLACEHOLDER, replaced in Phase 5 together with ai_munimji/jobs.py (dev/README.md).
 import frappe
-
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.tests.utils import ERPNextTestSuite
@@ -20,7 +19,9 @@ class TestCheckStock(ERPNextTestSuite):
 
 	def pending(self):
 		return frappe.get_all(
-			"Munimji Approval Request", filters={"item_code": self.item, "warehouse": WAREHOUSE, "status": "Pending"}, fields=["name", "qty", "reason"]
+			"Munimji Approval Request",
+			filters={"item_code": self.item, "warehouse": WAREHOUSE, "status": "Pending"},
+			fields=["name", "qty", "reason"],
 		)
 
 	def test_a_warehouse_below_the_threshold_gets_one_pending_request_and_a_second_run_adds_none(self):
@@ -76,8 +77,19 @@ class TestCheckStock(ERPNextTestSuite):
 		before = frappe.db.count("Purchase Order")
 		check_stock()
 		self.assertEqual(frappe.db.count("Purchase Order"), before)
-		self.assertEqual(frappe.db.count("Material Request", {"creation": [">=", frappe.utils.add_to_date(None, minutes=-5)]}), 0)
+		self.assertEqual(
+			frappe.db.count(
+				"Material Request", {"creation": [">=", frappe.utils.add_to_date(None, minutes=-5)]}
+			),
+			0,
+		)
 
 	def test_the_schedule_is_registered_as_a_scheduled_job_type(self):
-		jobs = frappe.get_all("Scheduled Job Type", filters={"method": "ai_munimji.jobs.check_stock"}, fields=["frequency", "cron_format", "stopped"])
-		self.assertEqual([(j.frequency, j.cron_format, j.stopped) for j in jobs], [("Cron", "*/5 * * * *", 0)])
+		jobs = frappe.get_all(
+			"Scheduled Job Type",
+			filters={"method": "ai_munimji.jobs.check_stock"},
+			fields=["frequency", "cron_format", "stopped"],
+		)
+		self.assertEqual(
+			[(j.frequency, j.cron_format, j.stopped) for j in jobs], [("Cron", "*/5 * * * *", 0)]
+		)

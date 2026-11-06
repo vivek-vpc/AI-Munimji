@@ -3,9 +3,8 @@
 # See license.txt
 
 import frappe
-from frappe.utils import add_days, nowdate
-
 from erpnext.tests.utils import ERPNextTestSuite
+from frappe.utils import add_days, nowdate
 
 from ai_munimji.tests.helpers import APPROVER_ROLES, make_request, make_user
 
@@ -22,11 +21,24 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 		request = make_request()
 		self.assertTrue(frappe.has_permission(request.doctype, "read", doc=request, user=self.viewer))
 		for right in ("write", "create", "delete", "approve"):
-			self.assertFalse(frappe.has_permission(request.doctype, right, doc=request, user=self.viewer), right)
+			self.assertFalse(
+				frappe.has_permission(request.doctype, right, doc=request, user=self.viewer), right
+			)
 
 	def test_the_permission_rows_grant_only_what_was_written(self):
 		# the fields of a permission row default to 1; a row made from {"role": ..., "read": 1} gave the Viewer write, create and delete
-		rights = ("read", "write", "create", "delete", "report", "export", "print", "email", "share", "approve")
+		rights = (
+			"read",
+			"write",
+			"create",
+			"delete",
+			"report",
+			"export",
+			"print",
+			"email",
+			"share",
+			"approve",
+		)
 		rows = {row.role: row for row in frappe.get_meta("Munimji Approval Request").permissions}
 		granted = {role: [right for right in rights if row.get(right)] for role, row in rows.items()}
 		self.assertEqual(granted["Munimji Viewer"], ["read", "report", "export"])
@@ -36,7 +48,11 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 	def test_the_approve_permission_needs_the_right_to_create_a_purchase_order(self):
 		request = make_request()
 		# the role has "approve", but ERPNext would not let this person create a Purchase Order, so the hook denies it
-		self.assertFalse(frappe.has_permission(request.doctype, "approve", doc=request, user=self.approver_without_po_rights))
+		self.assertFalse(
+			frappe.has_permission(
+				request.doctype, "approve", doc=request, user=self.approver_without_po_rights
+			)
+		)
 		self.assertTrue(frappe.has_permission(request.doctype, "approve", doc=request, user=self.approver))
 
 	def test_the_hook_documented_with_permission_type_is_never_given_it(self):
@@ -61,22 +77,35 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 	def test_an_approver_turns_a_request_into_a_draft_order_under_their_own_name(self):
 		request = make_request(qty=7)
 		with self.set_user(self.approver):
-			order_name = frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
+			order_name = frappe.get_doc(
+				"Munimji Approval Request", request.name
+			).create_draft_purchase_order()
 
 		order = frappe.get_doc("Purchase Order", order_name)
 		self.assertEqual(order.docstatus, 0, "a draft, never submitted")
 		self.assertEqual(order.custom_agent_ref, request.name)
-		self.assertEqual(order.custom_agent_approved_by, f"{self.approver} via desk", "the form of words the standalone service writes: user, 'via', where from")
-		self.assertEqual(order.owner, self.approver, "created by the signed-in user, not by a service account")
+		self.assertEqual(
+			order.custom_agent_approved_by,
+			f"{self.approver} via desk",
+			"the form of words the standalone service writes: user, 'via', where from",
+		)
+		self.assertEqual(
+			order.owner, self.approver, "created by the signed-in user, not by a service account"
+		)
 		self.assertEqual(order.company, frappe.db.get_value("Warehouse", request.warehouse, "company"))
 		self.assertEqual((order.items[0].item_code, order.items[0].qty), ("_Test Item", 7))
 
 		request.reload()
-		self.assertEqual((request.status, request.approved_by, request.purchase_order), ("Ordered", self.approver, order_name))
+		self.assertEqual(
+			(request.status, request.approved_by, request.purchase_order),
+			("Ordered", self.approver, order_name),
+		)
 
 	def test_purchase_user_without_purchase_manager_is_enough_to_make_the_draft(self):
 		# measured on ERPNext 16.53.0 (docs/INSTALL.md): the standalone service's README asks for both roles, the whole round trip here needs only Purchase User and Stock User
-		approver = make_user("munimji.approver.pu@example.com", ("Munimji Approver", "Purchase User", "Stock User"))
+		approver = make_user(
+			"munimji.approver.pu@example.com", ("Munimji Approver", "Purchase User", "Stock User")
+		)
 		request = make_request()
 		with self.set_user(approver):
 			order = frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
@@ -113,7 +142,11 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 		second = create_purchase_order(do_not_save=True)
 		second.custom_agent_ref = "MAR-REORDER-1"
 		second.insert()
-		live = frappe.get_all("Purchase Order", filters={"custom_agent_ref": "MAR-REORDER-1", "docstatus": ["<", 2]}, pluck="name")
+		live = frappe.get_all(
+			"Purchase Order",
+			filters={"custom_agent_ref": "MAR-REORDER-1", "docstatus": ["<", 2]},
+			pluck="name",
+		)
 		self.assertEqual(live, [second.name])
 		self.assertEqual(frappe.db.count("Purchase Order", {"custom_agent_ref": "MAR-REORDER-1"}), 2)
 
@@ -135,7 +168,9 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 
 	def test_someone_who_may_create_orders_in_erpnext_but_is_not_an_approver_here_is_refused(self):
 		# ERPNext would let this person create the Purchase Order; it is this app's own "approve" permission that stops them
-		buyer = make_user("munimji.buyer@example.com", ("Munimji Viewer", "Purchase User", "Purchase Manager"))
+		buyer = make_user(
+			"munimji.buyer@example.com", ("Munimji Viewer", "Purchase User", "Purchase Manager")
+		)
 		request = make_request()
 		with self.set_user(buyer), self.assertRaises(frappe.PermissionError):
 			frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()

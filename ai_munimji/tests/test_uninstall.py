@@ -25,7 +25,9 @@ class TestTheUninstallStep(IntegrationTestCase):
 	def test_what_it_says_stays_is_what_the_document_says(self):
 		text = DOC.read_text(encoding="utf-8")
 		for line in uninstall.what_stays():
-			self.assertIn(f"- {line}", text, "docs/UNINSTALL.md must hold the text the uninstall prints, word for word")
+			self.assertIn(
+				f"- {line}", text, "docs/UNINSTALL.md must hold the text the uninstall prints, word for word"
+			)
 		self.assertEqual(len(uninstall.what_stays()), 5)
 
 	def test_what_stays_names_the_things_that_do_stay(self):
@@ -35,6 +37,16 @@ class TestTheUninstallStep(IntegrationTestCase):
 
 	def test_the_document_lists_everything_the_step_removes(self):
 		text = DOC.read_text(encoding="utf-8")
-		for thing in (*ROLES, "custom_agent_ref", "custom_agent_approved_by", "custom_agent_note", "approve", "scheduled job", "AI Munimji Settings", "Munimji Approval Request", "Munimji Calendar Event"):
+		for thing in (
+			*ROLES,
+			"custom_agent_ref",
+			"custom_agent_approved_by",
+			"custom_agent_note",
+			"approve",
+			"scheduled job",
+			"AI Munimji Settings",
+			"Munimji Approval Request",
+			"Munimji Calendar Event",
+		):
 			self.assertIn(thing, text, thing)
 		self.assertIsNone(re.search(r"small business|working prototype", text, re.I))

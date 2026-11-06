@@ -5,7 +5,11 @@
 from ai_munimji.tests.test_custom_fields import STANDALONE
 
 # the service's own labels and notes (erpnext.py: PO_REF_LABEL, PO_APPROVER_LABEL, MR_NOTE_LABEL)
-LABELS = {"custom_agent_ref": "Agent proposal reference", "custom_agent_approved_by": "Approved by (Stock Assistant)", "custom_agent_note": "Stock Assistant note"}
+LABELS = {
+	"custom_agent_ref": "Agent proposal reference",
+	"custom_agent_approved_by": "Approved by (Stock Assistant)",
+	"custom_agent_note": "Stock Assistant note",
+}
 
 made = False
 for doctype, rows in STANDALONE.items():
