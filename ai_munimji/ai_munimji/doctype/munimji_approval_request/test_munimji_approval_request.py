@@ -1,8 +1,6 @@
 # Copyright (c) 2026, AI Munimji project and Contributors
 # See license.txt
 
-import json
-
 import frappe
 from frappe.utils import add_days, nowdate
 
@@ -126,29 +124,3 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 		with self.set_user(self.approver), self.assertRaises(frappe.ValidationError):
 			frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
 		self.assertFalse(frappe.db.exists("Purchase Order", {"custom_agent_ref": request.name}))
-
-	# --- the settings DocType and its Password field
-
-	def test_a_password_field_is_kept_out_of_the_table_and_out_of_the_version_log(self):
-		secret = "s3cret-value-for-the-test"
-		settings = frappe.get_doc("AI Munimji Settings")
-		settings.demo_secret = secret
-		settings.save()
-		self.assertEqual(frappe.get_doc("AI Munimji Settings").get_password("demo_secret"), secret)
-
-		singles = frappe.db.sql("SELECT value FROM tabSingles WHERE doctype = 'AI Munimji Settings' AND field = 'demo_secret'")
-		self.assertNotIn(secret, json.dumps(singles, default=str))
-		stored = frappe.db.sql("SELECT password FROM `__Auth` WHERE doctype = 'AI Munimji Settings' AND name = 'AI Munimji Settings' AND fieldname = 'demo_secret'")
-		self.assertTrue(stored)
-		self.assertNotIn(secret, json.dumps(stored, default=str), "stored encrypted")
-
-		# Document.save() sets ignore_version = frappe.in_test by default: the version log is OFF while tests run unless it is asked for
-		settings.reload()
-		settings.demo_secret = secret + "-changed"
-		settings.stock_threshold = (settings.stock_threshold or 0) + 1
-		settings.save(ignore_version=False)
-		versions = frappe.get_all("Version", filters={"ref_doctype": "AI Munimji Settings"}, pluck="data")
-		self.assertTrue(versions, "the version log records the change")
-		changed = json.loads(versions[-1])["changed"]
-		self.assertIn("demo_secret", [row[0] for row in changed], "the change of the Password field is recorded...")
-		self.assertNotIn(secret, json.dumps(versions), "...but never its value")

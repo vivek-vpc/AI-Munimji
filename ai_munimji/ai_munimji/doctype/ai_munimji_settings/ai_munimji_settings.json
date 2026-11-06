@@ -1,60 +1,225 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
  "creation": "2026-11-05 17:47:12.325512",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "enabled",
-  "stock_threshold",
-  "fallback_supplier",
-  "demo_secret"
+  "rules_section",
+  "min_qty",
+  "min_days_cover",
+  "use_lead_time_rule",
+  "safety_stock_days",
+  "default_lead_time_days",
+  "schedule_section",
+  "check_cron",
+  "recent_window_days",
+  "base_window_days",
+  "history_days",
+  "calendar_section",
+  "calendar_enabled",
+  "calendar_events",
+  "approvals_section",
+  "approval_expiry_hours",
+  "reminder_after_hours",
+  "max_reminders",
+  "alerts_section",
+  "stock_alerts",
+  "stock_alert_repeat_days",
+  "suppliers_section",
+  "fallback_supplier"
  ],
  "fields": [
   {
    "default": "1",
+   "description": "Switch this off to stop watching stock. Requests that are already waiting stay as they are.",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Watch stock"
   },
   {
-   "default": "10",
-   "fieldname": "stock_threshold",
-   "fieldtype": "Float",
-   "label": "Ask for a purchase when the quantity in a warehouse is below",
-   "non_negative": 1
+   "description": "Munimji asks for a purchase when either rule below says stock is running low.",
+   "fieldname": "rules_section",
+   "fieldtype": "Section Break",
+   "label": "When to ask for a purchase"
   },
   {
+   "default": "0",
+   "description": "A quantity, counted warehouse by warehouse. Leave 0 to not use this rule.",
+   "fieldname": "min_qty",
+   "fieldtype": "Float",
+   "label": "Ask when stock is at or below this quantity (0 = not used)"
+  },
+  {
+   "default": "7",
+   "description": "Worked out from how much of the item you have been using. Leave 0 to not use this rule.",
+   "fieldname": "min_days_cover",
+   "fieldtype": "Float",
+   "label": "Ask when stock will last this many days or fewer (0 = not used)"
+  },
+  {
+   "default": "1",
+   "description": "Ask early enough for the supplier to deliver: when the days of stock left are no more than the delivery time plus the safety days.",
+   "fieldname": "use_lead_time_rule",
+   "fieldtype": "Check",
+   "label": "Also ask in time for the delivery"
+  },
+  {
+   "default": "3",
+   "description": "Extra days of stock to keep on top of the delivery time.",
+   "fieldname": "safety_stock_days",
+   "fieldtype": "Float",
+   "label": "Safety days"
+  },
+  {
+   "default": "7",
+   "description": "Used for an item when ERPNext has no delivery time for it.",
+   "fieldname": "default_lead_time_days",
+   "fieldtype": "Float",
+   "label": "Delivery time to assume (days)"
+  },
+  {
+   "description": "How often stock is checked, and how much of your past use is looked at.",
+   "fieldname": "schedule_section",
+   "fieldtype": "Section Break",
+   "label": "When to check, and what history to look at"
+  },
+  {
+   "default": "0 6 * * *",
+   "description": "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest.",
+   "fieldname": "check_cron",
+   "fieldtype": "Data",
+   "label": "Check stock at"
+  },
+  {
+   "default": "14",
+   "description": "The latest days, to notice that use is speeding up or slowing down.",
+   "fieldname": "recent_window_days",
+   "fieldtype": "Int",
+   "label": "Recent use: look back this many days"
+  },
+  {
+   "default": "90",
+   "description": "The longer stretch that tells what normal use is. It must be more than the recent days.",
+   "fieldname": "base_window_days",
+   "fieldtype": "Int",
+   "label": "Normal use: look back this many days"
+  },
+  {
+   "default": "480",
+   "description": "How much past use is read from ERPNext. About 15 months or more lets last year's season count.",
+   "fieldname": "history_days",
+   "fieldtype": "Int",
+   "label": "Read this many days of history"
+  },
+  {
+   "description": "Festivals and promotions, when you use more or less than usual.",
+   "fieldname": "calendar_section",
+   "fieldtype": "Section Break",
+   "label": "Demand calendar"
+  },
+  {
+   "default": "1",
+   "fieldname": "calendar_enabled",
+   "fieldtype": "Check",
+   "label": "Use the demand calendar"
+  },
+  {
+   "description": "Each event applies to every item. Choosing items or item groups for an event comes later.",
+   "fieldname": "calendar_events",
+   "fieldtype": "Table",
+   "label": "Events",
+   "options": "Munimji Calendar Event"
+  },
+  {
+   "fieldname": "approvals_section",
+   "fieldtype": "Section Break",
+   "label": "Requests waiting for an answer"
+  },
+  {
+   "default": "72",
+   "description": "A request nobody answers is closed after this long. It is never approved on its own.",
+   "fieldname": "approval_expiry_hours",
+   "fieldtype": "Int",
+   "label": "A request expires after (hours)"
+  },
+  {
+   "default": "24",
+   "description": "One reminder goes to the approvers if there is still no answer after this long.",
+   "fieldname": "reminder_after_hours",
+   "fieldtype": "Int",
+   "label": "Remind after (hours)"
+  },
+  {
+   "default": "2",
+   "fieldname": "max_reminders",
+   "fieldtype": "Int",
+   "label": "Most reminders for one request"
+  },
+  {
+   "fieldname": "alerts_section",
+   "fieldtype": "Section Break",
+   "label": "Stock alerts"
+  },
+  {
+   "default": "1",
+   "description": "A short note inside this site when stock is low, before any purchase is asked for. Nothing is sent out of the site.",
+   "fieldname": "stock_alerts",
+   "fieldtype": "Check",
+   "label": "Send stock alerts"
+  },
+  {
+   "default": "7",
+   "description": "An item that is still low gets the same alert again after this many days. A worse level is always sent at once.",
+   "fieldname": "stock_alert_repeat_days",
+   "fieldtype": "Int",
+   "label": "Repeat an alert after (days)"
+  },
+  {
+   "fieldname": "suppliers_section",
+   "fieldtype": "Section Break",
+   "label": "Suppliers"
+  },
+  {
+   "description": "A request for an item that has no supplier of its own goes to this one.",
    "fieldname": "fallback_supplier",
    "fieldtype": "Link",
    "label": "Supplier to use when an item has none",
    "options": "Supplier"
-  },
-  {
-   "fieldname": "demo_secret",
-   "fieldtype": "Password",
-   "label": "A secret (spike: tests how a Password field is stored)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-05 17:47:12.325512",
+ "modified": "2026-11-06 10:30:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "export": 0,
+   "print": 0,
    "read": 1,
+   "report": 0,
    "role": "Munimji Manager",
+   "share": 0,
    "write": 1
   },
   {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
+   "export": 0,
+   "print": 0,
    "read": 1,
+   "report": 0,
    "role": "System Manager",
+   "share": 0,
    "write": 1
   }
  ],

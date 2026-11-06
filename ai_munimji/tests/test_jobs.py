@@ -13,7 +13,7 @@ class TestCheckStock(ERPNextTestSuite):
 	def setUp(self):
 		settings = frappe.get_doc("AI Munimji Settings")
 		settings.enabled = 1
-		settings.stock_threshold = 10
+		settings.min_qty = 10
 		settings.save()
 		self.item = make_item("_Munimji Test Item", {"is_stock_item": 1}).name
 
@@ -36,6 +36,18 @@ class TestCheckStock(ERPNextTestSuite):
 	def test_nothing_is_asked_for_when_the_stock_is_enough(self):
 		make_stock_entry(item_code=self.item, qty=50, to_warehouse=WAREHOUSE, rate=10)
 		check_stock()
+		self.assertEqual(self.pending(), [])
+
+	def test_stock_exactly_at_the_quantity_is_asked_for_and_zero_means_the_rule_is_not_used(self):
+		make_stock_entry(item_code=self.item, qty=10, to_warehouse=WAREHOUSE, rate=10)
+		check_stock()
+		self.assertEqual([r.qty for r in self.pending()], [10], "at the quantity counts: 2 x 10 - 10")
+
+		frappe.db.delete("Munimji Approval Request", {"item_code": self.item})
+		settings = frappe.get_doc("AI Munimji Settings")
+		settings.min_qty = 0
+		settings.save()
+		self.assertEqual(check_stock(), 0)
 		self.assertEqual(self.pending(), [])
 
 	def test_the_job_does_nothing_when_it_is_switched_off(self):
