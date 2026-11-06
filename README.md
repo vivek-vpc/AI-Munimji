@@ -1,6 +1,6 @@
 # AI Munimji
 
-A Frappe app for ERPNext v16 that watches stock and prepares purchase requests for a person to approve. **It is at an early stage of development.** It is not released, not listed on the Frappe Marketplace, and not installable from it. It has been run only on Frappe 16.55.2 and ERPNext 16.53.0, in a development container.
+A Frappe app for ERPNext v16 that watches stock and prepares purchase requests for a person to approve. **It is at an early stage of development.** It is not released, not listed on the Frappe Marketplace, and not installable from it. It has been run only on Frappe 16.55.2 and ERPNext 16.54.0 (earlier checks were on 16.53.0), in a development container.
 
 The rules the app is built to:
 

@@ -1,6 +1,6 @@
 # Installing AI Munimji, and who needs which role
 
-AI Munimji is **not released**. It is not on the Frappe Marketplace and you cannot install it from there. These notes are for people who run the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.53.0** (version 16 of both; nothing older or newer has been tried).
+AI Munimji is **not released**. It is not on the Frappe Marketplace and you cannot install it from there. These notes are for people who run the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
 
 ## What you need first
 
@@ -30,13 +30,37 @@ The app adds **no permission rows to any ERPNext DocType**. What a person may se
 | A person who... | Munimji role | ERPNext roles they also need |
 |---|---|---|
 | looks at the requests | Munimji Viewer | **Stock User**, to see the stock the requests are about (Item, Bin, Stock Ledger Entry, Warehouse) |
-| answers a request, which makes a **draft** Purchase Order under their own login | Munimji Approver | **Stock User** to read stock, and **Purchase User** to create the draft: measured on ERPNext 16.53.0, Purchase User is enough to create a Purchase Order. (The standalone service's list of roles is wider; that is a matter of its service account, not of the people who use this app.) |
+| answers a request, which makes a **draft** Purchase Order under their own login | Munimji Approver | **Stock User** to read stock, and **Purchase User** to create the draft: measured on ERPNext 16.53.0 and again on 16.54.0, Purchase User is enough to create a Purchase Order; on 16.54.0 it is also enough to change the quantity of an order made from a request and to cancel it (a Purchase Manager adds nothing, and cannot replace Purchase User). (The standalone service's list of roles is wider; that is a matter of its service account, not of the people who use this app.) |
 | changes the settings, and may delete requests | Munimji Manager | the same as an approver if they also answer requests |
 | everything | System Manager | none |
 
 A person with only a Munimji role reads nothing of ERPNext's (no Item, Bin, Stock Ledger Entry or Purchase Order). That is intended.
 
 Approving needs two things at once: the Munimji "approve" right, and the right to create a Purchase Order in ERPNext. Someone who has one without the other is refused, and nothing is created.
+
+### What each kind of person gets from the ERP client
+
+The part of the app that reads stock and purchases (`ai_munimji/erp_client.py`) works as the person who is signed in. It never reads with more rights than they have, and it never submits a document. Measured on the development site (`ai_munimji/tests/world/test_permissions.py` holds the table):
+
+| Reads and writes | Stock User only | Purchase User + Stock User | Only a Munimji role |
+|---|---|---|---|
+| Items, warehouses, stock, usage, sales orders due, vendors and their prices, orders and requisitions already made | yes | yes | permission error |
+| A vendor's credit days (payment terms) | not shown: unknown, not guessed | shown | permission error |
+| Duties and taxes (Tax Rules) | permission error | permission error | permission error |
+| Make a draft Purchase Order | refused | yes | refused |
+| Make a draft Material Request or Stock Entry (transfer) | yes | yes | refused |
+| Change the quantity of, or cancel, an order made from a request | refused | yes | refused |
+
+A permission error means the person gets no rows, not an empty list. Someone who may only pick an item from a drop-down (the "select" right) is treated the same as someone who may not see it. Only two places in the app go around a person's rights: the scheduled job (it reads as Administrator) and the install and uninstall steps (they create and remove the app's own roles and fields). `ai_munimji/tests/test_rules.py` fails the build if any other place uses `ignore_permissions` or `get_all`.
+
+### Taxes in a request
+
+Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User does not have, and the app adds no permission rows to ERPNext. So:
+
+* The **scheduled job** runs as Administrator, reads the tax setup of each vendor, and keeps the figures it used with the request.
+* When a person **changes the quantity** (or the vendor), the new totals are worked out from those kept figures, not from a fresh read as that person. If someone changes the tax setup in ERPNext afterwards, a request that is already waiting does not follow the change; ask for the order again to read the new setup.
+* If **no tax figures are available at all** (for example a request a person started, who may not read Tax Rules), the request says in plain words: "Taxes are not included in these totals". Every figure in it is then before tax. A tax of zero is never shown as if it were a result.
+* If ERPNext **has no Tax Rule and no default purchase taxes template** for the vendors, the request says that instead ("Duties and taxes are not in this comparison"): the read worked, and ERPNext applies none.
 
 ## Switching the stock monitor on
 

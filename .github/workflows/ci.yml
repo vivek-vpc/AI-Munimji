@@ -1,6 +1,7 @@
 name: CI
 
-# What runs here is what .\dev\verify-all.ps1 runs on a development machine, on a bench built from nothing: the app's tests on a site with ERPNext installed, and the translation template.
+# What runs here is what .\dev\verify-all.ps1 runs on a development machine, on a bench built from nothing: the app's tests on a site with ERPNext installed, the translation template,
+# and then the Frappe client of the ERP port on a second site that holds the contract data, as real users with real roles.
 #
 # The rules package (ai-munimji-engine) is not on PyPI. It is built from the erpnext-ai-agents repository by .github/actions/engine-wheel, at the branch or commit named by the repository
 # variables ENGINE_REPO and ENGINE_REF (defaults: vivek-vpc/erpnext-ai-agents, main). Before the engine's pull requests are merged, set ENGINE_REF to the branch that holds them.
@@ -21,7 +22,7 @@ concurrency:
 
 jobs:
   server:
-    name: Server tests (Frappe 16, ERPNext 16)
+    name: Server tests and the Frappe client on real data (Frappe 16, ERPNext 16)
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
@@ -148,3 +149,22 @@ jobs:
           cp "$pot" "$RUNNER_TEMP/main.pot.committed"
           bench --site test_site generate-pot-file --app ai_munimji
           diff -I '^"POT-Creation-Date' -I '^"PO-Revision-Date' -I '^#: ' "$RUNNER_TEMP/main.pot.committed" "$pot"
+
+      - name: The world site (a company, then the contract data)
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench new-site --db-root-password root --admin-password admin world_site
+          bench --site world_site install-app erpnext
+          bench --site world_site install-app ai_munimji
+          cd sites
+          ../env/bin/python "$MUNIMJI_REPO/dev/frappe_run.py" world_site "$MUNIMJI_REPO/dev/scripts/seed.py"
+          ../env/bin/python "$MUNIMJI_REPO/dev/frappe_run.py" world_site "$MUNIMJI_REPO/dev/scripts/load_contract_world.py"
+        env:
+          MUNIMJI_REPO: /home/runner/frappe-bench/apps/ai_munimji
+
+      - name: The Frappe client on real data, as real users (contract checks, who gets what, duplicates, taxes)
+        working-directory: /home/runner/frappe-bench/sites
+        run: |
+          ../env/bin/python "$MUNIMJI_REPO/dev/frappe_run.py" world_site "$MUNIMJI_REPO/dev/scripts/run_world_tests.py"
+        env:
+          MUNIMJI_REPO: /home/runner/frappe-bench/apps/ai_munimji

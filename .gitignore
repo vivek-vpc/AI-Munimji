@@ -18,3 +18,7 @@ dev/browser/*.png
 
 # the engine wheel for the step 7 check is built in the other repository and not kept here
 dev/wheels/
+
+# what the contract world on the dev site looks like, an API key for the REST column, and the results of the runs (dev/scripts/load_contract_world.py, dev/contract-rest.ps1): local, and the key is a secret
+
+dev/contract-*.json
