@@ -9,7 +9,7 @@ import frappe
 
 from ai_munimji_engine.packs.stock_procurement.erp import STOCK_COLUMNS
 
-folder = Path(args[0] if args else "/workspace/ai_munimji/dev/tmp_reads")
+folder = Path(args[0] if args else "dev/tmp_reads")  # the folder list_client_reads.py wrote, as seen from where this runs
 STANDARD = {"name", "owner", "creation", "modified", "modified_by", "docstatus", "idx", "parent", "parentfield", "parenttype"}
 reads = {n: json.loads((folder / f"reads_{n}.json").read_text(encoding="utf-8")) for n in ("rest", "frappe")}
 
