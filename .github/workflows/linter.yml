@@ -34,7 +34,7 @@ jobs:
           semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
 
   deps-vulnerable-check:
-    name: 'Vulnerable Dependency Check'
+    name: 'Vulnerable Dependency Check and bandit'
     runs-on: ubuntu-latest
 
     steps:
@@ -43,6 +43,10 @@ jobs:
           python-version: '3.14'
 
       - uses: actions/checkout@v6
+
+      - name: Build the engine wheel
+        id: engine
+        uses: ./.github/actions/engine-wheel
 
       - name: Cache pip
         uses: actions/cache@v5
@@ -53,8 +57,17 @@ jobs:
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
 
-      - name: Install and run pip-audit
+      # Not "pip-audit .": the project's one dependency is the engine, which is not on PyPI, so the audit cannot resolve it. What the app adds to a bench is the engine and what the
+      # engine needs, so that installed set is audited. Frappe's and ERPNext's own pins are not this app's to fix and are not audited here.
+      - name: Install the engine and audit it with what it needs
         run: |
+          python -m venv "$RUNNER_TEMP/audit-env"
+          "$RUNNER_TEMP/audit-env/bin/python" -m pip install --disable-pip-version-check --quiet "${{ steps.engine.outputs.wheel }}"
+          "$RUNNER_TEMP/audit-env/bin/python" dev/scripts/engine_requirements.py | tee "$RUNNER_TEMP/engine-requirements.txt"
           pip install pip-audit
-          cd ${GITHUB_WORKSPACE}
-          pip-audit --desc on .
+          pip-audit --desc on --no-deps --disable-pip -r "$RUNNER_TEMP/engine-requirements.txt"
+
+      - name: bandit (any finding fails the build)
+        run: |
+          pip install bandit
+          bandit -r ai_munimji -q -x ai_munimji/tests,ai_munimji/ai_munimji/doctype/munimji_approval_request/test_munimji_approval_request.py,ai_munimji/public
