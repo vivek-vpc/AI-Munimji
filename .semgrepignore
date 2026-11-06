@@ -1,4 +1,8 @@
-# Development tooling (dev/) is not the app and is not shipped; Frappe's rules are for app code. dev\semgrep.ps1 scans ai_munimji/ only, the same way,
-# and everything under ai_munimji/ (tests included) is still scanned.
+# What Frappe's Semgrep rules are run over: the app, as dev\semgrep.ps1 does (it scans ai_munimji/ and skips test code, which is what semgrep itself does when a repository has
+# no .semgrepignore of its own; having one replaces that default, so the test folders are listed here again).
+# Development tooling (dev/) is not the app and is not shipped.
 dev/
 node_modules/
+tests/
+test_*.py
+*_test.py
