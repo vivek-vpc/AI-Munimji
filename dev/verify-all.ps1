@@ -1,8 +1,9 @@
 # Rebuilds the development environment from nothing and runs every check, printing how long each step took:
-#   destroy (this project only) -> up -> bootstrap -> seed -> test site -> gate -> bench start -> round trip (HTTP) -> round trip (browser) -> uninstall check
+#   destroy (this project only) -> engine wheel -> up -> bootstrap -> seed -> test site -> gate -> Semgrep -> contract data -> world tests -> bench start -> round trip (HTTP) -> round trip (browser)
+#   -> uninstall check, and with -WithRest the standalone service's REST client over HTTP on the same data (about 8 minutes)
 #   .\dev\verify-all.ps1 -Fresh      # without -Fresh it keeps what exists and only runs the steps
 # It removes the containers and volumes of the compose project "munimji-dev" ONLY when you pass -Fresh. Images stay on the machine.
-param([switch]$Fresh)
+param([switch]$Fresh, [switch]$WithRest)
 # "Continue": docker and bench write progress to stderr; every step is judged by its exit code, not by what it prints
 $ErrorActionPreference = "Continue"
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -29,6 +30,9 @@ Step "bootstrap (bench init, ERPNext, dev site, app)" { & $exec bash /workspace/
 Step "seed the dev site" { & $exec bash /workspace/ai_munimji/dev/run-script.sh /workspace/ai_munimji/dev/scripts/seed.py | Out-Host }
 Step "test site (ERPNext + app)" { & $exec bash /workspace/ai_munimji/dev/make-site.sh test.localhost app | Out-Host }
 Step "gate: tests, bandit, pip-audit" { & $exec bash /workspace/ai_munimji/dev/gate.sh | Out-Host }
+Step "semgrep with Frappe's rules" { & (Join-Path $here "semgrep.ps1") | Out-Host }
+Step "contract data on the dev site (the engine test-kit's world)" { & $exec bash /workspace/ai_munimji/dev/run-script.sh /workspace/ai_munimji/dev/scripts/load_contract_world.py | Out-Host }
+Step "world tests: the Frappe client on real data, as real users" { & (Join-Path $here "world-tests.ps1") | Out-Host }
 Step "bench start (background)" {
     docker exec -d -u frappe munimji-dev-frappe-1 bash -c "cd /home/frappe/dev/frappe-bench && exec bench start --no-dev > /home/frappe/dev/bench-start.log 2>&1"
     for ($i = 0; $i -lt 60; $i++) { try { if ((Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:8000/api/method/ping" -TimeoutSec 3).StatusCode -eq 200) { return } } catch { }; Start-Sleep -Seconds 2 }
@@ -41,6 +45,9 @@ Step "put the demo back, then the round trip in a browser" {
     & $exec bash -c "cd /workspace/ai_munimji/dev/browser && (test -d node_modules || npm ci --no-audit --no-fund) && node round-trip.cjs" | Out-Host
 }
 Step "stop bench" { & $exec bash -c "pkill -INT -f 'honcho start'; sleep 4; pkill -f 'bench serve'; pkill -f 'frappe serve'; pkill -f socketio.js; pkill -f 'bench worker'; pkill -f 'bench schedule'; pkill -f 'esbuild --watch'; true" | Out-Null; $global:LASTEXITCODE = 0 }
+if ($WithRest) {
+    Step "the REST client of the standalone service on the same data (over HTTP)" { & (Join-Path $here "contract-rest.ps1") | Out-Host }
+}
 Step "uninstall check (throw-away site)" { & $exec bash /workspace/ai_munimji/dev/check-uninstall.sh | Out-Host }
 
 Write-Host ""
