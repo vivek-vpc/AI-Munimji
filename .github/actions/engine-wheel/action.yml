@@ -1,7 +1,16 @@
 name: Build the engine wheel
 description: >
-  The rules package ai-munimji-engine is not on PyPI. This builds its wheel from the erpnext-ai-agents repository (public), at the commit, branch or tag named by the repository
-  variables ENGINE_REPO and ENGINE_REF (defaults: vivek-vpc/erpnext-ai-agents and main), and says which commit that was. Nothing is published.
+  The rules package ai-munimji-engine is not on PyPI. This builds its wheel from the erpnext-ai-agents repository (public), at the commit, branch or tag named by the inputs
+  `repository` and `ref`, and says which commit that was. Nothing is published. A composite action cannot read the repository variables itself: the workflows pass
+  ENGINE_REPO and ENGINE_REF in (defaults there: vivek-vpc/erpnext-ai-agents and main).
+
+inputs:
+  repository:
+    description: The repository that holds the engine (owner/name)
+    default: vivek-vpc/erpnext-ai-agents
+  ref:
+    description: The branch, tag or commit to build the engine from
+    default: main
 
 outputs:
   wheel:
@@ -17,8 +26,8 @@ runs:
     - name: Check out the engine repository
       uses: actions/checkout@v6
       with:
-        repository: ${{ vars.ENGINE_REPO || 'vivek-vpc/erpnext-ai-agents' }}
-        ref: ${{ vars.ENGINE_REF || 'main' }}
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
         path: engine-source
 
     - name: Build the wheel
@@ -31,4 +40,4 @@ runs:
         commit=$(git -C engine-source rev-parse HEAD)
         echo "wheel=$wheel" >> "$GITHUB_OUTPUT"
         echo "commit=$commit" >> "$GITHUB_OUTPUT"
-        echo "Engine wheel: $wheel, built from ${{ vars.ENGINE_REPO || 'vivek-vpc/erpnext-ai-agents' }} at $commit"
+        echo "Engine wheel: $wheel, built from ${{ inputs.repository }} at $commit"
