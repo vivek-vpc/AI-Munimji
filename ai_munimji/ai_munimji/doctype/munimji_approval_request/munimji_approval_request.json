@@ -96,37 +96,54 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 0,
+   "delete": 0,
+   "email": 0,
    "export": 1,
+   "print": 0,
    "read": 1,
    "report": 1,
-   "role": "Munimji Viewer"
+   "role": "Munimji Viewer",
+   "share": 0,
+   "write": 0
   },
   {
    "approve": 1,
+   "create": 0,
+   "delete": 0,
+   "email": 0,
    "export": 1,
+   "print": 0,
    "read": 1,
    "report": 1,
    "role": "Munimji Approver",
+   "share": 0,
    "write": 1
   },
   {
    "approve": 1,
    "create": 1,
    "delete": 1,
+   "email": 0,
    "export": 1,
+   "print": 0,
    "read": 1,
    "report": 1,
    "role": "Munimji Manager",
+   "share": 0,
    "write": 1
   },
   {
    "approve": 1,
    "create": 1,
    "delete": 1,
+   "email": 0,
    "export": 1,
+   "print": 0,
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 0,
    "write": 1
   }
  ],

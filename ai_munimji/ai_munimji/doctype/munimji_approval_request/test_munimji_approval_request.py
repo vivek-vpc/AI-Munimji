@@ -73,6 +73,14 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 		request.reload()
 		self.assertEqual((request.status, request.approved_by, request.purchase_order), ("Ordered", self.approver, order_name))
 
+	def test_purchase_user_without_purchase_manager_is_enough_to_make_the_draft(self):
+		# measured on ERPNext 16.53.0 (docs/INSTALL.md): the standalone service's README asks for both roles, the whole round trip here needs only Purchase User and Stock User
+		approver = make_user("munimji.approver.pu@example.com", ("Munimji Approver", "Purchase User", "Stock User"))
+		request = make_request()
+		with self.set_user(approver):
+			order = frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
+		self.assertEqual(frappe.db.get_value("Purchase Order", order, "docstatus"), 0)
+
 	def test_a_second_order_for_the_same_request_is_refused(self):
 		request = make_request()
 		with self.set_user(self.approver):
