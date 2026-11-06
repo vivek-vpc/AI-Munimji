@@ -1,0 +1,9 @@
+{
+  "name": "ai-munimji-browser-check",
+  "private": true,
+  "description": "Drives the Desk in the development container's headless Chromium to click the form button of the spike. Dev tool only.",
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "puppeteer-core": "24.10.0"
+  }
+}

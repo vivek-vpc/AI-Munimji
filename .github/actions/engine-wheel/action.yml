@@ -1,0 +1,43 @@
+name: Build the engine wheel
+description: >
+  The rules package ai-munimji-engine is not on PyPI. This builds its wheel from the erpnext-ai-agents repository (public), at the commit, branch or tag named by the inputs
+  `repository` and `ref`, and says which commit that was. Nothing is published. A composite action cannot read the repository variables itself: the workflows pass
+  ENGINE_REPO and ENGINE_REF in (defaults there: vivek-vpc/erpnext-ai-agents and main).
+
+inputs:
+  repository:
+    description: The repository that holds the engine (owner/name)
+    default: vivek-vpc/erpnext-ai-agents
+  ref:
+    description: The branch, tag or commit to build the engine from
+    default: main
+
+outputs:
+  wheel:
+    description: Path of the built wheel
+    value: ${{ steps.build.outputs.wheel }}
+  commit:
+    description: The commit of the engine repository that the wheel was built from
+    value: ${{ steps.build.outputs.commit }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check out the engine repository
+      uses: actions/checkout@v6
+      with:
+        repository: ${{ inputs.repository }}
+        ref: ${{ inputs.ref }}
+        path: engine-source
+
+    - name: Build the wheel
+      id: build
+      shell: bash
+      run: |
+        python -m pip install --disable-pip-version-check --quiet build
+        python -m build --wheel --outdir "$RUNNER_TEMP/engine-wheel" engine-source/engine
+        wheel=$(ls "$RUNNER_TEMP"/engine-wheel/ai_munimji_engine-*.whl)
+        commit=$(git -C engine-source rev-parse HEAD)
+        echo "wheel=$wheel" >> "$GITHUB_OUTPUT"
+        echo "commit=$commit" >> "$GITHUB_OUTPUT"
+        echo "Engine wheel: $wheel, built from ${{ inputs.repository }} at $commit"

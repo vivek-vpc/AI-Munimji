@@ -10,5 +10,11 @@ node_modules/
 .DS_Store
 
 # measurements written by the dev scripts; they go into the report, not into git
-dev/timings.log
+dev/timings*.log
 dev/*.out
+dev/.cache/
+dev/browser/node_modules/
+dev/browser/*.png
+
+# the engine wheel for the step 7 check is built in the other repository and not kept here
+dev/wheels/

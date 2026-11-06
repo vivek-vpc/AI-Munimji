@@ -1,0 +1,150 @@
+name: CI
+
+# What runs here is what .\dev\verify-all.ps1 runs on a development machine, on a bench built from nothing: the app's tests on a site with ERPNext installed, and the translation template.
+#
+# The rules package (ai-munimji-engine) is not on PyPI. It is built from the erpnext-ai-agents repository by .github/actions/engine-wheel, at the branch or commit named by the repository
+# variables ENGINE_REPO and ENGINE_REF (defaults: vivek-vpc/erpnext-ai-agents, main). Before the engine's pull requests are merged, set ENGINE_REF to the branch that holds them.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: Server tests (Frappe 16, ERPNext 16)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    env:
+      FRAPPE_BRANCH: version-16
+      ERPNEXT_BRANCH: version-16
+
+    services:
+      redis-cache:
+        image: redis:alpine
+        ports:
+          - 13000:6379
+      redis-queue:
+        image: redis:alpine
+        ports:
+          - 11000:6379
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v6
+
+      - name: Find tests
+        run: |
+          echo "Finding tests"
+          grep -rn "def test" > /dev/null
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          check-latest: true
+
+      - name: Build the engine wheel
+        id: engine
+        uses: ./.github/actions/engine-wheel
+        with:
+          repository: ${{ vars.ENGINE_REPO || 'vivek-vpc/erpnext-ai-agents' }}
+          ref: ${{ vars.ENGINE_REF || 'main' }}
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml', '**/setup.py', '**/setup.cfg') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: 'echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT'
+
+      - uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install MariaDB Client
+        run: |
+          sudo apt update
+          sudo apt-get install -y mariadb-client libmariadb-dev pkg-config
+
+      - name: Setup the bench (Frappe 16)
+        run: |
+          pip install frappe-bench
+          bench init --skip-redis-config-generation --skip-assets --frappe-branch "$FRAPPE_BRANCH" --python "$(which python)" ~/frappe-bench
+
+      - name: Point the bench at the service containers
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench set-config -g db_host 127.0.0.1
+          bench set-config -g redis_cache redis://127.0.0.1:13000
+          bench set-config -g redis_queue redis://127.0.0.1:11000
+          bench set-config -g redis_socketio redis://127.0.0.1:13000
+
+      - name: Put the engine into the bench's environment
+        # The app's dependency line names the engine, which is not on PyPI; it is found in the environment. The environment already holds Frappe's pinned pydantic and PyYAML.
+        run: |
+          ~/frappe-bench/env/bin/python -m pip install --disable-pip-version-check --no-deps "${{ steps.engine.outputs.wheel }}"
+          ~/frappe-bench/env/bin/python -m pip check
+
+      - name: Get ERPNext 16 and this app
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench get-app --branch "$ERPNEXT_BRANCH" erpnext
+          bench get-app ai_munimji "$GITHUB_WORKSPACE"
+          bench version
+        env:
+          CI: 'Yes'
+
+      - name: The test site (ERPNext and the app installed)
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench new-site --db-root-password root --admin-password admin test_site
+          bench --site test_site install-app erpnext
+          bench --site test_site install-app ai_munimji
+          bench --site test_site set-config allow_tests true
+
+      - name: Run the app's tests
+        working-directory: /home/runner/frappe-bench
+        run: bench --site test_site run-tests --app ai_munimji
+        env:
+          TYPE: server
+
+      - name: The translation template holds every word of the app, and nothing else
+        working-directory: /home/runner/frappe-bench
+        run: |
+          pot=apps/ai_munimji/ai_munimji/locale/main.pot
+          cp "$pot" "$RUNNER_TEMP/main.pot.committed"
+          bench --site test_site generate-pot-file --app ai_munimji
+          diff -I '^"POT-Creation-Date' -I '^"PO-Revision-Date' -I '^#: ' "$RUNNER_TEMP/main.pot.committed" "$pot"

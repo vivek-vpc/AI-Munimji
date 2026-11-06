@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "creation": "2026-11-06 10:30:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "event_name",
+  "kind",
+  "start_date",
+  "end_date",
+  "uplift_pct",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "event_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "What it is",
+   "length": 80,
+   "reqd": 1
+  },
+  {
+   "default": "promotion",
+   "fieldname": "kind",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Kind",
+   "options": "festival\npromotion\nother"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "First day",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Last day",
+   "reqd": 1
+  },
+  {
+   "description": "+40 means 40% more use each day during the event, -20 means 20% less.",
+   "fieldname": "uplift_pct",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Change in daily use (%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note",
+   "length": 300
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-06 10:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "AI Munimji",
+ "name": "Munimji Calendar Event",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

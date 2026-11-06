@@ -1,0 +1,4 @@
+# Development tooling (dev/) is not the app and is not shipped; Frappe's rules are for app code. dev\semgrep.ps1 scans ai_munimji/ only, the same way,
+# and everything under ai_munimji/ (tests included) is still scanned.
+dev/
+node_modules/
