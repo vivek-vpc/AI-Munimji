@@ -1,3 +1,5 @@
+from ai_munimji import custom_fields
+
 app_name = "ai_munimji"
 app_title = "AI Munimji"
 app_publisher = "AI Munimji project"
@@ -99,11 +101,12 @@ required_apps = ["erpnext"]
 before_install = "ai_munimji.install.before_install"
 # after_install = "ai_munimji.install.after_install"
 
-# the two fields this app adds to Purchase Order (exported with `bench export-fixtures --app ai_munimji`)
+# the seven fields this app adds to Purchase Order, Material Request and Stock Entry (ai_munimji/custom_fields.py), written by `bench export-fixtures --app ai_munimji`
+# and filtered by name so that no other Custom Field of the site is exported with them
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["name", "in", ["Purchase Order-custom_agent_ref", "Purchase Order-custom_agent_approver"]]],
+		"filters": [["name", "in", list(custom_fields.NAMES)]],
 	}
 ]
 

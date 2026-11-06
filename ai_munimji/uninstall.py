@@ -1,8 +1,7 @@
 import frappe
 
+from ai_munimji.custom_fields import NAMES as CUSTOM_FIELDS
 from ai_munimji.install import ROLES
-
-CUSTOM_FIELDS = ("Purchase Order-custom_agent_ref", "Purchase Order-custom_agent_approver")
 PERMISSION_TYPES = ("munimji_approval_request_approve",)
 
 

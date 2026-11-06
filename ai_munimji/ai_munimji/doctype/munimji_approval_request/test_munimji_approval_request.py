@@ -65,7 +65,7 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 		order = frappe.get_doc("Purchase Order", order_name)
 		self.assertEqual(order.docstatus, 0, "a draft, never submitted")
 		self.assertEqual(order.custom_agent_ref, request.name)
-		self.assertEqual(order.custom_agent_approver, self.approver)
+		self.assertEqual(order.custom_agent_approved_by, f"{self.approver} via desk", "the form of words the standalone service writes: user, 'via', where from")
 		self.assertEqual(order.owner, self.approver, "created by the signed-in user, not by a service account")
 		self.assertEqual(order.company, frappe.db.get_value("Warehouse", request.warehouse, "company"))
 		self.assertEqual((order.items[0].item_code, order.items[0].qty), ("_Test Item", 7))
@@ -89,19 +89,34 @@ class TestMunimjiApprovalRequest(ERPNextTestSuite):
 				frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
 		self.assertEqual(frappe.db.count("Purchase Order", {"custom_agent_ref": request.name}), 1)
 
-	def test_the_database_refuses_a_second_order_with_the_same_reference_even_if_the_app_did_not(self):
+	def test_a_request_with_a_live_order_is_refused_even_if_it_shows_pending(self):
+		# the guard on its own: the status check cannot be what stops this one, and the reference is not unique in the database (next test)
 		request = make_request()
 		with self.set_user(self.approver):
 			frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
+			frappe.db.set_value("Munimji Approval Request", request.name, "status", "Pending")
+			with self.assertRaises(frappe.ValidationError):
+				frappe.get_doc("Munimji Approval Request", request.name).create_draft_purchase_order()
+		self.assertEqual(frappe.db.count("Purchase Order", {"custom_agent_ref": request.name}), 1)
 
+	def test_a_cancelled_order_and_its_replacement_may_carry_the_same_reference(self):
+		# The standalone service does exactly this when an order is changed: it looks for the order of a reference with docstatus < 2, so the reference cannot be unique.
+		# (The spike made it unique; a replacement would have been refused by the database.)
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		duplicate = create_purchase_order(do_not_save=True)
-		duplicate.custom_agent_ref = request.name
-		with self.assertRaises((frappe.UniqueValidationError, frappe.DuplicateEntryError)):
-			duplicate.insert()
+		first = create_purchase_order(do_not_save=True)
+		first.custom_agent_ref = "MAR-REORDER-1"
+		first.insert()
+		first.submit()
+		first.cancel()
+		second = create_purchase_order(do_not_save=True)
+		second.custom_agent_ref = "MAR-REORDER-1"
+		second.insert()
+		live = frappe.get_all("Purchase Order", filters={"custom_agent_ref": "MAR-REORDER-1", "docstatus": ["<", 2]}, pluck="name")
+		self.assertEqual(live, [second.name])
+		self.assertEqual(frappe.db.count("Purchase Order", {"custom_agent_ref": "MAR-REORDER-1"}), 2)
 
-	def test_ordinary_orders_without_a_reference_are_not_blocked_by_the_unique_field(self):
+	def test_ordinary_orders_without_a_reference_are_not_affected_by_the_field(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		first = create_purchase_order(do_not_submit=True)

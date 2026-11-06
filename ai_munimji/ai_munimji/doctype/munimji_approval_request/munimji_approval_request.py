@@ -17,8 +17,11 @@ class MunimjiApprovalRequest(Document):
 		"""The one thing a person can do with a request: turn it into a DRAFT Purchase Order, under their own ERPNext login.
 
 		Nothing is submitted. ERPNext checks the signed-in user's own rights on Purchase Order when the document is inserted, because this does not
-		pass ignore_permissions. The order carries the request's name in custom_agent_ref and the approver in custom_agent_approver.
+		pass ignore_permissions. The order carries the request's name in custom_agent_ref and the approver in custom_agent_approved_by ("user via desk"), the same two fields
+		(and the same form of words) that the standalone service writes, so that either product recognises the other's orders (ai_munimji/custom_fields.py).
 		A request becomes an order once: the row is locked until this transaction ends, so a second click waits and then sees "Ordered".
+
+		PLACEHOLDER, replaced in Phase 5: the request, this method and the button that calls it are the spike's, kept so that the app can be tried end to end.
 		"""
 		self.check_permission("approve")
 
@@ -26,7 +29,8 @@ class MunimjiApprovalRequest(Document):
 		status = frappe.db.get_value(self.doctype, self.name, "status", for_update=True)
 		if status != "Pending":
 			frappe.throw(_("This request is already {0}; it cannot be turned into an order again.").format(status))
-		if frappe.db.exists("Purchase Order", {"custom_agent_ref": self.name}):
+		# the same question the standalone asks: a cancelled order does not count, so that a request whose order was cancelled can be answered again
+		if frappe.db.exists("Purchase Order", {"custom_agent_ref": self.name, "docstatus": ["<", 2]}):
 			frappe.throw(_("A Purchase Order for this request already exists."))
 
 		supplier = self.supplier or frappe.db.get_single_value("AI Munimji Settings", "fallback_supplier")
@@ -39,7 +43,7 @@ class MunimjiApprovalRequest(Document):
 		po.transaction_date = nowdate()
 		po.schedule_date = add_days(nowdate(), 7)
 		po.custom_agent_ref = self.name
-		po.custom_agent_approver = frappe.session.user
+		po.custom_agent_approved_by = f"{frappe.session.user} via desk"[:140]
 		po.append(
 			"items",
 			{

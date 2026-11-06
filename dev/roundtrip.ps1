@@ -53,7 +53,7 @@ if ($r.Ok) {
     Check ($order.docstatus -eq 0) "it is a draft (docstatus $($order.docstatus))"
     Check ($order.custom_agent_ref -eq $first) "it carries the request: custom_agent_ref = $($order.custom_agent_ref)"
     Check ($order.supplier -eq "Munimji Demo Supplier" -and $order.items[0].qty -eq $pending[0].qty) "supplier and quantity are the request's ($($order.supplier), $($order.items[0].qty))"
-    Check ($order.custom_agent_approver -eq $approver.User) "it carries the approver: $($order.custom_agent_approver)"
+    Check ($order.custom_agent_approved_by -eq "$($approver.User) via desk") "it carries the approver, in the standalone service's form of words: $($order.custom_agent_approved_by)"
     Check ($order.owner -eq $approver.User) "it was created by the signed-in user: owner = $($order.owner)"
     $request = Get-Doc $approver "Munimji Approval Request" $first
     Check ($request.status -eq "Ordered" -and $request.purchase_order -eq $order.name) "the request is Ordered and points at $($request.purchase_order)"
