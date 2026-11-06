@@ -39,6 +39,11 @@ fi
 # plain http://localhost:8000 then serves the dev site: Windows itself cannot resolve *.localhost names (browsers can), and this needs no hosts-file change
 step "default site" bench set-config -g default_site "$SITE"
 
+# the app needs the engine (its pyproject.toml says so) and the engine is not on PyPI: put it into the environment first, from the local wheel
+if ! "$BENCH_DIR/env/bin/python" -c "import ai_munimji_engine" 2>/dev/null; then
+  bash "$REPO/dev/install-engine.sh"
+fi
+
 # the app of this repository, soft-linked so that edits made on Windows show up at once
 if [ -f "$REPO/pyproject.toml" ] && [ ! -e apps/ai_munimji ]; then
   step "get-app ai_munimji (soft link)" bench get-app --soft-link "$REPO"

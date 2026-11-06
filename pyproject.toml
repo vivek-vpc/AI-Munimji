@@ -9,6 +9,9 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
+    # The rule logic (stock analysis, vendor scoring, the settings models). It is not on PyPI yet: until it is, dev/install-engine.sh puts a local wheel
+    # into the bench first (README, "The engine"). This is the only line to change when the way of getting it changes (PyPI, a git URL, a copy).
+    "ai-munimji-engine>=0.1.0,<0.2",
 ]
 
 [build-system]

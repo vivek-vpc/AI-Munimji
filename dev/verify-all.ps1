@@ -23,6 +23,7 @@ function Step($name, [scriptblock]$body) {
 if ($Fresh) {
     Step "destroy the project munimji-dev (containers, volumes, network)" { docker compose -p munimji-dev -f (Join-Path $here "compose.yml") down --volumes --remove-orphans }
 }
+Step "engine wheel (built from ..\erpnext-ai-agents\engine, a few seconds)" { & (Join-Path $here "build-engine-wheel.ps1") }
 Step "up (images, containers)" { & (Join-Path $here "up.ps1") }
 Step "bootstrap (bench init, ERPNext, dev site, app)" { & $exec bash /workspace/ai_munimji/dev/bootstrap.sh | Out-Host }
 Step "seed the dev site" { & $exec bash /workspace/ai_munimji/dev/run-script.sh /workspace/ai_munimji/dev/scripts/seed.py | Out-Host }
