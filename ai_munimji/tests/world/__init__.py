@@ -4,7 +4,8 @@ against (`ai_munimji_engine.testkit.world`). They run the real FrappeERPClient o
 The world is loaded into the development site by `dev/scripts/load_contract_world.py` and described in `dev/contract-site.json`. On a site that does not hold it (the test site that
 `bench run-tests` uses) these tests are skipped, and say so. Run them where the world is:   .\\dev\\world-tests.ps1
 
-Every test cleans up after itself: the users it makes and the documents it creates are removed, and the run ends with a rollback.
+Every test cleans up after itself: the users it makes and the documents it creates are removed, and the run ends with a rollback. The two kinds of test that need other database connections to
+see their data (test_parallel_presses.py, test_end_to_end.py) commit what they set up, and remove it, and empty the app's own records, when they are done.
 """
 
 import json

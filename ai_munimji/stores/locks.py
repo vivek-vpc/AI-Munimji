@@ -123,7 +123,7 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 	row.holder, row.until = holder, now + timedelta(minutes=minutes)
 	row.flags.munimji_store = True
 	row.save()
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep: frappe-manual-commit - a lease nobody else can see is no lease: the commit is the point
 	return True
 
 
@@ -133,4 +133,4 @@ def release(name: str, holder: str) -> None:
 		row.holder, row.until = None, None
 		row.flags.munimji_store = True
 		row.save()
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep: frappe-manual-commit - the next tick must see that the lease is free

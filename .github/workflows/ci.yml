@@ -168,3 +168,23 @@ jobs:
           ../env/bin/python "$MUNIMJI_REPO/dev/frappe_run.py" world_site "$MUNIMJI_REPO/dev/scripts/run_world_tests.py"
         env:
           MUNIMJI_REPO: /home/runner/frappe-bench/apps/ai_munimji
+
+  secrets:
+    name: No secrets in the repository's history (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Clone, with the whole history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # Every commit of every branch the clone holds is scanned, not only the files of the latest one: a key that was committed once and removed is still in the history. The scanner is a
+      # container image pinned by digest (gitleaks 8.30.0); it reads the clone and sends nothing anywhere. The finding is printed redacted.
+      - name: Scan the history
+        run: |
+          docker run --rm -v "$PWD:/repo" \
+            -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/repo \
+            ghcr.io/gitleaks/gitleaks@sha256:691af3c7c5a48b16f187ce3446d5f194838f91238f27270ed36eef6359a574d9 \
+            git /repo --config /repo/.gitleaks.toml --log-opts="--all" --redact --no-banner --verbose

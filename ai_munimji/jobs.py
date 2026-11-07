@@ -53,7 +53,7 @@ def run_stock_check(clock=None, company: str | None = None, items: list[str] | N
 		procurement = services.procurement.run()
 		sealed = services.audit.sweep()
 		services.core.jobs.finished(STOCK_CHECK, iso(clock()), True, None)
-		frappe.db.commit()
+		# no commit here: Frappe's scheduler commits a job that returns, and rolls back one that raises (the failure is recorded below, which is why that one commits)
 		report = {
 			"ran": True,
 			"requests": inventory.new_alerts

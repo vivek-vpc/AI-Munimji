@@ -17,7 +17,8 @@ The rules the app is built to:
 | Three roles | Munimji Viewer, Munimji Approver, Munimji Manager; every right of each is pinned by a test |
 | Seven read-only fields on Purchase Order, Material Request and Stock Entry | the same fields the standalone service writes, so either product recognises the other's orders ([docs/NAMES.md](docs/NAMES.md)) |
 | An uninstall that is tested | [docs/UNINSTALL.md](docs/UNINSTALL.md) |
-| **Placeholders, replaced in Phase 5** | the list Munimji Approval Request with its "Create Purchase Order" button, and a scheduled job that asks for a purchase wherever a warehouse holds no more than a quantity. They are the first experiment's, kept so that the app can be tried end to end |
+| The engine's records as DocTypes | 25 of them: requests, purchase proposals, alerts, work orders, the audit seal and the rest; who may do what to each, how a value is kept, the locks and the clean-up are in [docs/STORES.md](docs/STORES.md) |
+| **Thin, replaced in Phase 5** | the request form has one button (a draft Purchase Order for a purchase request), and the scheduled job runs the engine's stock check on a schedule of its own; the approval form with the reasoning, the inbox, notifications and the settings-driven schedule are not built |
 
 To install it on a bench you run yourself, see [docs/INSTALL.md](docs/INSTALL.md), which also says which ERPNext roles a person needs to see stock and make orders.
 

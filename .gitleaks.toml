@@ -1,0 +1,13 @@
+# gitleaks: the rules the CI job "secrets" (and a run by hand) use. The default rules, plus one of our own.
+#   docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.0 git /repo --config /repo/.gitleaks.toml --log-opts="--all" --redact
+title = "AI Munimji"
+
+[extend]
+useDefault = true
+
+# The development API key (dev/scripts/make_api_key.py writes it, dev/contract-key.json, and .gitignore keeps it out). It was staged once by a careless `git add -A` and removed before
+# anything was published; a rule on the file name makes a second time fail the build whatever is inside the file.
+[[rules]]
+id = "dev-api-key-file"
+description = "The development API key file must never be committed"
+path = '''(^|/)contract-key\.json$'''

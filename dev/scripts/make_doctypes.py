@@ -4,7 +4,7 @@
     python dev/scripts/make_doctypes.py --check    # change nothing; exit 1 and name the files that would change (tests/test_store_specs.py does the same in the bench)
 
 It runs outside a bench (it reads specs.py by path and imports nothing of Frappe). For each table it writes `<snake>/<snake>.json` and, only if there is none, `__init__.py` and a controller
-that does nothing; a controller written by hand is never touched. `modified` is the old file's plus one second when anything else in the file changed, so that `bench migrate` takes a
+that does nothing; a controller written by hand is never touched. It also writes the table of DocTypes into docs/STORES.md, between its two marker lines. `modified` is the old file's plus one second when anything else in the file changed, so that `bench migrate` takes a
 changed file and a rerun with no change writes nothing.
 """
 
@@ -192,6 +192,42 @@ def files() -> dict[Path, str]:
 	return out
 
 
+SHORT = {"Munimji Viewer": "V", "Munimji Approver": "A", "Munimji Manager": "M", "System Manager": "S"}
+BEGIN, END = "<!-- stores-table:begin -->", "<!-- stores-table:end -->"
+
+
+def doc_table() -> str:
+	"""The table of docs/STORES.md: one row per DocType, from the same specs the files are made from."""
+	lines = [
+		"| DocType | Engine table | Kept | Columns (derived ones in brackets) | JSON | Rights | For a person's screen |",
+		"|---|---|---|---|---|---|---|",
+	]
+	for table in specs.TABLES:
+		columns = [f"({c.name})" if c.derived else c.name for c in table.cols if c.kind != "json"]
+		if table.numbered:
+			columns.insert(0, table.key[0])
+		jsons = [c.name for c in table.cols if c.kind == "json"] or ["none"]
+		if table.json_row:
+			jsons = ["the whole row (`row_json`)"]
+		rights = (
+			"; ".join(f"{SHORT.get(role, role)} {letters}" for role, letters in table.perms.items())
+			or "none (Administrator only)"
+		)
+		kept = "json row" if table.json_row else "columns"
+		lines.append(
+			f"| {table.doctype} | `{table.engine}` | {kept} | {', '.join(columns)} | {', '.join(jsons)} | {rights} | {'yes' if table.person else 'no'} |"
+		)
+	return "\n".join(lines)
+
+
+def stores_doc() -> tuple[Path, str]:
+	path = ROOT / "docs" / "STORES.md"
+	text = path.read_bytes().decode("utf-8").replace("\r\n", "\n")
+	head, rest = text.split(BEGIN, 1)
+	_old, tail = rest.split(END, 1)
+	return path, f"{head}{BEGIN}\n{doc_table()}\n{END}{tail}"
+
+
 def stub(table, module: str, base: str) -> str:
 	return (
 		"# Copyright (c) 2026, AI Munimji project and contributors\n# For license information, please see license.txt\n\n"
@@ -228,6 +264,11 @@ def main() -> int:
 			if not check:
 				path.parent.mkdir(parents=True, exist_ok=True)
 				path.write_text(text, encoding="utf-8", newline="\n")
+	path, text = stores_doc()
+	if path.read_bytes().decode("utf-8").replace("\r\n", "\n") != text:
+		changed.append(path)
+		if not check:
+			path.write_text(text, encoding="utf-8", newline="\n")
 	for path in changed:
 		print(("would write " if check else "wrote ") + str(path.relative_to(ROOT)))
 	print(f"{len(specs.TABLES)} DocTypes, {len(changed)} file(s) {'would change' if check else 'written'}")
