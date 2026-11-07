@@ -34,3 +34,12 @@ def make_request(**values):
 		}
 	)
 	return doc.insert()
+
+
+def empty_store_tables() -> None:
+	"""Empty every DocType of the engine's stores, and the lock rows with them (the numbers start again at 1 and the lock rows are made again when needed). A test does this inside its own
+	transaction and rolls back, so a site that holds records is not touched."""
+	from ai_munimji.stores.specs import TABLES
+
+	for table in TABLES:
+		frappe.db.delete(table.doctype)

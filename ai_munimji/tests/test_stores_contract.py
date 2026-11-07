@@ -13,15 +13,10 @@ from ai_munimji_engine.testkit import stores as store_checks
 from frappe.tests import IntegrationTestCase
 
 from ai_munimji.stores import frappe_core_stores, frappe_stock_stores
-from ai_munimji.stores.specs import TABLES
+from ai_munimji.tests.helpers import empty_store_tables
 
 # check name -> why the DocType stores differ from SQLite there (filled in as found; empty means all 60 are identical)
 DIFFERENCES: dict[str, str] = {}
-
-
-def empty_the_tables() -> None:
-	for table in TABLES:
-		frappe.db.delete(table.doctype)
 
 
 class TestStoresOnDocTypes(IntegrationTestCase):
@@ -34,7 +29,7 @@ class TestStoresOnDocTypes(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		self.savepoint = f"contract_{frappe.generate_hash(length=8)}"
 		frappe.db.savepoint(self.savepoint)
-		empty_the_tables()
+		empty_store_tables()
 		self.core = frappe_core_stores(system=True)
 		self.stock = frappe_stock_stores(self.core)
 
