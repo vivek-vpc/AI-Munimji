@@ -48,10 +48,11 @@ BY_FIELD = {m.fieldname: m for m in MAPPED}
 
 # Fields of the page that the engine knows nothing about. `enabled` is the pack's on/off switch (the standalone keeps it in settings.yaml under packs.enabled, and the pack manifest, in
 # the engine, says enabled_by_default: true); `fallback_supplier` is a link to an ERPNext Supplier, which only ERPNext can check.
-APP_ONLY = ("enabled", "fallback_supplier")
+APP_ONLY = ("enabled", "fallback_supplier", "keep_logs_days")
 # The ONE setting where the app deliberately differs from the standalone service: the stock monitor is OFF until a person has reviewed the thresholds and switches it on, so that nothing
 # starts creating requests on a customer's live stock at install (docs/NAMES.md). The standalone service keeps the manifest's default, which is on.
 ENABLED_DEFAULT = 0
+KEEP_LOGS_DEFAULT = 90  # days (retention.py); the clean-up of the logs is the app's own, so the number is too
 
 # The fields of the child table "Munimji Calendar Event" and the engine's CalendarEvent field each one holds.
 EVENT_FIELDS = {
@@ -211,7 +212,11 @@ def cron_problem(expression: str) -> str | None:
 def fill_missing(doc) -> None:
 	"""Give every setting that has nothing stored its default, before the document is saved. A page saved before a field existed has no row for it (None), and Frappe stores a
 	None number as 0 and a None text as empty, which the engine's rules then refuse (found by the tests: tests/test_settings.py)."""
-	for fieldname, default in {**engine_defaults(), "enabled": ENABLED_DEFAULT}.items():
+	for fieldname, default in {
+		**engine_defaults(),
+		"enabled": ENABLED_DEFAULT,
+		"keep_logs_days": KEEP_LOGS_DEFAULT,
+	}.items():
 		if doc.get(fieldname) is None:
 			doc.set(fieldname, default)
 
@@ -221,6 +226,10 @@ def validate(doc) -> None:
 	fill_missing(doc)
 	values = to_engine(doc)
 	found = problems(values)
+	if int(doc.get("keep_logs_days") or 0) < 0:
+		found.append(
+			_("“{0}” cannot be negative (0 keeps the logs for ever)").format(_("Keep logs for (days)"))
+		)
 	if not any(
 		p.startswith(label_of("check_cron")) for p in found
 	):  # the engine has not already complained about it

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-07 09:06+0000\n"
-"PO-Revision-Date: 2026-11-07 09:06+0000\n"
+"POT-Creation-Date: 2026-11-07 09:20+0000\n"
+"PO-Revision-Date: 2026-11-07 09:20+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -25,37 +25,37 @@ msgstr ""
 
 #. Description of the 'Ask when stock is at or below this quantity (0 = not
 #. used)' (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:48
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:50
 msgid "A quantity, counted warehouse by warehouse. Leave 0 to not use this rule."
 msgstr ""
 
 #. Label of the approval_expiry_hours (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:144
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:146
 msgid "A request expires after (hours)"
 msgstr ""
 
 #. Description of the 'Supplier to use when an item has none' (Link) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:184
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:186
 msgid "A request for an item that has no supplier of its own goes to this one."
 msgstr ""
 
 #. Description of the 'A request expires after (hours)' (Int) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:141
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:143
 msgid "A request nobody answers is closed after this long. It is never approved on its own."
 msgstr ""
 
 #. Description of the 'Check stock at' (Data) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:89
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:91
 msgid "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest."
 msgstr ""
 
 #. Description of the 'Send stock alerts' (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:166
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:168
 msgid "A short note inside this site when stock is low, before any purchase is asked for. Nothing is sent out of the site."
 msgstr ""
 
@@ -69,7 +69,7 @@ msgid "AI Munimji"
 msgstr ""
 
 #. Name of a DocType
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:198
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:212
 msgid "AI Munimji Settings"
 msgstr ""
 
@@ -114,13 +114,13 @@ msgstr ""
 
 #. Label of the use_lead_time_rule (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:65
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:67
 msgid "Also ask in time for the delivery"
 msgstr ""
 
 #. Description of the 'Repeat an alert after (days)' (Int) field in DocType 'AI
 #. Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:173
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:175
 msgid "An item that is still low gets the same alert again after this many days. A worse level is always sent at once."
 msgstr ""
 
@@ -156,17 +156,17 @@ msgstr ""
 
 #. Description of the 'Also ask in time for the delivery' (Check) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:62
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:64
 msgid "Ask early enough for the supplier to deliver: when the days of stock left are no more than the delivery time plus the safety days."
 msgstr ""
 
 #. Label of the min_qty (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:51
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:53
 msgid "Ask when stock is at or below this quantity (0 = not used)"
 msgstr ""
 
 #. Label of the min_days_cover (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:58
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:60
 msgid "Ask when stock will last this many days or fewer (0 = not used)"
 msgstr ""
 
@@ -213,11 +213,11 @@ msgstr ""
 msgid "Cache key"
 msgstr ""
 
-#: ai_munimji/settings_map.py:187
+#: ai_munimji/settings_map.py:188
 msgid "Calendar events"
 msgstr ""
 
-#: ai_munimji/settings_map.py:185
+#: ai_munimji/settings_map.py:186
 #, python-brace-format
 msgid "Calendar events, row {0}"
 msgstr ""
@@ -257,7 +257,7 @@ msgid "Channel"
 msgstr ""
 
 #. Label of the check_cron (Data) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:92
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:94
 msgid "Check stock at"
 msgstr ""
 
@@ -302,19 +302,19 @@ msgstr ""
 msgid "Created at"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:22
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:23
 msgid "Creating the draft..."
 msgstr ""
 
 #. Label of the default_lead_time_days (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:79
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:81
 msgid "Delivery time to assume (days)"
 msgstr ""
 
 #. Label of the calendar_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:119
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:121
 msgid "Demand calendar"
 msgstr ""
 
@@ -365,11 +365,6 @@ msgstr ""
 msgid "Draft Stock Entry"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:25
-#, python-brace-format
-msgid "Draft {0} created"
-msgstr ""
-
 #. Label of the dry_run (Check) field in DocType 'Munimji Agent Run'
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:42
 msgid "Dry run"
@@ -381,7 +376,7 @@ msgid "Due on"
 msgstr ""
 
 #. Description of the 'Events' (Table) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:128
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:130
 msgid "Each event applies to every item. Choosing items or item groups for an event comes later."
 msgstr ""
 
@@ -401,7 +396,7 @@ msgid "Event"
 msgstr ""
 
 #. Label of the calendar_events (Table) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:131
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:133
 msgid "Events"
 msgstr ""
 
@@ -422,13 +417,13 @@ msgstr ""
 
 #. Description of the 'Safety days' (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:69
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:71
 msgid "Extra days of stock to keep on top of the delivery time."
 msgstr ""
 
 #. Description of the 'Demand calendar' (Section Break) field in DocType 'AI
 #. Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:116
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:118
 msgid "Festivals and promotions, when you use more or less than usual."
 msgstr ""
 
@@ -474,15 +469,21 @@ msgstr ""
 msgid "Holder"
 msgstr ""
 
+#. Label of the housekeeping_section (Section Break) field in DocType 'AI
+#. Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:195
+msgid "Housekeeping"
+msgstr ""
+
 #. Description of the 'Read this many days of history' (Int) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:110
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:112
 msgid "How much past use is read from ERPNext. About 15 months or more lets last year's season count."
 msgstr ""
 
 #. Description of the 'When to check, and what history to look at' (Section
 #. Break) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:82
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:84
 msgid "How often stock is checked, and how much of your past use is looked at."
 msgstr ""
 
@@ -541,6 +542,12 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:27
 #: ai_munimji/ai_munimji/doctype/munimji_work_order/munimji_work_order.json:40
 msgid "Item code"
+msgstr ""
+
+#. Label of the keep_logs_days (Int) field in DocType 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:202
+#: ai_munimji/settings_map.py:226
+msgid "Keep logs for (days)"
 msgstr ""
 
 #. Label of the kind (Data) field in DocType 'Munimji Approval Request'
@@ -616,7 +623,7 @@ msgid "Model"
 msgstr ""
 
 #. Label of the max_reminders (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:157
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:159
 msgid "Most reminders for one request"
 msgstr ""
 
@@ -716,7 +723,7 @@ msgid "Munimji Lock"
 msgstr ""
 
 #. Name of a role
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:209
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:223
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:83
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:155
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:135
@@ -822,7 +829,7 @@ msgstr ""
 
 #. Description of the 'When to ask for a purchase' (Section Break) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:41
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:43
 msgid "Munimji asks for a purchase when either rule below says stock is running low."
 msgstr ""
 
@@ -839,8 +846,12 @@ msgstr ""
 msgid "Munimji request"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:28
+msgid "No answer"
+msgstr ""
+
 #. Label of the base_window_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:106
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:108
 msgid "Normal use: look back this many days"
 msgstr ""
 
@@ -884,7 +895,7 @@ msgstr ""
 
 #. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:35
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:37
 msgid "Off until you switch it on. Review the thresholds below first: once it is on, requests for purchases start to appear for your real stock. Switching it off again stops that; requests that are already waiting stay as they are."
 msgstr ""
 
@@ -895,7 +906,7 @@ msgstr ""
 
 #. Description of the 'Remind after (hours)' (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:148
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:150
 msgid "One reminder goes to the approvers if there is still no answer after this long."
 msgstr ""
 
@@ -964,7 +975,7 @@ msgid "Rate"
 msgstr ""
 
 #. Label of the history_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:113
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:115
 msgid "Read this many days of history"
 msgstr ""
 
@@ -1008,7 +1019,7 @@ msgid "Received at"
 msgstr ""
 
 #. Label of the recent_window_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:99
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:101
 msgid "Recent use: look back this many days"
 msgstr ""
 
@@ -1040,7 +1051,7 @@ msgstr ""
 
 #. Label of the reminder_after_hours (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:151
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:153
 msgid "Remind after (hours)"
 msgstr ""
 
@@ -1057,7 +1068,7 @@ msgstr ""
 
 #. Label of the stock_alert_repeat_days (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:176
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:178
 msgid "Repeat an alert after (days)"
 msgstr ""
 
@@ -1108,7 +1119,7 @@ msgstr ""
 
 #. Label of the approvals_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:137
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:139
 msgid "Requests waiting for an answer"
 msgstr ""
 
@@ -1124,7 +1135,7 @@ msgstr ""
 
 #. Label of the safety_stock_days (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:72
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:74
 msgid "Safety days"
 msgstr ""
 
@@ -1153,7 +1164,7 @@ msgid "Seen at"
 msgstr ""
 
 #. Label of the stock_alerts (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:169
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:171
 msgid "Send stock alerts"
 msgstr ""
 
@@ -1262,7 +1273,7 @@ msgstr ""
 
 #. Label of the alerts_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:162
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:164
 msgid "Stock alerts"
 msgstr ""
 
@@ -1300,13 +1311,13 @@ msgid "Supplier quotations"
 msgstr ""
 
 #. Label of the fallback_supplier (Link) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:187
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:189
 msgid "Supplier to use when an item has none"
 msgstr ""
 
 #. Label of the suppliers_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:181
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:183
 msgid "Suppliers"
 msgstr ""
 
@@ -1322,7 +1333,7 @@ msgid "Suppress until"
 msgstr ""
 
 #. Name of a role
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:221
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:235
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:95
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:167
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:147
@@ -1368,7 +1379,7 @@ msgstr ""
 msgid "The answer, as the engine recorded it"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.py:38
+#: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.py:39
 msgid "The audit seal is append only: a row is never changed or deleted."
 msgstr ""
 
@@ -1406,13 +1417,13 @@ msgstr ""
 
 #. Description of the 'Recent use: look back this many days' (Int) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:96
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:98
 msgid "The latest days, to notice that use is speeding up or slowing down."
 msgstr ""
 
 #. Description of the 'Normal use: look back this many days' (Int) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:103
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:105
 msgid "The longer stretch that tells what normal use is. It must be more than the recent days."
 msgstr ""
 
@@ -1446,7 +1457,7 @@ msgstr ""
 msgid "The row, as the engine kept it"
 msgstr ""
 
-#: ai_munimji/settings_map.py:85
+#: ai_munimji/settings_map.py:86
 msgid "The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
 msgstr ""
 
@@ -1454,7 +1465,7 @@ msgstr ""
 msgid "The scheduled job reads and proposes; a document is made only as the person who approved it."
 msgstr ""
 
-#: ai_munimji/stores/core.py:73
+#: ai_munimji/stores/core.py:74
 msgid "The system mode is for the scheduled job, which runs as Administrator."
 msgstr ""
 
@@ -1485,7 +1496,7 @@ msgstr ""
 msgid "There are several companies and no default company is set, so nothing was created: it would land in whichever company the signed-in user has."
 msgstr ""
 
-#: ai_munimji/settings_map.py:231
+#: ai_munimji/settings_map.py:234
 msgid "These settings cannot be saved"
 msgstr ""
 
@@ -1494,7 +1505,7 @@ msgstr ""
 msgid "This client makes documents as the person signed in, {0}; it cannot act for {1}."
 msgstr ""
 
-#: ai_munimji/stores/record.py:28
+#: ai_munimji/stores/record.py:29
 msgid "This record is kept by the app's stores and is not edited by hand: use the screen's own buttons."
 msgstr ""
 
@@ -1547,13 +1558,13 @@ msgid "Updated by"
 msgstr ""
 
 #. Label of the calendar_enabled (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:125
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:127
 msgid "Use the demand calendar"
 msgstr ""
 
 #. Description of the 'Delivery time to assume (days)' (Float) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:76
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:78
 msgid "Used for an item when ERPNext has no delivery time for it."
 msgstr ""
 
@@ -1570,7 +1581,7 @@ msgid "Warehouse"
 msgstr ""
 
 #. Label of the enabled (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:38
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:40
 msgid "Watch stock"
 msgstr ""
 
@@ -1583,6 +1594,12 @@ msgstr ""
 #. Label of the event_name (Data) field in DocType 'Munimji Calendar Event'
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:20
 msgid "What it is"
+msgstr ""
+
+#. Description of the 'Keep logs for (days)' (Int) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:199
+msgid "What the agents did, the chat log and the ids of handled messages older than this are deleted by the clean-up. 0 keeps them all. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age."
 msgstr ""
 
 #. Label of the payload_json (JSON) field in DocType 'Munimji Work Order'
@@ -1610,13 +1627,13 @@ msgstr ""
 
 #. Label of the rules_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:44
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:46
 msgid "When to ask for a purchase"
 msgstr ""
 
 #. Label of the schedule_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:85
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:87
 msgid "When to check, and what history to look at"
 msgstr ""
 
@@ -1648,7 +1665,7 @@ msgstr ""
 
 #. Description of the 'Ask when stock will last this many days or fewer (0 =
 #. not used)' (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:55
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:57
 msgid "Worked out from how much of the item you have been using. Leave 0 to not use this rule."
 msgstr ""
 
@@ -1715,7 +1732,7 @@ msgstr ""
 msgid "{0} have already been received against it, so it cannot be for less than that."
 msgstr ""
 
-#: ai_munimji/stores/core.py:84
+#: ai_munimji/stores/core.py:87
 #, python-brace-format
 msgid "{0} is done by the scheduled job, not in a person's session."
 msgstr ""
@@ -1760,8 +1777,13 @@ msgstr ""
 msgid "{0}% of it has been received and {1}% billed, so it has to be dealt with in ERPNext (cancel the receipt or invoice first)."
 msgstr ""
 
-#: ai_munimji/settings_map.py:206
+#: ai_munimji/settings_map.py:207
 #, python-brace-format
 msgid "{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
+msgstr ""
+
+#: ai_munimji/settings_map.py:226
+#, python-brace-format
+msgid "“{0}” cannot be negative (0 keeps the logs for ever)"
 msgstr ""
 

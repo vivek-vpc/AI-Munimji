@@ -1,6 +1,6 @@
 // Clicks the real "Create Purchase Order" button in the Desk, in the container's headless Chromium.
 //   .\dev\exec.ps1 bash -c "cd /workspace/ai_munimji/dev/browser && node round-trip.cjs"
-// Needs the bench running (bench start) and the demo seeded with two Pending requests (dev\scripts\reset_demo.py).
+// Needs the bench running (bench start) and the demo seeded with two pending purchase requests (dev\scripts\reset_demo.py).
 const puppeteer = require("puppeteer-core");
 
 const BASE = process.env.BASE || "http://localhost:8000";
@@ -29,10 +29,13 @@ async function signIn(browser, user) {
 async function pendingRequests(page) {
   return page.evaluate(async () => {
     const filters = encodeURIComponent(
-      JSON.stringify([["status", "=", "Pending"]])
+      JSON.stringify([
+        ["status", "=", "pending"],
+        ["kind", "=", "procurement.po"],
+      ])
     );
     const r = await fetch(
-      `/api/resource/Munimji Approval Request?filters=${filters}&order_by=name asc&fields=["name","status","purchase_order"]`
+      `/api/resource/Munimji Approval Request?filters=${filters}&order_by=creation asc&fields=["name","status","item_code","qty"]`
     );
     return (await r.json()).data;
   });
@@ -63,13 +66,13 @@ async function clickButton(page, label) {
   });
   try {
     console.log(
-      "1. The approver opens a Pending request and presses the button"
+      "1. The approver opens a pending purchase request and presses the button"
     );
     const approver = await signIn(browser, "munimji.approver@example.com");
     const [first, second] = await pendingRequests(approver);
     check(
       first && second,
-      `two requests are Pending (${first && first.name}, ${
+      `two purchase requests are pending (${first && first.name}, ${
         second && second.name
       })`
     );
@@ -106,19 +109,30 @@ async function clickButton(page, label) {
         ).data,
       first.name
     );
+    const proposal = await approver.evaluate(async (name) => {
+      const filters = encodeURIComponent(
+        JSON.stringify([["approval_id", "=", name]])
+      );
+      const r = await fetch(
+        `/api/resource/Munimji Purchase Proposal?filters=${filters}&fields=["name","po_name"]`
+      );
+      return (await r.json()).data[0];
+    }, first.name);
     check(
-      after.status === "Ordered" && !!after.purchase_order,
-      `the request is now ${after.status}, order ${after.purchase_order}`
+      after.status === "decided" && !!proposal && !!proposal.po_name,
+      `the request is now ${after.status}, order ${
+        proposal && proposal.po_name
+      }`
     );
     const order = await approver.evaluate(
       async (name) =>
         (
           await (await fetch(`/api/resource/Purchase Order/${name}`)).json()
         ).data,
-      after.purchase_order
+      proposal.po_name
     );
     check(
-      order.docstatus === 0 && order.custom_agent_ref === first.name,
+      order.docstatus === 0 && order.custom_agent_ref === proposal.name,
       `a draft order with custom_agent_ref = ${order.custom_agent_ref}`
     );
     const buttons = await approver.evaluate(() =>
@@ -128,7 +142,7 @@ async function clickButton(page, label) {
     );
     check(
       !buttons.includes("Create Purchase Order"),
-      "the button is gone from the Ordered request"
+      "the button is gone from the decided request"
     );
 
     console.log("2. The viewer opens the other request and presses the button");
@@ -145,8 +159,8 @@ async function clickButton(page, label) {
     await new Promise((r) => setTimeout(r, 3000));
     const text = await viewer.evaluate(() => document.body.innerText);
     check(
-      /not permitted|permission/i.test(text),
-      "the viewer is told they are not permitted"
+      /not allowed|not permitted|permission/i.test(text),
+      "the viewer is told they are not allowed to answer"
     );
     const still = await viewer.evaluate(
       async (name) =>
@@ -157,7 +171,7 @@ async function clickButton(page, label) {
         ).data.status,
       second.name
     );
-    check(still === "Pending", `the request is still ${still}`);
+    check(still === "pending", `the request is still ${still}`);
 
     console.log(
       "3. A Munimji Manager opens AI Munimji Settings, and the viewer is refused"
