@@ -1,18 +1,19 @@
-"""The engine's order-preparing agent, on the engine's own in-memory stores, with whatever ERP client a test gives it. The Frappe app keeps its proposals in DocTypes later (Phase 4b);
-until then this is how the tests let the real agent, and not a copy of its logic, read the real site through the real client."""
+"""The engine's order-preparing agent on this site's DocType stores, with whatever ERP client a test gives it: the real agent, and not a copy of its logic, reads the real site through the real
+client and keeps its requests, proposals and work orders in the app's own records. (Until Phase 4b this kit used the engine's in-memory stores.)
 
-from datetime import UTC, datetime, time, timezone
+The tables of the stores are emptied when a kit is made, inside the test's transaction, and the world tests end with a rollback: a site that holds records is not touched, and one test's
+requests are not another test's.
+"""
 
-from ai_munimji_engine.core.approvals.router import ApprovalRouter
-from ai_munimji_engine.core.approvals.service import ApprovalService
+from datetime import UTC, datetime, time
+
+import frappe
 from ai_munimji_engine.core.common import Actor
-from ai_munimji_engine.core.settings_store import SettingsStore
-from ai_munimji_engine.core.workorders import REORDER_NEEDED, WorkOrderQueue
-from ai_munimji_engine.packs.stock_procurement.procurement.agent import ProcurementAgent
-from ai_munimji_engine.packs.stock_procurement.procurement.proposals import ProposalRepo
-from ai_munimji_engine.packs.stock_procurement.settings import attach as attach_settings
-from ai_munimji_engine.stores import memory_core_stores
-from ai_munimji_engine.stores.stock import memory_stock_stores
+from ai_munimji_engine.core.workorders import REORDER_NEEDED
+
+from ai_munimji import wiring
+from ai_munimji.stores import frappe_core_stores
+from ai_munimji.tests.helpers import empty_store_tables
 
 OWNER = Actor(id="owner", roles=frozenset({"admin", "approver"}), via="test")
 COST_ONLY = {"weight_cost": 100, "weight_delivery": 0, "weight_reliability": 0, "weight_terms": 0}
@@ -22,29 +23,23 @@ class Kit:
 	def __init__(self, erp, today, **procurement):
 		noon = datetime.combine(today, time(12, 0), tzinfo=UTC)
 		self.clock = lambda: noon
-		self.core = memory_core_stores()
-		self.stock = memory_stock_stores(self.core.backend)
-		self.settings = SettingsStore(self.core.settings, clock=self.clock)
-		attach_settings(self.settings)
-		self.settings.update_procurement(OWNER, {**COST_ONLY, **procurement})
-		self.approvals = ApprovalService(
-			self.core.approvals,
-			ApprovalRouter({}, []),
-			system_settings=self.settings.system,
-			clock=self.clock,
-			inbound=self.core.inbound,
-		)
-		self.workorders = WorkOrderQueue(self.core.workorders, self.clock)
-		self.proposals = ProposalRepo(self.stock.proposals, self.clock)
-		self.agent = ProcurementAgent(
-			erp,
-			self.settings,
-			self.proposals,
-			self.approvals,
-			self.workorders,
-			self.stock.runs,
-			self.core.transaction,
-			self.clock,
+		empty_store_tables()
+		self.services = wiring.build(erp, frappe_core_stores(), self.clock)
+		s = self.services
+		self.core, self.stock, self.settings = s.core, s.stock, s.settings
+		who = frappe.session.user
+		frappe.set_user(
+			"Administrator"
+		)  # the weights are the site owner's setting (a Manager's), whoever then asks for a request
+		try:
+			self.settings.update_procurement(OWNER, {**COST_ONLY, **procurement})
+		finally:
+			frappe.set_user(who)
+		self.approvals, self.workorders, self.proposals, self.agent = (
+			s.approvals,
+			s.workorders,
+			s.proposals,
+			s.procurement,
 		)
 
 	def propose(self, item_code: str, qty: float, uom: str = "Nos"):

@@ -5,6 +5,7 @@ A test that is rolled back at its end cannot show a race: the other connections 
 """
 
 import threading
+import traceback
 from collections.abc import Callable
 from typing import Any
 
@@ -31,6 +32,7 @@ def on_own_connections(user: str, jobs: list[Callable[[], Any]], timeout: float 
 				frappe.db.commit()
 			except BaseException as exc:
 				frappe.db.rollback()
+				traceback.print_exc()  # a failure in a job is reported with where it happened, not only that it did
 				results[index] = exc
 		except BaseException as exc:
 			results[index] = exc

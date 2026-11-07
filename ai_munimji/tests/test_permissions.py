@@ -47,7 +47,7 @@ EXPECTED_LETTERS: dict[str, dict[str, str]] = {
 	"Munimji Stock Alert": SCREEN,
 	"Munimji Stock Notice": SCREEN,
 	"Munimji Purchase Proposal": SCREEN,
-	"Munimji Agent Run": {M: "r", S: "r"},
+	"Munimji Agent Run": {A: "c", M: "rc", S: "r"},
 	"Munimji Assistant Answer": {A: "rwcd", M: "rwcd", S: "r"},
 	"Munimji Chat Log": {A: "c", M: "rc", S: "r"},
 	"Munimji Vendor Message": {A: "rwc", M: "rwc", S: "r"},

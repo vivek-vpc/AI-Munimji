@@ -11,10 +11,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-ONLY_THE_STORES = (
-	"This record is kept by the app's stores and is not edited by hand: use the screen's own buttons."
-)
-
 
 class StoreRecord(Document):
 	def validate(self):
@@ -28,4 +24,9 @@ class StoreRecord(Document):
 
 	def only_through_the_stores(self):
 		if not self.flags.get("munimji_store"):
-			frappe.throw(_(ONLY_THE_STORES), frappe.PermissionError)
+			frappe.throw(
+				_(
+					"This record is kept by the app's stores and is not edited by hand: use the screen's own buttons."
+				),
+				frappe.PermissionError,
+			)

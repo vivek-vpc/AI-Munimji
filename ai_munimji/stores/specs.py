@@ -333,7 +333,11 @@ TABLES: tuple[Table, ...] = (
 		"agent_runs",
 		(d("agent", "lfi"), dt("started_at", "li"), dt("finished_at", ""), ck("dry_run", "f")),
 		json_row=True,
-		perms=READ_ONLY_FOR_PEOPLE,
+		perms={
+			APPROVER: "c",
+			MANAGER: "rc",
+			SYSTEM: "r",
+		},  # a request a person starts runs the agent in their session, and the run is recorded
 	),
 	Table(
 		"Munimji Assistant Answer",

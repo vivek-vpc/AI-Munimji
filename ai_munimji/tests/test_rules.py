@@ -5,8 +5,11 @@
 2. Every method that a browser or an API client can call (`@frappe.whitelist`) checks the caller's permission as its FIRST statement, and none is open to guests.
 3. `ignore_permissions=True` (and `flags.ignore_permissions = True`, and `frappe.set_user`) is allowed in the install and uninstall hooks only, which create and remove the app's own roles
    and records from the command line. Nowhere else: not in the ERP client, not in a button, not in a job.
-4. The ERP client's system mode, `FrappeERPClient(system=True)`, is built in the scheduled job module only (`jobs.system_erp()`).
+4. The ERP client's system mode, `FrappeERPClient(system=True)`, and the stores' system mode, `frappe_core_stores(system=True)`, are built in the scheduled job module only
+   (`jobs.system_erp()`, `jobs.system_stores()`).
 5. The ERP client reads through `frappe.get_list` and the document APIs only: no `frappe.db` call at all, no `get_all`, no cached read (those do not apply the person's permissions).
+6. The same holds for the stores (ai_munimji/stores): they read with `frappe.get_list` and documents and write through documents. Two modules are named exceptions, with the reason:
+   `unit.py` (the savepoint: transaction control, no read) and `locks.py` (row locks: a locking read that returns a name, which the caller then reads through the permission rules).
 
 If this fails, the code does not satisfy the rules the app is built to; fix the code, not the test. An exception is a decision: add the module to the list that names it, with the reason.
 """
@@ -21,6 +24,12 @@ SCHEDULED_JOB_MODULES = {"ai_munimji/jobs.py"}
 # Modules that run once, from the command line, when the app is installed or removed.
 LIFECYCLE_MODULES = {"ai_munimji/install.py", "ai_munimji/uninstall.py"}
 ERP_CLIENT_MODULE = "ai_munimji/erp_client.py"
+STORE_PREFIX = "ai_munimji/stores/"
+STORE_EXCEPTIONS = {
+	"ai_munimji/stores/unit.py",
+	"ai_munimji/stores/locks.py",
+}  # transaction control; row locks
+SYSTEM_BUILDERS = {"FrappeERPClient", "frappe_core_stores"}  # what has a system mode
 NOT_PERMISSION_AWARE = {
 	"get_all",
 	"get_cached_doc",
@@ -98,7 +107,7 @@ def _frappe_call_name(call: ast.Call) -> str | None:
 def _is_system_client(call: ast.Call) -> bool:
 	f = call.func
 	name = f.id if isinstance(f, ast.Name) else f.attr if isinstance(f, ast.Attribute) else ""
-	return name == "FrappeERPClient" and any(k.arg == "system" and _not_false(k.value) for k in call.keywords)
+	return name in SYSTEM_BUILDERS and any(k.arg == "system" and _not_false(k.value) for k in call.keywords)
 
 
 class Found:
@@ -135,9 +144,11 @@ def scan_source(source: str, filename: str) -> Found:
 				found.system_clients += 1
 				if filename not in SCHEDULED_JOB_MODULES:
 					found.problems.append(
-						f"{filename}:{node.lineno}: the ERP client's system mode is built only in {sorted(SCHEDULED_JOB_MODULES)} (jobs.system_erp())"
+						f"{filename}:{node.lineno}: a system mode (the ERP client's, the stores') is built only in {sorted(SCHEDULED_JOB_MODULES)} (jobs.system_erp(), jobs.system_stores())"
 					)
-			if filename == ERP_CLIENT_MODULE:
+			if filename == ERP_CLIENT_MODULE or (
+				filename.startswith(STORE_PREFIX) and filename not in STORE_EXCEPTIONS
+			):
 				name = _frappe_call_name(node)
 				if (
 					(name in NOT_PERMISSION_AWARE)
@@ -145,7 +156,7 @@ def scan_source(source: str, filename: str) -> Found:
 					or _is_get_all(node)
 				):
 					found.problems.append(
-						f"{filename}:{node.lineno}: the ERP client reads with frappe.get_list and documents only; this call does not apply the person's permissions"
+						f"{filename}:{node.lineno}: the ERP client and the stores read with frappe.get_list and documents only; this call does not apply the person's permissions"
 					)
 		if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
 			targets = node.targets if isinstance(node, ast.Assign) else [node.target]
@@ -191,12 +202,14 @@ class TestTheReadsRule(unittest.TestCase):
 	def test_the_app_follows_the_rules(self):
 		problems, whitelisted, scanned = [], [], []
 		get_all_in_jobs = system_clients_in_jobs = bypasses_in_hooks = 0
+		get_all_anywhere = 0
 		for path in scan.python_files():
 			name = scan.relative(path)
 			scanned.append(name)
 			found = scan_source(path.read_text(encoding="utf-8"), name)
 			problems += found.problems
 			whitelisted += found.whitelisted
+			get_all_anywhere += found.get_all_calls
 			if name in SCHEDULED_JOB_MODULES:
 				get_all_in_jobs += found.get_all_calls
 				system_clients_in_jobs += found.system_clients
@@ -204,14 +217,16 @@ class TestTheReadsRule(unittest.TestCase):
 				bypasses_in_hooks += found.ignore_permissions
 		self.assertEqual(problems, [])
 		# positive controls: the scan sees what it is meant to see, so that it cannot pass by looking at nothing
-		self.assertIn("create_draft_purchase_order", whitelisted)
-		self.assertGreaterEqual(
-			get_all_in_jobs, 1, "the scheduled job reads with get_all, and the scan sees it"
+		self.assertIn("answer", whitelisted)
+		self.assertEqual(
+			get_all_anywhere,
+			0,
+			"nothing in the app reads with get_all: the scheduled job reads through the stores and the system-mode client",
 		)
 		self.assertEqual(
 			system_clients_in_jobs,
-			1,
-			"the scheduled job module builds the system-mode client in one place, and the scan sees it",
+			2,
+			"the scheduled job module builds the system-mode client and the system-mode stores, one place each, and the scan sees both",
 		)
 		self.assertGreaterEqual(
 			bypasses_in_hooks,
@@ -219,7 +234,8 @@ class TestTheReadsRule(unittest.TestCase):
 			"the install and uninstall hooks create and remove roles and records with ignore_permissions, and the scan sees it",
 		)
 		self.assertIn(ERP_CLIENT_MODULE, scanned)
-		for module in SCHEDULED_JOB_MODULES | LIFECYCLE_MODULES | {ERP_CLIENT_MODULE}:
+		self.assertIn("ai_munimji/stores/table.py", scanned)
+		for module in SCHEDULED_JOB_MODULES | LIFECYCLE_MODULES | STORE_EXCEPTIONS | {ERP_CLIENT_MODULE}:
 			self.assertTrue(
 				(scan.ROOT / module).exists(), f"{module} is named in the rules but does not exist"
 			)
@@ -326,3 +342,46 @@ class TestTheReadsRule(unittest.TestCase):
 		)
 		for source in checked:
 			self.assertEqual(scan_source(source, "ai_munimji/api.py").problems, [], source)
+
+	def test_the_scan_notices_the_system_stores_built_anywhere_but_the_job_module(self):
+		source = "from ai_munimji.stores import frappe_core_stores\ncore = frappe_core_stores(system=True)\n"
+		for module in (
+			"ai_munimji/api.py",
+			"ai_munimji/wiring.py",
+			"ai_munimji/erp_client.py",
+			"ai_munimji/stores/core.py",
+		):
+			self.assertEqual(len(scan_source(source, module).problems), 1, module)
+		self.assertEqual(scan_source(source, "ai_munimji/jobs.py").problems, [])
+		self.assertEqual(scan_source("core = frappe_core_stores()\n", "ai_munimji/wiring.py").problems, [])
+		self.assertEqual(
+			scan_source("core = frappe_core_stores(system=False)\n", "ai_munimji/wiring.py").problems, []
+		)
+
+	def test_the_scan_notices_a_read_in_a_store_that_ignores_the_persons_rights(self):
+		for source in (
+			"import frappe\nx = frappe.db.get_value('Item', 'a', 'b')\n",
+			"import frappe\nx = frappe.db.sql('select 1')\n",
+			"import frappe\nfrappe.db.delete('Munimji Lock')\n",
+			"import frappe\nx = frappe.get_all('Item')\n",
+			"import frappe\nx = frappe.get_cached_doc('Item', 'a')\n",
+		):
+			for module in (
+				"ai_munimji/stores/table.py",
+				"ai_munimji/stores/core.py",
+				"ai_munimji/stores/stock.py",
+			):
+				self.assertTrue(scan_source(source, module).problems, f"{module}: {source}")
+			for exception in STORE_EXCEPTIONS:
+				if "get_all" not in source:
+					self.assertEqual(
+						scan_source(source, exception).problems,
+						[],
+						f"{exception} is a named exception: {source}",
+					)
+		for source in (
+			"import frappe\nx = frappe.get_list('Item', fields=['name'])\n",
+			"import frappe\nx = frappe.get_doc('Item', 'a', for_update=True)\n",
+			"import frappe\ndoc.save()\n",
+		):
+			self.assertEqual(scan_source(source, "ai_munimji/stores/table.py").problems, [], source)

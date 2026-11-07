@@ -12,6 +12,7 @@ from typing import Any
 import frappe
 from ai_munimji_engine.stores import CoreStores
 from ai_munimji_engine.stores.agents import STALE_NOTE
+from frappe import _
 
 from ai_munimji.stores import convert, unit
 from ai_munimji.stores.table import DocTable, Exists, Row
@@ -70,7 +71,7 @@ class Context:
 	def __init__(self, system: bool = False) -> None:
 		if system and frappe.session.user != SYSTEM_USER:
 			raise frappe.PermissionError(
-				"the system mode is for the scheduled job, which runs as Administrator"
+				_("The system mode is for the scheduled job, which runs as Administrator.")
 			)
 		self.system = system
 		self._tables: dict[str, DocTable] = {}
@@ -82,7 +83,9 @@ class Context:
 
 	def need_system(self, what: str) -> None:
 		if not self.system:
-			raise frappe.PermissionError(f"{what} is done by the scheduled job, not in a person's session")
+			raise frappe.PermissionError(
+				_("{0} is done by the scheduled job, not in a person's session.").format(what)
+			)
 
 
 class _Store:

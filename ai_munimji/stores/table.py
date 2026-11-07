@@ -10,6 +10,7 @@ from collections.abc import Callable, Sequence
 from typing import Any
 
 import frappe
+from frappe import _
 
 from ai_munimji.stores import convert, locks
 from ai_munimji.stores.specs import BY_ENGINE, Col, Table
@@ -43,7 +44,9 @@ class DocTable:
 		"""The person must hold `right` on this DocType at all; said plainly, because Frappe's own error for it can be empty."""
 		if not frappe.has_permission(self.doctype, right):
 			raise frappe.PermissionError(
-				f"{frappe.session.user} may not {right} {self.doctype} records (the DocType's permission rows decide)"
+				_("{0} may not {1} {2} records (the DocType's permission rows decide).").format(
+					frappe.session.user, right, self.doctype
+				)
 			)
 
 	# ------------------------------------------------------------------ names

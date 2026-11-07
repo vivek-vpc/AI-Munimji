@@ -11,7 +11,6 @@ from ai_munimji.stores.record import StoreRecord
 # ignore_permissions, a script that sets the store flag. What no controller can stop is a write that does not go through a document at all (frappe.db.set_value, frappe.db.delete, SQL,
 # `ignore_on_trash`): the chain itself detects those, because every entry holds the hash of the one before and a digest of the record it sealed (`AuditChain.verify`). A fork of the chain
 # is refused by the unique index on `prev`.
-APPEND_ONLY = "The audit seal is append only: a row is never changed or deleted."
 
 
 class MunimjiAuditSeal(StoreRecord):
@@ -25,11 +24,17 @@ class MunimjiAuditSeal(StoreRecord):
 		self.refuse_to_change()
 
 	def on_trash(self):
-		frappe.throw(_(APPEND_ONLY), frappe.PermissionError)
+		self.refuse()
 
 	def before_rename(self, old, new, merge=False):
-		frappe.throw(_(APPEND_ONLY), frappe.PermissionError)
+		self.refuse()
 
 	def refuse_to_change(self):
 		if not self.is_new():
-			frappe.throw(_(APPEND_ONLY), frappe.PermissionError)
+			self.refuse()
+
+	@staticmethod
+	def refuse():
+		frappe.throw(
+			_("The audit seal is append only: a row is never changed or deleted."), frappe.PermissionError
+		)
