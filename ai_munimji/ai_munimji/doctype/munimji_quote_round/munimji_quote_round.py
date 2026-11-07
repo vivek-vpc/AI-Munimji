@@ -1,0 +1,8 @@
+# Copyright (c) 2026, AI Munimji project and contributors
+# For license information, please see license.txt
+
+from frappe.model.document import Document
+
+
+class MunimjiQuoteRound(Document):
+	pass
