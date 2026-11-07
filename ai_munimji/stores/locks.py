@@ -4,12 +4,14 @@ A file lock holds only on the server it was taken on, and it is released when th
 nothing yet (the first one's order is not committed) and make a second. A lock that is a row of the database is held until the transaction ends, on every worker and every server that
 shares the database. That is what these functions give:
 
-  * `take(key)`: a Lock record chosen by the key, locked until the transaction ends. A second connection that takes the same record waits for the first to commit or roll back, in turn.
-    There is a fixed set of 64 records (made at install and migrate, `ensure()`), and a key picks one by its hash: two different keys may share one, which only makes them wait for each
-    other a moment. They are never made on demand in a person's session: two connections that find a missing row and each INSERT it end up holding a shared lock apiece on the duplicate
-    and deadlock when they ask for the exclusive one (found with five presses at once).
-  * `marker(key)`: under that lock, the record that remembers what the key led to. MariaDB's default isolation level (REPEATABLE READ) lets a plain read miss what another connection
-    committed after this one's first read; a locking read always sees it, which is how the second press learns what the first made.
+  * `take(doctype)`: the one Lock record for making documents of that type, locked until the transaction ends. A second connection that takes it waits for the first to commit or roll
+    back, in turn. Making an order is something a person does a few times a day, so one record per document type costs nothing, and it avoids the two failures that finer locks had when
+    five presses (and then two different references) were pressed together: a record made on demand deadlocks (each connection holds a shared lock on the duplicate and asks for the
+    exclusive one), and a locking read of a reference that has no order yet takes a gap lock that two different references' inserts then wait on. The records are made at install and
+    migrate (`ensure()`); reading one for update needs no right on the Lock DocType, so a person with only the ERPNext role can still make the document.
+  * `find_locked(doctype, filters)`: the name of the newest document that matches, read with a locking read. MariaDB's default isolation level (REPEATABLE READ) lets a plain read miss
+    what another connection committed after this one's first read; a locking read always sees it, which is how the second press learns what the first made. It returns a name and
+    nothing else; the caller reads the document through the permission rules.
   * `next_number(doctype)`: 1, 2, 3 ... for the tables whose rows the engine numbers. The counter is a Lock record too, so it is rolled back with the transaction (a database sequence
     would not be) and two connections never get the same number.
   * `lease(name, holder, minutes)` / `release(name, holder)`: "one scheduled run at a time" that survives a worker that dies: the lease expires.
@@ -21,30 +23,36 @@ from datetime import timedelta
 import frappe
 from frappe.utils import now_datetime
 
-from ai_munimji.stores import convert
 from ai_munimji.stores.specs import TABLES
 
 LOCK = "Munimji Lock"
-STRIPES = 64
+MAKING = ("Purchase Order", "Material Request", "Stock Entry")  # the documents the app makes from a request
+LEASES = ("stock_check",)
 
 
-def stripe_name(key: str) -> str:
-	return f"ref-{int(hashlib.sha256(key.encode('utf-8')).hexdigest(), 16) % STRIPES:02d}"
+def _hash(text: str) -> str:
+	return hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
+
+
+def mutex_name(doctype: str) -> str:
+	return f"making-{_hash(doctype)}"
 
 
 def counter_name(doctype: str) -> str:
-	return "number-" + hashlib.sha256(doctype.encode("utf-8")).hexdigest()[:12]
+	return f"number-{_hash(doctype)}"
+
+
+def lease_name(name: str) -> str:
+	return f"lease-{_hash(name)}"
 
 
 def names() -> list[str]:
 	"""Every Lock record the app expects to exist."""
-	return [stripe_name_at(i) for i in range(STRIPES)] + [
-		counter_name(t.doctype) for t in TABLES if t.numbered
-	]
-
-
-def stripe_name_at(i: int) -> str:
-	return f"ref-{i:02d}"
+	return (
+		[mutex_name(d) for d in MAKING]
+		+ [counter_name(t.doctype) for t in TABLES if t.numbered]
+		+ [lease_name(n) for n in LEASES]
+	)
 
 
 def _row(name: str, for_update: bool = True):
@@ -81,23 +89,14 @@ def _take_row(name: str):
 	return doc
 
 
-def take(key: str):
-	"""The Lock record for `key`, locked for update until this transaction commits or rolls back."""
-	return _take_row(stripe_name(key))
+def take(doctype: str):
+	"""The Lock record for making documents of this type, locked for update until this transaction commits or rolls back."""
+	return _take_row(mutex_name(doctype))
 
 
-def marker(key: str):
-	"""The record that remembers what a key led to (`result`: the name of the order made for a reference). Take the stripe lock for the same key first: then one connection at a time
-	makes or reads it. It is made by INSERT and, if it exists, read with a locking read; a locking read of a row that is not there takes a gap lock, and two references whose rows would
-	sit in the same gap then each wait for the other's insert (found with two different references pressed together)."""
-	name = convert.hashed_name(key)
-	doc = frappe.get_doc({"doctype": LOCK})
-	doc.flags.name_set = True
-	doc.name = name
-	try:
-		return doc.insert()
-	except frappe.DuplicateEntryError:
-		return frappe.get_doc(LOCK, name, for_update=True)
+def find_locked(doctype: str, filters: dict, order_by: str = "creation desc") -> str | None:
+	"""The name of the newest document of this type that matches the filters, found with a locking read (see above), or None."""
+	return frappe.db.get_value(doctype, filters, "name", order_by=order_by, for_update=True)
 
 
 def next_number(doctype: str) -> int:
@@ -114,7 +113,7 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 		raise RuntimeError(
 			"take a lease first: it commits, and this transaction already has uncommitted work"
 		)
-	row = _take_row(f"lease-{counter_name(name)[7:]}")
+	row = _take_row(lease_name(name))
 	now = now_datetime()
 	if row.holder and row.holder != holder and row.until and row.until > now:
 		frappe.db.rollback()
@@ -126,7 +125,7 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 
 
 def release(name: str, holder: str) -> None:
-	row = _take_row(f"lease-{counter_name(name)[7:]}")
+	row = _take_row(lease_name(name))
 	if row.holder == holder:
 		row.holder, row.until = None, None
 		row.save()

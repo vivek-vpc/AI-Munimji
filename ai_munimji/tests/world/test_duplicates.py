@@ -68,7 +68,12 @@ class TestOneDocumentPerReference(WorldCase):
 
 	def test_the_negative_control_without_the_guard_two_presses_make_two_orders(self):
 		ref = self.reference("noguard")
-		with as_user("approver"), mock.patch.object(FrappeERPClient, "find_by_reference", return_value=None):
+		# the guard is two things: the row lock, and the look for an order of the same reference made under it; both are taken away
+		with (
+			as_user("approver"),
+			mock.patch.object(FrappeERPClient, "_already_made", return_value=None),
+			mock.patch.object(FrappeERPClient, "_hold", return_value=None),
+		):
 			client = FrappeERPClient()
 			first, second = (
 				client.create_purchase_order(self.order(ref)),

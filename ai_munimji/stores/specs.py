@@ -500,12 +500,11 @@ TABLES: tuple[Table, ...] = (
 		(
 			d("holder", ""),
 			dt("until", ""),
-			d("result", "", label="Made for this reference"),
 			n("counter", ""),
 		),
 		key=("lock_key",),
 		perms={APPROVER: "wc", MANAGER: "wc"},
-		note="rows that serialise work: a reference being turned into an order (64 stripes), the next number of a numbered table, a scheduled run's lease. Made by install and migrate",
+		note="rows that serialise work: making a document from a request (one per document type), the next number of a numbered table, a scheduled run's lease. Made by install and migrate",
 	),
 )
 

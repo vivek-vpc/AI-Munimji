@@ -44,9 +44,9 @@ from ai_munimji_engine.packs.stock_procurement.erp import (
 )
 from frappe import _
 from frappe.utils import nowtime
-from frappe.utils.synchronization import filelock
 
 from ai_munimji.custom_fields import APPROVED_BY, NOTE, REF
+from ai_munimji.stores import locks
 
 FINISHED = ["Completed", "Closed", "Cancelled", "Delivered"]
 CONSUMPTION_VOUCHERS = ["Delivery Note", "Sales Invoice"]
@@ -846,11 +846,28 @@ class FrappeERPClient:
 		names = [r["name"] for r in self._list("Company", ["name"], [])]
 		return names[0] if len(names) == 1 else None
 
+	def _hold(self, doctype: str, reference: str) -> None:
+		"""Take the row lock for making documents of this type: held until the transaction ends, on every worker and server that shares the database (stores/locks.py). Nothing when
+		there is no reference to serialise on. The one place the lock is taken, so that a test can take it away."""
+		if reference:
+			locks.take(doctype)
+
+	def _already_made(self, doctype: str, reference: str) -> str | None:
+		"""The not-cancelled document this reference has already led to, found with a locking read (a plain read may not see what another connection committed after this one began),
+		then checked against what this person may read: someone who may not read these documents cannot know whether one exists, so nothing is made for them."""
+		name = locks.find_locked(doctype, {REF: reference, "docstatus": ["<", 2]})
+		if name is None:
+			return None
+		frappe.get_doc(doctype, name, for_update=True).check_permission(
+			"read"
+		)  # a locking read again: a plain one may not see a document that was committed a moment ago
+		return name
+
 	def _make(
 		self, doctype: str, body: dict[str, Any], reference: str, approved_by: str, label: str, acting: Any
 	) -> PurchaseOrderResult:
-		"""Insert a DRAFT as the signed-in person. Under a lock named for the reference, an earlier not-cancelled document of the same reference is returned instead of making
-		a second one: two presses of one button, or a retry, give one document. Never submitted."""
+		"""Insert a DRAFT as the signed-in person. Under a row lock named for the reference, an earlier not-cancelled document of the same reference is returned instead of making
+		a second one: two presses of one button, or a retry, give one document, whichever worker or server they reach. Never submitted."""
 		other = self._acting_is_me(acting)
 		if other is not None:
 			return other
@@ -862,23 +879,27 @@ class FrappeERPClient:
 				)
 			)
 		body = {"doctype": doctype, "company": company, **body}
+		reference = str(reference or "").strip()
 		try:
-			with filelock(
-				f"munimji_{doctype}_{reference or frappe.generate_hash(length=10)}".replace(" ", "_"),
-				timeout=30,
-			):
-				if reference:
-					existing = self.find_by_reference(doctype, reference)
-					if existing is not None:
-						return PurchaseOrderResult(ok=True, name=existing.name)
-					body[REF] = reference
-				if approved_by:
-					body[APPROVED_BY] = approved_by[:140]
-				doc = frappe.get_doc(body)
-				if hasattr(doc, "set_missing_values"):
-					doc.set_missing_values()
-				doc.insert()
-				return PurchaseOrderResult(ok=True, name=doc.name)
+			self._hold(doctype, reference)
+			if reference:
+				existing = self._already_made(doctype, reference)
+				if existing is not None:
+					return PurchaseOrderResult(ok=True, name=existing)
+				body[REF] = reference
+			if approved_by:
+				body[APPROVED_BY] = approved_by[:140]
+			doc = frappe.get_doc(body)
+			if hasattr(doc, "set_missing_values"):
+				doc.set_missing_values()
+			doc.insert()
+			return PurchaseOrderResult(ok=True, name=doc.name)
+		except (frappe.QueryTimeoutError, frappe.QueryDeadlockError):
+			return refused(
+				_(
+					"Another press for this request is still being handled. Wait a moment and look at the {0} before pressing again."
+				).format(label)
+			)
 		except frappe.PermissionError as exc:
 			return refused(_("{0} may not create a {1}: {2}").format(frappe.session.user, label, _plain(exc)))
 		except frappe.ValidationError as exc:

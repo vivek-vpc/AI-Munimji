@@ -8,7 +8,6 @@
  "field_order": [
   "holder",
   "until",
-  "result",
   "counter"
  ],
  "fields": [
@@ -25,12 +24,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "result",
-   "fieldtype": "Data",
-   "label": "Made for this reference",
-   "read_only": 1
-  },
-  {
    "fieldname": "counter",
    "fieldtype": "Int",
    "label": "Counter",
@@ -40,7 +33,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-07 12:00:02.000000",
+ "modified": "2026-11-07 12:00:03.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Lock",

@@ -19,11 +19,14 @@ from ai_munimji.tests.helpers import make_user
 
 SITE_FILE = Path(__file__).resolve().parents[3] / "dev" / "contract-site.json"
 
-# the people the permission tests speak of. The two ERPNext roles are the ones docs/INSTALL.md names; "neither" has only an app role, which reads nothing of ERPNext's.
+# the people the permission tests speak of. The ERPNext roles are the ones docs/INSTALL.md names, with the app role that goes with the job (the app's own records need it); "neither" has only
+# the app's Viewer role, which reads nothing of ERPNext's, and "nobody" has no role at all.
 PEOPLE = {
-	"viewer": ("world.viewer@example.com", ("Stock User",)),
-	"approver": ("world.approver@example.com", ("Purchase User", "Stock User")),
+	"viewer": ("world.viewer@example.com", ("Stock User", "Munimji Viewer")),
+	"approver": ("world.approver@example.com", ("Purchase User", "Stock User", "Munimji Approver")),
+	"manager": ("world.manager@example.com", ("Stock User", "Munimji Manager")),
 	"neither": ("world.neither@example.com", ("Munimji Viewer",)),
+	"nobody": ("world.nobody@example.com", ()),
 }
 
 
