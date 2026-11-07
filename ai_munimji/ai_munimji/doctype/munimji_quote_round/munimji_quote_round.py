@@ -1,8 +1,8 @@
 # Copyright (c) 2026, AI Munimji project and contributors
 # For license information, please see license.txt
 
-from frappe.model.document import Document
+from ai_munimji.stores.record import StoreRecord
 
 
-class MunimjiQuoteRound(Document):
+class MunimjiQuoteRound(StoreRecord):
 	pass

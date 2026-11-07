@@ -65,6 +65,7 @@ def _row(name: str, for_update: bool = True):
 def _make(name: str):
 	doc = frappe.get_doc({"doctype": LOCK})
 	doc.flags.name_set = True
+	doc.flags.munimji_store = True
 	doc.name = name
 	return doc.insert()
 
@@ -102,6 +103,7 @@ def find_locked(doctype: str, filters: dict, order_by: str = "creation desc") ->
 def next_number(doctype: str) -> int:
 	lock = _take_row(counter_name(doctype))
 	lock.counter = int(lock.counter or 0) + 1
+	lock.flags.munimji_store = True
 	lock.save()
 	return lock.counter
 
@@ -119,6 +121,7 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 		frappe.db.rollback()
 		return False
 	row.holder, row.until = holder, now + timedelta(minutes=minutes)
+	row.flags.munimji_store = True
 	row.save()
 	frappe.db.commit()
 	return True
@@ -128,5 +131,6 @@ def release(name: str, holder: str) -> None:
 	row = _take_row(lease_name(name))
 	if row.holder == holder:
 		row.holder, row.until = None, None
+		row.flags.munimji_store = True
 		row.save()
 	frappe.db.commit()

@@ -135,6 +135,7 @@ class DocTable:
 		name = self.name_of(row)
 		doc = frappe.get_doc({"doctype": self.doctype, **self.values(row)})
 		doc.flags.name_set = True
+		doc.flags.munimji_store = True  # see stores/record.py
 		doc.name = name
 		doc.flags.ignore_links = (
 			True  # a Link here is a pointer for the Desk; the engine's ids need not exist in ERPNext
@@ -156,6 +157,7 @@ class DocTable:
 		if new is None:
 			return None
 		doc.update(self.values(new))
+		doc.flags.munimji_store = True
 		doc.flags.ignore_links = True
 		doc.save()
 		return new
@@ -176,6 +178,7 @@ class DocTable:
 			doc = frappe.get_doc(self.doctype, name, for_update=True)
 		except frappe.DoesNotExistError:
 			return False
+		doc.flags.munimji_store = True
 		doc.delete()
 		return True
 

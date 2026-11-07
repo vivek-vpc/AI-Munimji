@@ -16,6 +16,7 @@ from frappe.tests import IntegrationTestCase
 
 from ai_munimji.ai_munimji.doctype.munimji_audit_seal.munimji_audit_seal import MunimjiAuditSeal
 from ai_munimji.stores import frappe_core_stores
+from ai_munimji.stores.record import StoreRecord
 from ai_munimji.tests.helpers import empty_store_tables, make_user
 
 SEAL = "Munimji Audit Seal"
@@ -83,78 +84,94 @@ class TestTheSameChainAsTheOtherBackends(SealCase):
 
 
 class TestNoOneCanChangeOrDeleteARow(SealCase):
+	"""Three barriers, each shown alone: the permission rows, the store-only rule of every record of the app, and the seal's own refusal."""
+
 	def row(self):
 		self.sealed()
 		return frappe.get_doc(SEAL, self.core.audit.entries()[1]["seq"])
 
-	def manager(self, role: str = "System Manager") -> str:
+	def person(self, role: str) -> str:
 		return make_user(f"seal.{role.split()[-1].lower()}@example.com", (role,))
 
-	def test_administrator_cannot_change_a_row(self):
-		doc = self.row()
+	def changed(self, name, flagged: bool):
+		doc = frappe.get_doc(SEAL, name)
 		doc.digest = "0" * 64
-		with self.assertRaises(frappe.PermissionError):
-			doc.save()
-		again = frappe.get_doc(SEAL, doc.name)
-		again.digest = "0" * 64
-		with self.assertRaises(frappe.PermissionError):
-			again.save(ignore_permissions=True)
+		doc.flags.munimji_store = flagged
+		return doc
+
+	def test_administrator_cannot_change_a_row(self):
+		name = self.row().name
+		for flagged in (
+			False,
+			True,
+		):  # unflagged: refused as a record only the stores may save; flagged: refused by the seal itself
+			with self.subTest(flagged=flagged), self.assertRaises(frappe.PermissionError):
+				self.changed(name, flagged).save()
+			with (
+				self.subTest(flagged=flagged, ignore_permissions=True),
+				self.assertRaises(frappe.PermissionError),
+			):
+				self.changed(name, flagged).save(ignore_permissions=True)
 
 	def test_nobody_can_delete_a_row_not_even_by_force(self):
-		doc = self.row()
+		name = self.row().name
+		for flagged in (False, True):
+			doc = frappe.get_doc(SEAL, name)
+			doc.flags.munimji_store = flagged
+			with self.subTest(flagged=flagged), self.assertRaises(frappe.PermissionError):
+				doc.delete()
+			with self.subTest(flagged=flagged, force=True), self.assertRaises(frappe.PermissionError):
+				frappe.delete_doc(
+					SEAL, name, force=True, ignore_permissions=True, flags={"munimji_store": flagged}
+				)
 		with self.assertRaises(frappe.PermissionError):
-			doc.delete()
-		with self.assertRaises(frappe.PermissionError):
-			frappe.delete_doc(SEAL, doc.name, force=True, ignore_permissions=True)
-		with self.assertRaises(frappe.PermissionError):
-			frappe.rename_doc(SEAL, doc.name, "99", force=True)
+			frappe.rename_doc(SEAL, name, "99", force=True)
 		self.assertEqual(len(self.core.audit.entries()), 4)
 
 	def test_system_manager_cannot_change_or_delete_by_permission_alone(self):
-		# the controller's guard is taken away: what is left is what the permission rows say
-		doc = self.row()
-		person = self.manager("System Manager")
+		# the other two barriers are taken away; what is left is what the permission rows say
+		name = self.row().name
+		person = self.person("System Manager")
 		with (
 			mock.patch.object(MunimjiAuditSeal, "refuse_to_change", lambda self: None),
 			mock.patch.object(MunimjiAuditSeal, "on_trash", lambda self: None),
+			mock.patch.object(StoreRecord, "only_through_the_stores", lambda self: None),
 		):
 			frappe.set_user(person)
-			own = frappe.get_doc(SEAL, doc.name)
-			own.digest = "0" * 64
 			with self.assertRaises(frappe.PermissionError):
-				own.save()
+				self.changed(name, True).save()
 			with self.assertRaises(frappe.PermissionError):
-				frappe.delete_doc(SEAL, doc.name)
+				frappe.delete_doc(SEAL, name)
+			forged = frappe.get_doc(
+				{
+					"doctype": SEAL,
+					"at": k.T0,
+					"source": "approval",
+					"ref_id": "x",
+					"event": "e",
+					"digest": "d",
+					"prev": "p",
+					"hash": "h",
+				}
+			)
 			with self.assertRaises(frappe.PermissionError):
-				frappe.get_doc(
-					{
-						"doctype": SEAL,
-						"at": k.T0,
-						"source": "approval",
-						"ref_id": "x",
-						"event": "e",
-						"digest": "d",
-						"prev": "p",
-						"hash": "h",
-					}
-				).insert()
+				forged.insert()
 
 	def test_a_manager_may_read_the_seal_and_an_approver_may_not(self):
-		doc = self.row()
-		frappe.set_user(self.manager("Munimji Manager"))
-		self.assertEqual(frappe.get_doc(SEAL, doc.name).source, "approval")
+		name = self.row().name
+		frappe.set_user(self.person("Munimji Manager"))
+		self.assertEqual(frappe.get_doc(SEAL, name).source, "approval")
 		self.assertEqual(len(frappe.get_list(SEAL)), 4)
-		frappe.set_user(make_user("seal.approver@example.com", ("Munimji Approver",)))
+		frappe.set_user(self.person("Munimji Approver"))
 		with self.assertRaises(frappe.PermissionError):
 			frappe.get_list(SEAL)
 
-	def test_the_guard_is_what_stops_administrator_and_without_it_the_chain_says_so(self):
-		# the negative control for the guard: with it taken away Administrator changes a row through the document, and the only thing left that notices is verify()
+	def test_the_seals_own_refusal_is_what_stops_a_script_and_without_it_the_chain_says_so(self):
+		# the negative control: with the seal's refusal taken away, a script that sets the store flag changes a row through the document, and the only thing left that notices is verify()
 		chain = self.sealed()
-		doc = frappe.get_doc(SEAL, self.core.audit.entries()[1]["seq"])
+		name = self.core.audit.entries()[1]["seq"]
 		with mock.patch.object(MunimjiAuditSeal, "refuse_to_change", lambda self: None):
-			doc.digest = "0" * 64
-			doc.save()
+			self.changed(name, True).save()
 		verdict = chain.verify()
 		self.assertFalse(verdict["ok"])
 		self.assertTrue(
@@ -164,20 +181,22 @@ class TestNoOneCanChangeOrDeleteARow(SealCase):
 	def test_a_fork_of_the_chain_is_refused_by_the_database(self):
 		self.sealed()
 		last = self.core.audit.entries()[-1]
+		fork = frappe.get_doc(
+			{
+				"doctype": SEAL,
+				"seq": 99,
+				"at": k.T3,
+				"source": "approval",
+				"ref_id": "forged",
+				"event": "e",
+				"digest": "d",
+				"prev": self.core.audit.entries()[-2]["hash"],
+				"hash": "h",
+			}
+		)
+		fork.flags.munimji_store = True
 		with self.assertRaises(frappe.ValidationError):
-			frappe.get_doc(
-				{
-					"doctype": SEAL,
-					"seq": 99,
-					"at": k.T3,
-					"source": "approval",
-					"ref_id": "forged",
-					"event": "e",
-					"digest": "d",
-					"prev": self.core.audit.entries()[-2]["hash"],
-					"hash": "h",
-				}
-			).insert()
+			fork.insert()
 		self.assertEqual(self.core.audit.last_hash(), last["hash"])
 
 

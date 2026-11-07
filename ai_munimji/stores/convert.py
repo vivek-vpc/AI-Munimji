@@ -32,7 +32,9 @@ def to_datetime(text: str | None, zone: ZoneInfo | None = None) -> datetime | No
 	moment = datetime.fromisoformat(text)
 	if moment.tzinfo is None:
 		moment = moment.replace(tzinfo=UTC)
-	return moment.astimezone(zone or site_zone()).replace(tzinfo=None)
+	return moment.astimezone(zone or site_zone()).replace(
+		tzinfo=None, fold=0
+	)  # a column cannot say which pass of a repeated hour it is
 
 
 def from_datetime(value: datetime | str | None, zone: ZoneInfo | None = None) -> str | None:

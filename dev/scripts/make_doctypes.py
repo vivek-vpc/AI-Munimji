@@ -192,15 +192,24 @@ def files() -> dict[Path, str]:
 	return out
 
 
+def stub(table, module: str, base: str) -> str:
+	return (
+		"# Copyright (c) 2026, AI Munimji project and contributors\n# For license information, please see license.txt\n\n"
+		f"from {module} import {base}\n\n\nclass {class_name(table.doctype)}({base}):\n\tpass\n"
+	)
+
+
 def controllers() -> dict[Path, str]:
+	"""A controller is written when there is none, and an old default one (a bare Document) is replaced by the current default (a StoreRecord); one written by hand is left as it is."""
 	out = {}
 	for table in specs.TABLES:
 		name = snake(table.doctype)
 		out[DOCTYPES / name / "__init__.py"] = ""
-		out[DOCTYPES / name / f"{name}.py"] = (
-			"# Copyright (c) 2026, AI Munimji project and contributors\n# For license information, please see license.txt\n\n"
-			f"from frappe.model.document import Document\n\n\nclass {class_name(table.doctype)}(Document):\n\tpass\n"
-		)
+		path = DOCTYPES / name / f"{name}.py"
+		current = stub(table, "ai_munimji.stores.record", "StoreRecord")
+		old = stub(table, "frappe.model.document", "Document")
+		have = path.read_bytes().decode("utf-8").replace("\r\n", "\n") if path.exists() else None
+		out[path] = current if have in (None, old) else have
 	return out
 
 
@@ -214,7 +223,7 @@ def main() -> int:
 				path.parent.mkdir(parents=True, exist_ok=True)
 				path.write_text(text, encoding="utf-8", newline="\n")
 	for path, text in controllers().items():
-		if not path.exists():
+		if not path.exists() or path.read_text(encoding="utf-8") != text:
 			changed.append(path)
 			if not check:
 				path.parent.mkdir(parents=True, exist_ok=True)

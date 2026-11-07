@@ -360,7 +360,7 @@ class FrappeAuditStore(_Store):
 		sealed = {r["ref_id"] for r in self.s.select(["ref_id"], [["source", "=", "approval"]])}
 		closed = self.a.select(["decided_at", "created_at"], [["status", "!=", "pending"]])
 		todo = [r for r in closed if r["name"] not in sealed]
-		todo.sort(key=lambda r: (r["decided_at"] or r["created_at"], r["name"]))
+		todo.sort(key=lambda r: (r["decided_at"] or r["created_at"] or "", r["name"]))
 		return todo
 
 	def unsealed_approvals(self) -> list[Row]:
