@@ -3,8 +3,7 @@ name: CI
 # What runs here is what .\dev\verify-all.ps1 runs on a development machine, on a bench built from nothing: the app's tests on a site with ERPNext installed, the translation template,
 # and then the Frappe client of the ERP port on a second site that holds the contract data, as real users with real roles.
 #
-# The rules package (ai-munimji-engine) is not on PyPI. It is built from the erpnext-ai-agents repository by .github/actions/engine-wheel, at the branch or commit named by the repository
-# variables ENGINE_REPO and ENGINE_REF (defaults: vivek-vpc/erpnext-ai-agents, main). Before the engine's pull requests are merged, set ENGINE_REF to the branch that holds them.
+# The rules package (ai-munimji-engine) comes from PyPI, at the exact version that pyproject.toml pins. (Until 0.1.0 was published it was built from the erpnext-ai-agents repository.)
 
 on:
   push:
@@ -67,13 +66,6 @@ jobs:
           node-version: 24
           check-latest: true
 
-      - name: Build the engine wheel
-        id: engine
-        uses: ./.github/actions/engine-wheel
-        with:
-          repository: ${{ vars.ENGINE_REPO || 'vivek-vpc/erpnext-ai-agents' }}
-          ref: ${{ vars.ENGINE_REF || 'main' }}
-
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -122,9 +114,12 @@ jobs:
           mariadb --host 127.0.0.1 --user root --password=root --execute "SELECT @@version, @@global.innodb_snapshot_isolation"
 
       - name: Put the engine into the bench's environment
-        # The app's dependency line names the engine, which is not on PyPI; it is found in the environment. The environment already holds Frappe's pinned pydantic and PyYAML.
+        # From PyPI, at the exact version that the app's pyproject.toml pins (read from there, so that the pin is changed in one place). The environment already holds Frappe's pinned
+        # pydantic and PyYAML, so the engine's own dependencies are not installed again.
         run: |
-          ~/frappe-bench/env/bin/python -m pip install --disable-pip-version-check --no-deps "${{ steps.engine.outputs.wheel }}"
+          pin=$(python -c "import tomllib; print(next(d for d in tomllib.load(open('pyproject.toml', 'rb'))['project']['dependencies'] if d.startswith('ai-munimji-engine')))")
+          echo "installing $pin from PyPI"
+          ~/frappe-bench/env/bin/python -m pip install --disable-pip-version-check --no-deps "$pin"
           ~/frappe-bench/env/bin/python -m pip check
 
       - name: Get ERPNext 16 and this app
