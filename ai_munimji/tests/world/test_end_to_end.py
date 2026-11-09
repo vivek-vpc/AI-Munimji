@@ -425,6 +425,35 @@ class TestChangingARequest(EndToEnd):
 		self.assertIn("Already answered", second["message"])
 
 
+class TestTwoAnswersAtOnce(EndToEnd):
+	"""Two people press Approve on one order request at the same moment (two connections, the engine really racing): one wins and makes the one draft order; the other reads a plain sentence,
+	never the database's words or the engine's bare 'Status: pending.'."""
+
+	def test_the_second_answer_reads_a_plain_sentence_and_one_order_is_made(self):
+		self.waiting_reorder()
+		with as_administrator():
+			jobs.run_stock_check(items=[self.item])
+		frappe.db.commit()
+		[request] = self.pending(KIND_PO)
+		results = on_own_connections(
+			self.person("approver"), [lambda: api.answer(request["id"], "approve")] * 2
+		)
+		self.assertFalse([r for r in results if isinstance(r, BaseException)], results)
+		won, lost = [r for r in results if r["ok"]], [r for r in results if not r["ok"]]
+		self.assertEqual((len(won), len(lost)), (1, 1), results)
+		message = lost[0]["message"]
+		for words in ("1020", "1305", "SAVEPOINT", "Traceback", "Status:", "Could not apply"):
+			self.assertNotIn(words, message)
+		self.assertTrue(
+			message.startswith("Already answered") or lost[0]["status"] == "busy",
+			f"a sentence a person can act on: {lost[0]}",
+		)
+		[proposal] = self.proposals()
+		self.assertEqual(
+			frappe.db.count("Purchase Order", {"custom_agent_ref": proposal["id"], "docstatus": ["<", 2]}), 1
+		)
+
+
 class TestTheScheduledJob(EndToEnd):
 	"""The job the Settings page switches on is Frappe's own Scheduled Job Type: its record runs the stock check as the scheduler does. Nothing happens while Watch stock is off, one
 	proposal is made when it is on, two ticks at once make one, and the people who answer are told once per request, not once per tick."""

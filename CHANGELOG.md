@@ -4,6 +4,18 @@ What changed in the app for someone who installs it or builds on it. AI Munimji 
 
 ## Unreleased
 
+### Phase 6: checks a Marketplace review would care about (nothing released)
+
+* **The database setting.** After install and migrate the app prints and logs a warning if MariaDB has `innodb_snapshot_isolation` ON, and AI Munimji Settings shows the same warning in red at the top
+  while it is ON; a database that cannot be asked says nothing. The statement is one fixed, read-only `SHOW VARIABLES` in `dbcheck.py`, the only raw SQL the rules test allows. A person whose answer lost to
+  another one given at the same moment now reads one plain sentence (status `busy`) instead of the database's words or the engine's bare "Status: pending."
+* **Nothing leaves the site, proved.** A static test (no import of a network, mail or model library, no call of Frappe's mail or request functions, no outside address in the scripts) and a runtime test (the
+  scheduled job and the whole approval flow with outside connections, HTTP and mail cut off). The form no longer adds "Taxes are not included in these totals." to a request whose engine note already says why
+  there are no tax figures.
+* **Versions.** The lower bounds in `[tool.bench.frappe-dependencies]` are the oldest versions CI ran on (Frappe 16.55.2, ERPNext 16.54.0), which are also the newest stable v16 tags. `pyproject.toml` now declares the licence.
+* **Public-repository hygiene.** `SECURITY.md`; the four public pages (`docs/PRIVACY.md`, `TERMS.md`, `SUPPORT.md`, `USER_GUIDE.md`) as drafted; `docs/BACKUP_RESTORE.md` (a rehearsed backup and restore, with
+  `dev/scripts/check_restore.py`); `docs/RELEASE_CHECKLIST.md`.
+
 ### Phase 5: the flow a person can use
 
 * **The stock check runs on a schedule that the Settings page sets.** Watch stock switches the job on and off (off until a person ticks it) and "Check stock at" is its time. The job is a Scheduled

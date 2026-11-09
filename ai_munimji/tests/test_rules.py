@@ -11,6 +11,8 @@
 5. The ERP client reads through `frappe.get_list` and the document APIs only: no `frappe.db` call at all, no `get_all`, no cached read (those do not apply the person's permissions).
 6. The same holds for the stores (ai_munimji/stores): they read with `frappe.get_list` and documents and write through documents. Two modules are named exceptions, with the reason:
    `unit.py` (the savepoint: transaction control, no read) and `locks.py` (row locks: a locking read that returns a name, which the caller then reads through the permission rules).
+7. Raw SQL (`frappe.db.sql` and its kin) is allowed in one place: `dbcheck.py`, which reads one database setting with one fixed, read-only statement (RAW_SQL below), written out in full
+   as a single string: no f-string, no %-formatting, no `.format`, no concatenation, no parameters. Nowhere else, and no other statement there.
 
 If this fails, the code does not satisfy the rules the app is built to; fix the code, not the test. An exception is a decision: add the module to the list that names it, with the reason.
 """
@@ -33,6 +35,10 @@ STORE_EXCEPTIONS = {
 	"ai_munimji/stores/unit.py",
 	"ai_munimji/stores/locks.py",
 }  # transaction control; row locks
+RAW_SQL = {
+	"ai_munimji/dbcheck.py": "SHOW VARIABLES LIKE 'innodb_snapshot_isolation'"
+}  # the one module that may run raw SQL, and the one statement it may run (rule 7)
+RAW_SQL_CALLS = {"sql", "multisql", "sql_list", "sql_ddl"}
 SYSTEM_BUILDERS = {"FrappeERPClient", "frappe_core_stores"}  # what has a system mode
 NOT_PERMISSION_AWARE = {
 	"get_all",
@@ -114,9 +120,31 @@ def _is_system_client(call: ast.Call) -> bool:
 	return name in SYSTEM_BUILDERS and any(k.arg == "system" and _not_false(k.value) for k in call.keywords)
 
 
+def _is_raw_sql(call: ast.Call) -> bool:
+	f = call.func
+	return isinstance(f, ast.Attribute) and f.attr in RAW_SQL_CALLS and _is_frappe_db(f.value)
+
+
+def _raw_sql_problem(call: ast.Call, filename: str) -> str | None:
+	"""Why this raw SQL call breaks rule 7, or None if it is the one allowed statement, written as a single plain string."""
+	allowed = RAW_SQL.get(filename)
+	if allowed is None:
+		return f"{filename}:{call.lineno}: raw SQL is allowed only in {sorted(RAW_SQL)}"
+	only_the_literal = (
+		len(call.args) == 1
+		and not call.keywords
+		and isinstance(call.args[0], ast.Constant)
+		and call.args[0].value == allowed
+	)
+	if not only_the_literal:
+		return f"{filename}:{call.lineno}: the only raw SQL allowed here is the literal statement {allowed!r}, with no arguments and no string building"
+	return None
+
+
 class Found:
 	def __init__(self):
 		self.problems: list[str] = []
+		self.raw_sql_calls = 0
 		self.whitelisted: list[str] = []
 		self.get_all_calls = 0
 		self.ignore_permissions = 0
@@ -144,6 +172,11 @@ def scan_source(source: str, filename: str) -> Found:
 					found.problems.append(
 						f"{filename}:{node.lineno}: ignore_permissions / set_user is allowed only in {sorted(BYPASS_MODULES)}"
 					)
+			if _is_raw_sql(node):
+				found.raw_sql_calls += 1
+				problem = _raw_sql_problem(node, filename)
+				if problem:
+					found.problems.append(problem)
 			if _is_system_client(node):
 				found.system_clients += 1
 				if filename not in SCHEDULED_JOB_MODULES:
@@ -207,6 +240,7 @@ class TestTheReadsRule(unittest.TestCase):
 		problems, whitelisted, scanned = [], [], []
 		get_all_in_jobs = system_clients_in_jobs = bypasses_in_hooks = 0
 		get_all_anywhere = 0
+		raw_sql_by_module: dict[str, int] = {}
 		for path in scan.python_files():
 			name = scan.relative(path)
 			scanned.append(name)
@@ -214,6 +248,8 @@ class TestTheReadsRule(unittest.TestCase):
 			problems += found.problems
 			whitelisted += found.whitelisted
 			get_all_anywhere += found.get_all_calls
+			if found.raw_sql_calls:
+				raw_sql_by_module[name] = found.raw_sql_calls
 			if name in SCHEDULED_JOB_MODULES:
 				get_all_in_jobs += found.get_all_calls
 				system_clients_in_jobs += found.system_clients
@@ -237,6 +273,11 @@ class TestTheReadsRule(unittest.TestCase):
 			3,
 			"the install and uninstall hooks create and remove roles and records with ignore_permissions, and the scan sees it",
 		)
+		self.assertEqual(
+			raw_sql_by_module,
+			{"ai_munimji/dbcheck.py": 1},
+			"the one statement that reads the database setting is the only raw SQL in the app, and the scan sees it",
+		)
 		self.assertIn(ERP_CLIENT_MODULE, scanned)
 		self.assertIn("ai_munimji/stores/table.py", scanned)
 		for module in (
@@ -244,10 +285,44 @@ class TestTheReadsRule(unittest.TestCase):
 			| LIFECYCLE_MODULES
 			| SCHEDULE_MODULES
 			| STORE_EXCEPTIONS
+			| set(RAW_SQL)
 			| {ERP_CLIENT_MODULE}
 		):
 			self.assertTrue(
 				(scan.ROOT / module).exists(), f"{module} is named in the rules but does not exist"
+			)
+
+	def test_the_scan_notices_raw_sql_that_is_not_the_one_allowed_statement(self):
+		statement = RAW_SQL["ai_munimji/dbcheck.py"]
+		allowed = f"import frappe\nfrappe.db.sql({statement!r})\n"
+		self.assertEqual(
+			scan_source(allowed, "ai_munimji/dbcheck.py").problems, [], "the statement, as one string"
+		)
+		self.assertEqual(scan_source(allowed, "ai_munimji/dbcheck.py").raw_sql_calls, 1)
+		elsewhere = (
+			(allowed, "ai_munimji/api.py"),
+			(allowed, "ai_munimji/jobs.py"),
+			(allowed, "ai_munimji/stores/core.py"),
+		)
+		for source, module in elsewhere:
+			self.assertTrue(
+				scan_source(source, module).problems, f"{module}: the same statement is not allowed there"
+			)
+		built = (
+			"import frappe\nfrappe.db.sql(f\"SHOW VARIABLES LIKE '{name}'\")\n",
+			"import frappe\nfrappe.db.sql(\"SHOW VARIABLES LIKE '%s'\" % name)\n",
+			"import frappe\nfrappe.db.sql(\"SHOW VARIABLES LIKE '{}'\".format(name))\n",
+			'import frappe\nfrappe.db.sql("SHOW VARIABLES LIKE " + name)\n',
+			"import frappe\nfrappe.db.sql(STATEMENT)\n",
+			f"import frappe\nfrappe.db.sql({statement!r}, (name,))\n",
+			f"import frappe\nfrappe.db.sql({statement!r}, as_dict=True)\n",
+			"import frappe\nfrappe.db.sql('SELECT 1')\n",
+			"import frappe\nfrappe.db.sql_list('SELECT name FROM tabItem')\n",
+		)
+		for source in built:
+			self.assertTrue(
+				scan_source(source, "ai_munimji/dbcheck.py").problems,
+				f"not allowed even in dbcheck.py: {source!r}",
 			)
 
 	def test_the_scan_notices_a_permission_bypass_outside_the_install_hooks(self):
@@ -296,7 +371,7 @@ class TestTheReadsRule(unittest.TestCase):
 	def test_the_scan_notices_a_read_in_the_erp_client_that_ignores_the_persons_rights(self):
 		for source in (
 			"import frappe\nx = frappe.db.get_value('Item', 'a', 'b')\n",
-			"import frappe\nx = frappe.db.sql('select 1')\n",
+			"import frappe\nx = frappe.db.get_values('Item', 'a', 'b')\n",  # raw SQL has its own rule (7) and its own test
 			"import frappe\nx = frappe.db.exists('Item', 'a')\n",
 			"import frappe\nx = frappe.db.count('Item')\n",
 			"import frappe\nx = frappe.get_all('Item')\n",
@@ -376,7 +451,7 @@ class TestTheReadsRule(unittest.TestCase):
 	def test_the_scan_notices_a_read_in_a_store_that_ignores_the_persons_rights(self):
 		for source in (
 			"import frappe\nx = frappe.db.get_value('Item', 'a', 'b')\n",
-			"import frappe\nx = frappe.db.sql('select 1')\n",
+			"import frappe\nx = frappe.db.get_values('Item', 'a', 'b')\n",  # raw SQL has its own rule (7) and its own test
 			"import frappe\nfrappe.db.delete('Munimji Lock')\n",
 			"import frappe\nx = frappe.get_all('Item')\n",
 			"import frappe\nx = frappe.get_cached_doc('Item', 'a')\n",

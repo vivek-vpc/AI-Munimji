@@ -86,11 +86,37 @@ FORBIDDEN = {
 }
 
 
+# Named exceptions: a phrase that the patterns above would catch but that says nothing about this app. Each is a decision, with the reason, and test_the_exceptions_are_still_in_the_text
+# fails if the phrase goes away, so that an exception cannot outlive its reason.
+ALLOWED_PHRASES = {
+	"docs/PRIVACY.md": (
+		"before that version is released",  # about a LATER version ("this policy will be updated before that version is released"), not a claim that this one is
+	),
+}
+
+
 class TestWhatThePublicTextSaysAboutTheApp(unittest.TestCase):
+	def test_the_exceptions_are_still_in_the_text_and_do_not_hide_a_real_claim(self):
+		for relative, phrases in ALLOWED_PHRASES.items():
+			text = (ROOT / relative).read_text(encoding="utf-8")
+			for phrase in phrases:
+				self.assertIn(
+					phrase,
+					text,
+					f"{relative} no longer holds the exception {phrase!r}: remove it from ALLOWED_PHRASES",
+				)
+		released = r"(?<!not )(?<!not yet )(?:is|are) (?:now )?released"
+		self.assertIn(released, FORBIDDEN)
+		self.assertTrue(
+			re.search(released, "AI Munimji is released", re.I), "the pattern still catches a real claim"
+		)
+
 	def test_no_public_text_says_what_the_project_does_not_say_or_cannot_claim(self):
 		found = []
 		for relative in PUBLIC_TEXT:
 			text = (ROOT / relative).read_text(encoding="utf-8")
+			for phrase in ALLOWED_PHRASES.get(relative, ()):
+				text = text.replace(phrase, "")
 			for pattern, why in FORBIDDEN.items():
 				for match in re.finditer(pattern, text, re.I):
 					found.append(f"{relative}: “{match.group(0)}” ({why})")

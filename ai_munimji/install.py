@@ -29,6 +29,18 @@ def make_schedule():
 	schedule.sync(bool(settings.enabled), settings.check_cron)
 
 
+def check_database():
+	"""After install and migrate: say, without stopping anything, if the database has innodb_snapshot_isolation ON (dbcheck.py). Nothing is said when it is OFF or cannot be read."""
+	import click
+
+	from ai_munimji import dbcheck
+
+	if dbcheck.snapshot_isolation_is_on():
+		message = dbcheck.warning()
+		click.secho(f"AI Munimji: {message}", fg="yellow")
+		frappe.logger("ai_munimji").warning(message)
+
+
 NOTIFICATION = "Munimji: a request is waiting for an answer"
 
 
