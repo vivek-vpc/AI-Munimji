@@ -27,14 +27,14 @@ To install it on a bench you run yourself, see [docs/INSTALL.md](docs/INSTALL.md
 
 ## The engine (for developers)
 
-The rules (stock analysis, vendor scoring, the settings models) live in a separate package, `ai-munimji-engine`, built from the `erpnext-ai-agents` repository. It is **not on PyPI**, and nothing is published. The app lists it as one line in `pyproject.toml` (`dependencies`). Until it is published, a local wheel is put into the bench's environment before the app is installed or updated, because the installer would otherwise look for it on PyPI and stop:
+The rules (stock analysis, vendor scoring, the settings models) live in a separate package, `ai-munimji-engine`, built from the `erpnext-ai-agents` repository and published on PyPI. The app pins it exactly in one line of `pyproject.toml` (`dependencies`), so installing the app installs that version, and CI installs the same version from PyPI. When you work on the app, a local wheel of the engine can be put into the bench's environment first, so that an engine that is not published yet can be tried:
 
 ```
 .\dev\build-engine-wheel.ps1       # builds dev\wheels\ai_munimji_engine-<version>-py3-none-any.whl from ..\erpnext-ai-agents\engine
 .\dev\exec.ps1 bash /workspace/ai_munimji/dev/install-engine.sh      # installs the newest wheel in dev/wheels into the bench (bootstrap.sh and verify-all.ps1 do both for you)
 ```
 
-`dev/install-engine.sh` is the only place that knows how the engine arrives. The day it is published, nothing in the code changes: the dependency line already names it, and the script is dropped. `ai_munimji/tests/test_engine_wheel.py` checks, inside the bench, that the installed engine is the wheel, satisfies the declared line, brings nothing but pydantic and PyYAML, imports in full and runs.
+`dev/install-engine.sh` is the only place that knows how the development engine arrives. `ai_munimji/tests/test_engine_wheel.py` checks, inside the bench, that the installed engine is the wheel, satisfies the declared line, brings nothing but pydantic and PyYAML, imports in full and runs.
 
 ## Development
 

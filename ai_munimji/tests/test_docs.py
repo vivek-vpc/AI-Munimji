@@ -87,6 +87,64 @@ FORBIDDEN = {
 }
 
 
+# A path of the owner's machine, a Windows user folder or another of their projects must not be in a file that will be public. The files are READ here, one by one: `git grep` with a Windows
+# path in it missed one (dev/README.md, phase 6), so no check of this kind may rely on it.
+PERSONAL = (
+	"C:\\ERP",
+	"C:/ERP",
+	"\\Users\\",
+	"/Users/",
+	"AppData",
+	"OneDrive",
+	"registry-prep",
+	"listing-drafts",
+	"Automotive chatbot",
+)
+TEXT_SUFFIXES = {
+	".md",
+	".py",
+	".sh",
+	".ps1",
+	".yml",
+	".yaml",
+	".json",
+	".js",
+	".cjs",
+	".toml",
+	".txt",
+	".cfg",
+	".html",
+	".pot",
+}
+SKIPPED_FOLDERS = {".git", "node_modules", "__pycache__", "wheels", ".cache", "locale"}
+GENERATED = ("dev/contract-",)  # made by the loader on a development machine, never committed (.gitignore)
+
+
+class TestNoPersonalPaths(unittest.TestCase):
+	def test_no_file_of_the_repository_names_a_path_or_a_project_of_the_owners_machine(self):
+		import os
+
+		found, read = [], 0
+		for folder, subfolders, names in os.walk(ROOT):
+			subfolders[:] = sorted(
+				s for s in subfolders if s not in SKIPPED_FOLDERS
+			)  # not descended into at all: node_modules is big
+			for name in sorted(names):
+				path = Path(folder) / name
+				relative = path.relative_to(ROOT).as_posix()
+				if (
+					path.suffix not in TEXT_SUFFIXES
+					or relative.startswith(GENERATED)
+					or relative == "ai_munimji/tests/test_docs.py"  # this file names them
+				):
+					continue
+				text = path.read_text(encoding="utf-8", errors="replace")
+				read += 1
+				found += [f"{relative}: {needle!r}" for needle in PERSONAL if needle in text]
+		self.assertGreater(read, 100, "the test reads the repository's text files")
+		self.assertEqual(found, [])
+
+
 RELEASE_WORDING = (
 	"README.md",
 	"pyproject.toml",

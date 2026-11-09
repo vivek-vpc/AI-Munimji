@@ -8,7 +8,8 @@ What changed in the app for someone who installs it or builds on it. This is the
 
 * **Version 0.1.0.** `__version__`, the descriptions in `hooks.py` and `pyproject.toml` (the same sentence as the listing's summary), and the wording of the README, `docs/INSTALL.md` and `docs/KNOWN_LIMITATIONS.md` no longer say
   that the app is in development.
-* **The engine is pinned exactly:** `ai-munimji-engine==0.1.0` in `pyproject.toml`. CI still builds the engine from the `erpnext-ai-agents` repository (`ENGINE_REF`) until it is on PyPI; how to switch is in the pull request.
+* **The engine is pinned exactly:** `ai-munimji-engine==0.1.0` in `pyproject.toml`, and it is on PyPI (published on 9 Nov 2026 from the tag `engine-v0.1.0` of the `erpnext-ai-agents` repository). CI installs it from there,
+  at the pin that `pyproject.toml` holds; the build of the engine from the other repository, and the variables `ENGINE_REF` and `ENGINE_REPO` that steered it, are gone.
 * **The pages are in `docs/`:** `PRIVACY.md`, `TERMS.md`, `SUPPORT.md`, `USER_GUIDE.md` (reworded after the app was compared with them: seven custom fields, a change or cancel of an order is said, two answers from low stock to an order,
   the seal waits for the next run) and `LISTING.md` (the fields of the registry entry); the logo is `docs/img/ai-munimji-logo.png`. The test of the public text no longer needs an exception.
 

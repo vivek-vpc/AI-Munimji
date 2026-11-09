@@ -5,11 +5,11 @@ A Frappe v16 + ERPNext v16 bench in Docker, for building and testing the `ai_mun
 It is its own compose project, `munimji-dev`; it does not touch other Docker projects.
 
 You need Docker Desktop (about 6 GB for its virtual machine; 8 recommended) and about 10 GB of free disk. Nothing else is installed on Windows.
-The rules package `ai-munimji-engine` is not on PyPI: the wheel comes from the `erpnext-ai-agents` repository (next to this one) and is built by `.\dev\build-engine-wheel.ps1`.
+The rules package `ai-munimji-engine` is on PyPI and the app pins it exactly. This environment installs a wheel of it built from the `erpnext-ai-agents` repository (next to this one) by `.\dev\build-engine-wheel.ps1` instead, so that an engine that is not published yet can be tried.
 
 ## The commands you run
 
-From `C:\ERP\AI-Munimji` in PowerShell:
+From the folder of this repository, in PowerShell:
 
 ```
 .\dev\build-engine-wheel.ps1   # the engine wheel, from ..\erpnext-ai-agents\engine, into dev\wheels\ (not in git)

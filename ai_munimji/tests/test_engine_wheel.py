@@ -21,8 +21,9 @@ def declared_engine_requirements() -> list[Requirement]:
 
 
 class TestTheEngineInTheBench(unittest.TestCase):
-	"""The engine is not on PyPI, so dev/install-engine.sh puts a local wheel into the bench's environment. These tests say that it really is the wheel, that it is what the app
-	declares, and that it runs here, in Frappe's own environment (Python 3.14 with Frappe's pinned pydantic and PyYAML)."""
+	"""In the bench, the engine is an installed package: from PyPI in CI and in an installation, and in development a local wheel of the same version that dev/install-engine.sh puts into
+	the environment. These tests say that it really is the installed wheel and not a checkout, that it is what the app declares, and that it runs here, in Frappe's own environment
+	(Python 3.14 with Frappe's pinned pydantic and PyYAML)."""
 
 	def test_the_app_declares_the_engine_on_one_line(self):
 		declared = declared_engine_requirements()
