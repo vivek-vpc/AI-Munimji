@@ -34,7 +34,7 @@
  "fields": [
   {
    "default": "0",
-   "description": "Off until you switch it on. Review the thresholds below first: once it is on, requests for purchases start to appear for your real stock. Switching it off again stops that; requests that are already waiting stay as they are.",
+   "description": "Off until you switch it on. Before you do, review: the thresholds below (minimum quantity and days of cover), the time in \"Check stock at\", and who holds the Munimji Approver role (they are told in their notification bell when a request is made). Once it is on, requests for purchases start to appear for your real stock at that time. Nothing is ordered until a person with that role approves a request, and then only a Draft Purchase Order is made. Switching it off stops the schedule; requests that are already waiting stay as they are.",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Watch stock"
@@ -206,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-07 15:00:00.000000",
+ "modified": "2026-11-09 09:00:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",

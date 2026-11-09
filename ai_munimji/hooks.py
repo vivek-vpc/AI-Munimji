@@ -20,9 +20,18 @@ required_apps = ["erpnext"]
 # the roles must exist before the DocTypes are synced (their permission rows name them), so they are made before the install
 before_install = "ai_munimji.install.before_install"
 
-# the rows that serialise work (stores/locks.py) exist after the DocTypes are synced, at install and at every migrate
-after_install = "ai_munimji.install.make_locks"
-after_migrate = "ai_munimji.install.make_locks"
+# after the DocTypes are synced, at install and at every migrate: the rows that serialise work (stores/locks.py), the stock check's scheduled job (schedule.py, which follows the
+# Settings page) and the notification to the people who answer requests; each one finds what is already there and changes nothing
+after_install = [
+	"ai_munimji.install.make_locks",
+	"ai_munimji.install.make_schedule",
+	"ai_munimji.install.make_notification",
+]
+after_migrate = [
+	"ai_munimji.install.make_locks",
+	"ai_munimji.install.make_schedule",
+	"ai_munimji.install.make_notification",
+]
 
 # the seven fields this app adds to Purchase Order, Material Request and Stock Entry (ai_munimji/custom_fields.py), written by `bench export-fixtures --app ai_munimji`
 # and filtered by name so that no other Custom Field of the site is exported with them
@@ -47,15 +56,43 @@ has_permission = {
 	"Munimji Approval Request": "ai_munimji.permissions.has_permission",
 }
 
+# Deleting
+# --------
+
+# The app's records name an Item, a Warehouse, a Supplier, a Purchase Order or a Stock Entry in Link fields, but they are history: they keep the name as text and must never stop
+# ERPNext from deleting its own documents (Frappe v16: delete_doc.py skips the links of these DocTypes). The AI Munimji Settings page is not in the list: a fallback supplier that
+# is still named there is not deleted. tests/test_deleting.py checks the list against the DocTypes the app has.
+ignore_links_on_delete = [
+	"Munimji Agent Run",
+	"Munimji Agent Task",
+	"Munimji Approval Delivery",
+	"Munimji Approval Request",
+	"Munimji Assistant Answer",
+	"Munimji Audit Seal",
+	"Munimji Calendar Event",
+	"Munimji Chat Log",
+	"Munimji Count Review",
+	"Munimji Cycle Count",
+	"Munimji Delivery Chase",
+	"Munimji Inbound Seen",
+	"Munimji Job Run",
+	"Munimji Lock",
+	"Munimji Purchase Proposal",
+	"Munimji Quote Round",
+	"Munimji Receipt Check",
+	"Munimji Settings Change",
+	"Munimji Settings Override",
+	"Munimji Stock Alert",
+	"Munimji Stock Notice",
+	"Munimji Stock Transfer",
+	"Munimji Tool Call",
+	"Munimji Vendor Message",
+	"Munimji Vendor Reply",
+	"Munimji Work Order",
+]
+
 # Scheduled Tasks
 # ---------------
 
-# PLACEHOLDER, replaced in Phase 5 (ai_munimji/jobs.py).
-# Frappe runs scheduled work at its scheduler tick (240 seconds unless the bench sets another), so nothing here can run more often than that.
-scheduler_events = {
-	"cron": {
-		"*/5 * * * *": [
-			"ai_munimji.jobs.check_stock",
-		],
-	},
-}
+# None are declared here on purpose. Frappe resets or deletes at every migrate the job types that hooks declare or leave undeclared, so the stock check's own job (a Scheduler Event
+# and the Scheduled Job Type linked to it, which the AI Munimji Settings page switches on and off and sets the time of) is made by install.py and kept in step by schedule.py.

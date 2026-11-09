@@ -4,6 +4,22 @@ What changed in the app for someone who installs it or builds on it. AI Munimji 
 
 ## Unreleased
 
+### Phase 5: the flow a person can use
+
+* **The stock check runs on a schedule that the Settings page sets.** Watch stock switches the job on and off (off until a person ticks it) and "Check stock at" is its time. The job is a Scheduled
+  Job Type on a Scheduler Event, made at install and at every migrate, so that `bench migrate` does not reset or delete a schedule a person has edited; the placeholder cron entry of `hooks.py`
+  (every 5 minutes, always on) is gone. A Munimji Manager may save the page without holding any right on Frappe's job records: `schedule.py` is the one module besides the install hooks that writes
+  with `ignore_permissions` (`tests/test_rules.py` names it). The page now says what to review before switching it on.
+* **The approval form** shows a request in words, drawn from the JSON the engine stored (nothing is worked out again): the stock and how long it lasts, what is proposed and what it costs, when it
+  arrives, why this vendor, the other vendors and why they were not chosen, the duties and taxes or the plain statement that taxes are not included, and what each button does. Buttons: Approve,
+  Change quantity, Change vendor, Dismiss (and Got it, for a request that asks for no order). The first answer wins; the second is told who answered first. `ai_munimji.api.answer` also returns the
+  revised request to open after a change and the vendors to choose from.
+* **One notification** in the Desk bell of each person with the role Munimji Approver when a request is made, once per request, not per tick; no e-mail. Made if missing, never overwritten.
+* **An Item, Warehouse, Supplier, Purchase Order or Stock Entry that a record points at can be deleted** (`ignore_links_on_delete`); the record keeps the name as text. Before this the Link fields stopped ERPNext
+  from deleting them.
+* Agent Run keeps its create-only right for Approver and Manager; a test shows that nobody can put another user's name on the row.
+* The placeholder form's single "Create Purchase Order" button is replaced by the form above; no data changes.
+
 ### Phase 4b: the engine's records are DocTypes
 
 * **25 DocTypes hold the engine's records** (requests, purchase proposals, alerts and notices, work orders, transfers, chases, the audit seal, the agents' log and the rest); the table, the

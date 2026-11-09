@@ -9,7 +9,7 @@ bench --site <your site> uninstall-app ai_munimji
 ## What goes
 
 * **With the app itself** (Frappe removes these): the DocTypes AI Munimji Settings, Munimji Approval Request and Munimji Calendar Event, **with every record in them** (so the settings and all requests are deleted), the module, and the app's entry.
-* **Removed by the app's own uninstall step** (`before_uninstall`): the three roles Munimji Viewer, Munimji Approver and Munimji Manager, and their assignment to users; the seven Custom Fields `custom_agent_ref` and `custom_agent_approved_by` (on Purchase Order, Material Request and Stock Entry) and `custom_agent_note` (on Material Request); the "approve" permission type; and the scheduled job.
+* **Removed by the app's own uninstall step** (`before_uninstall`): the three roles Munimji Viewer, Munimji Approver and Munimji Manager, and their assignment to users; the seven Custom Fields `custom_agent_ref` and `custom_agent_approved_by` (on Purchase Order, Material Request and Stock Entry) and `custom_agent_note` (on Material Request); the "approve" permission type; the scheduled job and the Scheduler Event it hangs on; and the notification to the Approvers.
 
 ## What stays
 

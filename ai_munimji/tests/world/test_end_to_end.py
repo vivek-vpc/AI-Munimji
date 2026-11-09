@@ -8,6 +8,7 @@ Every call to the ERP is recorded. The seven methods the Frappe client leaves ou
 methods were.
 """
 
+import json
 import threading
 from contextlib import contextmanager
 from unittest import mock
@@ -19,7 +20,7 @@ from ai_munimji_engine.packs.stock_procurement.inventory.messages import KIND as
 from ai_munimji_engine.packs.stock_procurement.procurement.messages import KIND_PO
 from ai_munimji_engine.packs.stock_procurement.procurement.proposals import ProposalRepo
 
-from ai_munimji import jobs, wiring
+from ai_munimji import api, jobs, schedule, wiring
 from ai_munimji.erp_client import FrappeERPClient
 from ai_munimji.stores import frappe_core_stores, locks
 from ai_munimji.stores.core import FrappeJobRunStore
@@ -99,6 +100,7 @@ class EndToEnd(ParallelCase):
 	def setUp(self):
 		frappe.set_user("Administrator")
 		empty_store_tables()
+		frappe.db.delete("Notification Log", {"document_type": REQUEST})
 		frappe.db.commit()
 		self.item = self.names["steady"]
 		self.trace: list = []
@@ -116,6 +118,7 @@ class EndToEnd(ParallelCase):
 		):
 			self.remember("Purchase Order", name)
 		empty_store_tables()
+		frappe.db.delete("Notification Log", {"document_type": REQUEST})
 		frappe.db.commit()
 
 	def pending(self, kind: str) -> list[dict]:
@@ -126,6 +129,65 @@ class EndToEnd(ParallelCase):
 
 	def person_services(self, user: str):
 		return wiring.build(Recorder(FrappeERPClient(), user, self.trace), frappe_core_stores(), None)
+
+	def waiting_reorder(self):
+		"""A reorder a person has approved, waiting for the procurement pass: the work order the inventory agent would have made."""
+		with as_administrator():
+			services = jobs.system_services()
+			services.workorders.emit(
+				REORDER_NEEDED,
+				{
+					"item_code": self.item,
+					"item_name": self.item,
+					"item_group": "All Item Groups",
+					"uom": "Nos",
+					"suggested_qty": 100,
+					"cover_days": 20.0,
+					"lead_time_days": 5.0,
+					"daily_rate": 4.0,
+					"on_hand": 10.0,
+					"severity": "HIGH",
+					"reasons": ["Low."],
+				},
+			)
+		frappe.db.commit()
+
+	@staticmethod
+	def slowed(original):
+		"""The look for an open proposal, made to wait until both ticks have read the waiting reorders (so neither can have claimed it before the other looked), and then a moment more."""
+		meeting = threading.Barrier(2)
+
+		def slow(self, *args, **kwargs):
+			found = original(self, *args, **kwargs)
+			try:
+				meeting.wait(4)  # with the lease only one tick gets here, and goes on after the wait
+			except threading.BrokenBarrierError:
+				pass
+			return found
+
+		return slow
+
+	def two_ticks(self, tick=None):
+		"""Two ticks on two connections, both made to reach the pass over the waiting reorders together. `tick` is what each runs (the stock check of this item unless said)."""
+		tick = tick or (lambda: jobs.run_stock_check(items=[self.item]))
+
+		def no_stock_pass(
+			agent, **kwargs
+		):  # what is tested is the pass over the waiting reorders: both ticks must reach it together
+			return RunReport(run_id="x", dry_run=False, started_at="2026-10-16T08:00:00+00:00")
+
+		with (
+			mock.patch.object(ProposalRepo, "open_for_item", self.slowed(ProposalRepo.open_for_item)),
+			mock.patch.object(InventoryAgent, "run", no_stock_pass),
+		):
+			return on_own_connections("Administrator", [tick] * 2)
+
+	def proposals(self):
+		with as_administrator():
+			frappe.db.commit()
+			return wiring.build(
+				FrappeERPClient(system=True), frappe_core_stores(system=True)
+			).stock.proposals.list(None, self.item, 10)
 
 
 class TestFromTheStockToADraftOrder(EndToEnd):
@@ -274,62 +336,6 @@ class TestFromTheStockToADraftOrder(EndToEnd):
 
 
 class TestTwoTicksAtOnce(EndToEnd):
-	def waiting_reorder(self):
-		"""A reorder a person has approved, waiting for the procurement pass: the work order the inventory agent would have made."""
-		with as_administrator():
-			services = jobs.system_services()
-			services.workorders.emit(
-				REORDER_NEEDED,
-				{
-					"item_code": self.item,
-					"item_name": self.item,
-					"item_group": "All Item Groups",
-					"uom": "Nos",
-					"suggested_qty": 100,
-					"cover_days": 20.0,
-					"lead_time_days": 5.0,
-					"daily_rate": 4.0,
-					"on_hand": 10.0,
-					"severity": "HIGH",
-					"reasons": ["Low."],
-				},
-			)
-		frappe.db.commit()
-
-	@staticmethod
-	def slowed(original):
-		"""The look for an open proposal, made to wait until both ticks have read the waiting reorders (so neither can have claimed it before the other looked), and then a moment more."""
-		meeting = threading.Barrier(2)
-
-		def slow(self, *args, **kwargs):
-			found = original(self, *args, **kwargs)
-			try:
-				meeting.wait(4)  # with the lease only one tick gets here, and goes on after the wait
-			except threading.BrokenBarrierError:
-				pass
-			return found
-
-		return slow
-
-	def two_ticks(self):
-		def no_stock_pass(
-			agent, **kwargs
-		):  # what is tested is the pass over the waiting reorders: both ticks must reach it together
-			return RunReport(run_id="x", dry_run=False, started_at="2026-10-16T08:00:00+00:00")
-
-		with (
-			mock.patch.object(ProposalRepo, "open_for_item", self.slowed(ProposalRepo.open_for_item)),
-			mock.patch.object(InventoryAgent, "run", no_stock_pass),
-		):
-			return on_own_connections("Administrator", [lambda: jobs.run_stock_check(items=[self.item])] * 2)
-
-	def proposals(self):
-		with as_administrator():
-			frappe.db.commit()
-			return wiring.build(
-				FrappeERPClient(system=True), frappe_core_stores(system=True)
-			).stock.proposals.list(None, self.item, 10)
-
 	def test_two_ticks_at_once_make_one_proposal(self):
 		self.waiting_reorder()
 		results = self.two_ticks()
@@ -367,3 +373,160 @@ class TestTwoTicksAtOnce(EndToEnd):
 			self.assertTrue(locks.lease("probe", "a", -1), "a lease of no time at all")
 			self.assertTrue(locks.lease("probe", "b", 5), "has run out by the time the next one asks")
 			locks.release("probe", "b")
+
+
+class TestChangingARequest(EndToEnd):
+	"""The form's Change quantity and Change vendor buttons carry their answers through api.answer, which also says which request to look at next and the vendors to choose from."""
+
+	def an_order_request(self) -> str:
+		self.waiting_reorder()
+		with as_administrator():
+			jobs.run_stock_check(items=[self.item])
+		frappe.db.commit()
+		[request] = self.pending(KIND_PO)
+		return request["id"]
+
+	def test_changing_the_quantity_replaces_the_request_and_says_which_one_to_open(self):
+		old = self.an_order_request()
+		with as_user("approver"):
+			result = api.answer(old, "change_qty", json.dumps({"qty": 150}))
+		self.assertTrue(result["ok"], result)
+		self.assertEqual(result["status"], "revised")
+		self.assertNotEqual(result["approval"], old, "the revised request is a new one: the form opens it")
+		frappe.db.commit()
+		[waiting] = self.pending(KIND_PO)
+		self.assertEqual(waiting["id"], result["approval"])
+		self.assertEqual(frappe.db.get_value(REQUEST, waiting["id"], "qty"), 150)
+		self.assertNotEqual(
+			frappe.db.get_value(REQUEST, old, "status"), "pending", "and the old one is closed"
+		)
+
+	def test_change_vendor_without_a_vendor_lists_the_choices_and_with_one_revises(self):
+		old = self.an_order_request()
+		with as_user("approver"):
+			listed = api.answer(old, "change_vendor")
+		self.assertTrue(listed["ok"], listed)
+		self.assertEqual(listed["status"], "need_input")
+		self.assertTrue(
+			listed["choices"] and all({"id", "label"} <= set(c) for c in listed["choices"]), listed
+		)
+		with as_user("approver"):
+			revised = api.answer(old, "change_vendor", json.dumps({"supplier": listed["choices"][0]["id"]}))
+		self.assertEqual((revised["ok"], revised["status"]), (True, "revised"), revised)
+		self.assertNotEqual(revised["approval"], old)
+
+	def test_a_stale_answer_is_refused_with_the_first_answer_in_the_message(self):
+		old = self.an_order_request()
+		with as_user("approver"):
+			first = api.answer(old, "dismiss")
+			second = api.answer(old, "approve")
+		self.assertTrue(first["ok"], first)
+		self.assertFalse(second["ok"], second)
+		self.assertIn("Already answered", second["message"])
+
+
+class TestTheScheduledJob(EndToEnd):
+	"""The job the Settings page switches on is Frappe's own Scheduled Job Type: its record runs the stock check as the scheduler does. Nothing happens while Watch stock is off, one
+	proposal is made when it is on, two ticks at once make one, and the people who answer are told once per request, not once per tick."""
+
+	def job(self):
+		return frappe.get_doc("Scheduled Job Type", {"method": schedule.METHOD})
+
+	def watch_stock(self, on: int):
+		page = frappe.get_doc(SETTINGS)
+		page.enabled = on
+		page.save()
+		frappe.db.commit()
+
+	def tick(self):
+		"""What the scheduler does with a job that is due: the job record runs its method, as the system."""
+		with as_administrator():
+			self.job().execute()
+		frappe.db.commit()
+
+	def told(self, request_id: str) -> list[str]:
+		return [
+			row.for_user
+			for row in frappe.get_all(
+				"Notification Log",
+				filters={"document_type": REQUEST, "document_name": request_id},
+				fields=["for_user"],
+			)
+		]
+
+	def test_off_creates_nothing(self):
+		self.waiting_reorder()
+		self.watch_stock(0)
+		self.assertEqual(self.job().stopped, 1)
+		self.assertFalse(
+			frappe.get_all("Scheduled Job Type", {"method": schedule.METHOD, "stopped": 0}),
+			"the scheduler takes the jobs that are not stopped, and this one is",
+		)
+		self.tick()  # even a tick that someone runs by hand finds Watch stock off
+		self.assertEqual(self.proposals(), [])
+		self.assertEqual(self.pending(KIND_PO), [])
+		self.assertEqual(frappe.db.count("Munimji Job Run"), 0, "not even a record that the check ran")
+		self.assertEqual(frappe.db.count(REQUEST), 0)
+
+	def test_on_creates_one_proposal(self):
+		self.waiting_reorder()
+		self.watch_stock(1)
+		self.assertEqual(self.job().stopped, 0)
+		self.tick()
+		self.assertEqual(len(self.proposals()), 1)
+		self.assertEqual(len(self.pending(KIND_PO)), 1)
+		log = frappe.get_all(
+			"Scheduled Job Log",
+			{"scheduled_job_type": self.job().name},
+			["status"],
+			order_by="creation desc",
+			limit=1,
+		)
+		self.assertEqual(log[0].status, "Complete", "the scheduler's own log says the job ran")
+		self.tick()
+		self.assertEqual(len(self.proposals()), 1, "the next tick finds it already proposed")
+
+	def test_two_ticks_at_once_give_one_proposal(self):
+		self.waiting_reorder()
+		self.watch_stock(1)
+		name = self.job().name
+		results = self.two_ticks(lambda: frappe.get_doc("Scheduled Job Type", name).execute())
+		self.assertFalse([r for r in results if isinstance(r, BaseException)], results)
+		self.assertEqual(len(self.proposals()), 1, "one proposal, not two")
+		self.assertEqual(len(self.pending(KIND_PO)), 1)
+
+	def test_one_notification_per_request_not_per_tick(self):
+		# Frappe queues the notification logs for a background worker, which this bench does not run; when frappe.in_test is set it writes them at once
+		patch = mock.patch.object(frappe, "in_test", True)
+		patch.start()
+		self.addCleanup(patch.stop)
+		self.watch_stock(1)
+		with as_administrator():
+			jobs.run_stock_check(items=[self.item])
+			jobs.run_stock_check(items=[self.item])  # a second tick finds the same request waiting
+		frappe.db.commit()
+		[reorder] = self.pending(KIND_REORDER)
+		told = self.told(reorder["id"])
+		self.assertIn(self.person("approver"), told, "the Approver is told")
+		self.assertNotIn(self.person("viewer"), told, "the Viewer, who cannot answer, is not")
+		self.assertEqual(len(told), len(set(told)), f"nobody twice: {told}")
+		self.assertEqual(
+			frappe.db.count("Notification Log", {"document_type": REQUEST}),
+			len(told),
+			"two ticks, one request, one round of notifications",
+		)
+
+		with as_user("approver"):
+			started = self.person_services("approver").approvals.decide(
+				reorder["id"], "approve", wiring.actor_for(), "desk"
+			)
+		self.assertTrue(started.ok, started)
+		frappe.db.commit()
+		with as_administrator():
+			jobs.run_stock_check(items=[self.item])
+		frappe.db.commit()
+		[order] = self.pending(KIND_PO)
+		self.assertEqual(
+			sorted(self.told(order["id"])), sorted(told), "the order request tells the same people, once each"
+		)
+		self.assertEqual(frappe.db.count("Notification Log", {"document_type": REQUEST}), 2 * len(told))

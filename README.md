@@ -18,7 +18,10 @@ The rules the app is built to:
 | Seven read-only fields on Purchase Order, Material Request and Stock Entry | the same fields the standalone service writes, so either product recognises the other's orders ([docs/NAMES.md](docs/NAMES.md)) |
 | An uninstall that is tested | [docs/UNINSTALL.md](docs/UNINSTALL.md) |
 | The engine's records as DocTypes | 25 of them: requests, purchase proposals, alerts, work orders, the audit seal and the rest; who may do what to each, how a value is kept, the locks and the clean-up are in [docs/STORES.md](docs/STORES.md) |
-| **Thin, replaced in Phase 5** | the request form has one button (a draft Purchase Order for a purchase request), and the scheduled job runs the engine's stock check on a schedule of its own; the approval form with the reasoning, the inbox, notifications and the settings-driven schedule are not built |
+| The stock check on a schedule | a job that the Settings page switches on and off and sets the time of; off until a person ticks Watch stock |
+| The approval form | the request in words, drawn from what the engine stored (the stock, why this vendor, why the others were not chosen, cost, delivery, taxes, the order that approving makes), with the buttons Approve, Change quantity, Change vendor and Dismiss; the first answer wins and the second is told who answered first |
+| A notification | one in the Desk bell of each Approver when a request is made, once per request; no e-mail |
+| **Not built yet** | a dry run, a stock monitor view, an inbox beyond the standard list view, reminders and expiry, e-mail notifications; the list is in [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 
 To install it on a bench you run yourself, see [docs/INSTALL.md](docs/INSTALL.md), which also says which ERPNext roles a person needs to see stock and make orders.
 

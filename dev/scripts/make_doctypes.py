@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DOCTYPES = ROOT / "ai_munimji" / "ai_munimji" / "doctype"
 FIRST = "2026-11-07 12:00:00.000000"
+APPROVAL = "Munimji Approval Request"
 BORN = {
 	"Munimji Approval Request": "2026-11-05 17:47:10.827362"
 }  # the placeholder's own creation time; the others are new
@@ -76,6 +77,9 @@ def field(col, table) -> dict:
 
 def fields_of(table) -> list[dict]:
 	out = []
+	if table.doctype == APPROVAL:
+		# the form's first thing is the request in words, drawn from the stored JSON by the form's script (munimji_approval_request.js); the columns come after it
+		out.append({"fieldname": "reasoning", "fieldtype": "HTML", "label": "Why this request"})
 	if table.numbered:
 		out.append(
 			{
@@ -90,7 +94,12 @@ def fields_of(table) -> list[dict]:
 	details_started = False
 	for col in table.cols:
 		if col.kind in ("json", "long") and not details_started and out:
-			out.append({"fieldname": "details_section", "fieldtype": "Section Break", "label": "Details"})
+			section = {"fieldname": "details_section", "fieldtype": "Section Break", "label": "Details"}
+			if table.doctype == APPROVAL:
+				section.update(
+					label="The request and the answer, exactly as the engine kept them", collapsible=1
+				)
+			out.append(section)
 			details_started = True
 		out.append(field(col, table))
 	if any(c.null for c in table.cols):

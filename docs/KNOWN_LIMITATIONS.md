@@ -32,11 +32,20 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
 * **A request a person starts and a scheduled run can still meet.** The job takes a lease, so two runs make one proposal; a request that a person starts by hand does not take it, so
   that person and a run, at the same moment, for the same item, could make two proposals. Nothing is ordered by either; the second is answered or dismissed like any other.
 * **The hour that happens twice** when summer time ends: a record made in the second pass of that hour on a site with summer time reads back an hour early ([STORES.md](STORES.md)).
-* **An item that a request points at cannot be deleted** in ERPNext until the request is gone (the Link field); renaming an item updates the requests.
+* **An Item, Warehouse, Supplier or Purchase Order that a record points at can be deleted** in ERPNext: the app's records are history and keep the name as text (`ignore_links_on_delete` in
+  `hooks.py`). Renaming one updates the records. A fallback supplier that the Settings page still names is not deleted.
 * **The follow-up stores** (messages to vendors and their replies, delivery chases, receipt checks, quote rounds, stock transfers, cycle counts, the assistant's answers and chat log) have
   their DocTypes, their tests and their permissions, but the rules that use them are not part of version 0.1, so nothing writes to them yet and no screen shows them.
-* **The Desk screens and the real schedule are not built.** The request form has one button (a draft Purchase Order for a purchase request); the approval form with the reasoning, the inbox,
-  notifications and the job's own schedule are the next phase. The clean-up of old logs exists and is run by hand.
+* **Deferred on purpose, not built in version 0.1:**
+  * a **dry run** (see what the check would do, without making anything);
+  * a **stock monitor view** (a report of every item and why it is or is not low);
+  * an **inbox** beyond the standard list view of Munimji Approval Request (no workspace, no dashboard);
+  * **reminders and expiry**: a request waits until someone answers it; none is reminded or closed by the clock, though the records carry the columns for it;
+  * **e-mail notifications**: the one notification is in the Desk bell, to the role Munimji Approver, once per request; a request that is changed is a new request and is announced again;
+  * a **volume test** of the stores with many thousands of records;
+  * **sealing at the moment of the answer**: the job seals what was answered at its next run (above).
+
+  The clean-up of old logs exists and is run by hand; it has no schedule yet.
 * **Searching the requests** narrows them in the database and then applies the engine's rules to what is left; over many thousands of requests that is slower than SQLite's scan.
 
 ## Taxes

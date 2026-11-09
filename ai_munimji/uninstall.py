@@ -1,8 +1,9 @@
 import frappe
 from frappe import _
 
+from ai_munimji import schedule
 from ai_munimji.custom_fields import NAMES as CUSTOM_FIELDS
-from ai_munimji.install import ROLES
+from ai_munimji.install import NOTIFICATION, ROLES
 
 PERMISSION_TYPES = ("munimji_approval_request_approve",)
 
@@ -35,12 +36,16 @@ def before_uninstall():
 	Left on purpose: the COLUMNS on Purchase Order, Material Request and Stock Entry. Frappe never drops a column when a field is deleted, so that no data is lost (docs: "Database
 	Migrations"); the columns hold the references of orders made from requests.
 	"""
-	# the cron entry of hooks.py became a Scheduled Job Type; without this it stays until the next `bench migrate`
+	# the stock check's job (a Scheduled Job Type and the Scheduler Event it is linked to) and the notification to the Approvers; without this they stay behind and the scheduler
+	# keeps calling a method that is no longer there
 	# (the command line runs this as the system; frappe.db.get_values is the plain read, and frappe.get_all is kept for the scheduled job module: tests/test_rules.py)
 	for name in frappe.db.get_values(
 		"Scheduled Job Type", {"method": ["like", "ai_munimji.%"]}, "name", pluck=True
 	):
 		frappe.delete_doc("Scheduled Job Type", name, force=True, ignore_permissions=True)
+	schedule.remove()
+	if frappe.db.exists("Notification", NOTIFICATION):
+		frappe.delete_doc("Notification", NOTIFICATION, force=True, ignore_permissions=True)
 
 	for name in CUSTOM_FIELDS:
 		if frappe.db.exists("Custom Field", name):
