@@ -60,9 +60,10 @@ class TestTheInstallNotes(unittest.TestCase):
 		self.assertIn("Taxes are not included in these totals", source)
 		self.assertIn("Duties and taxes are not in this comparison", source)
 
-	def test_they_do_not_claim_a_release(self):
-		self.assertIn("not released", self.text)
-		self.assertIn("not on the Frappe Marketplace", self.text)
+	def test_they_name_the_version_they_describe(self):
+		from ai_munimji import __version__
+
+		self.assertIn(f"version **{__version__}**", self.text)
 
 	def test_they_say_which_versions_it_was_run_on(self):
 		self.assertIn("Frappe 16.55.2 and ERPNext 16.54.0", self.text)
@@ -84,6 +85,58 @@ FORBIDDEN = {
 	r"production[- ]ready": "it is not",
 	r"(?:compatible|works|tested|runs) (?:with|on) (?:frappe|erpnext)\s*v?(?:1[0-5]|1[7-9]|[2-9]\d)\b": "only version 16 was run",
 }
+
+
+RELEASE_WORDING = (
+	"README.md",
+	"pyproject.toml",
+	"ai_munimji/hooks.py",
+	"docs/INSTALL.md",
+	"docs/KNOWN_LIMITATIONS.md",
+	"dev/new-app.sh",
+)
+STALE = (
+	r"not released",
+	r"in development",
+	r"early stage",
+	r"not on the (?:frappe )?marketplace",
+	r"early spike",
+)
+
+
+class TestTheReleaseWording(unittest.TestCase):
+	"""Version 0.1.0 is the first version. The files that describe the app to a person no longer say that it is in development or not released (the release commit,
+	docs/RELEASE_CHECKLIST.md), and the version is the same everywhere it is written."""
+
+	def test_no_file_that_describes_the_app_says_it_is_in_development_or_not_released(self):
+		found = []
+		for relative in RELEASE_WORDING:
+			text = (ROOT / relative).read_text(encoding="utf-8")
+			for pattern in STALE:
+				found += [f"{relative}: “{m.group(0)}”" for m in re.finditer(pattern, text, re.I)]
+		self.assertEqual(found, [])
+		self.assertTrue(all((ROOT / relative).exists() for relative in RELEASE_WORDING))
+
+	def test_the_version_is_the_same_everywhere_and_the_engine_is_pinned_to_the_one_installed(self):
+		from importlib.metadata import version
+
+		from ai_munimji import __version__
+
+		self.assertEqual(__version__, "0.1.0")
+		self.assertIn(f"## {__version__} (", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
+		pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+		self.assertIn(
+			f'"ai-munimji-engine=={version("ai-munimji-engine")}"',
+			pyproject,
+			"an exact pin, the engine this bench has",
+		)
+		self.assertEqual(
+			re.search(r'(?m)^description = "(.*)"', pyproject).group(1),
+			re.search(
+				r'(?m)^app_description = "(.*)"', (ROOT / "ai_munimji/hooks.py").read_text(encoding="utf-8")
+			).group(1),
+			"one description for pyproject.toml and hooks.py",
+		)
 
 
 class TestWhatThePublicTextSaysAboutTheApp(unittest.TestCase):

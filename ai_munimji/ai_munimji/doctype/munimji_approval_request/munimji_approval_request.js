@@ -92,7 +92,16 @@ function reasoning_html(frm, request) {
 	(request.sections || []).forEach((section) => parts.push(section_html(section, 5)));
 	const details = request.details || [];
 	const taxed = details.some((section) => section.heading === "Duties and taxes by vendor");
-	if (!taxed && (request.facts || {}).total !== undefined) {
+	// the engine says in its own notes why there are no tax figures ("Taxes are not included in these totals: ... could not be read", or "Duties and taxes are not in this comparison: no Tax
+	// Rule applies"); this plain line is only for a request that says nothing about taxes, so that the two are never both shown
+	const says_nothing_about_taxes = ![...(request.sections || []), ...details].some((section) =>
+		(section.lines || []).some((line) =>
+			/Taxes are not included in these totals|Duties and taxes are not in this comparison/.test(
+				line
+			)
+		)
+	);
+	if (!taxed && says_nothing_about_taxes && (request.facts || {}).total !== undefined) {
 		parts.push(
 			`<p class="text-muted">${esc(__("Taxes are not included in these totals."))}</p>`
 		);

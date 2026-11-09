@@ -1,11 +1,12 @@
 # Installing AI Munimji, and who needs which role
 
-AI Munimji is **not released**. It is not on the Frappe Marketplace and you cannot install it from there. These notes are for people who run the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
+These notes are for version **0.1.0** of AI Munimji, for people who install it from the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
 
 ## What you need first
 
 * A bench with Frappe 16 and ERPNext 16 and a site with ERPNext installed (`required_apps` in `hooks.py` says ERPNext is a must).
 * **MariaDB with `innodb_snapshot_isolation = OFF`.** Frappe's own Docker files (frappe_docker) and its Pilot start MariaDB 11.8 this way; the stock MariaDB 11.8 image has it ON. With it ON a locking read of a row that another connection changed since the transaction began fails with error 1020 ("Record has changed since last read"), so two presses of one button, or two runs of the job at the same moment, fail instead of waiting (the app's parallel tests fail 6 of 10, measured on 9 Nov 2026). Everything that does not run at the same moment works either way. Set it in the server's `[mysqld]` section; on a running server `SET GLOBAL innodb_snapshot_isolation=OFF` is read by new connections. `ai_munimji.tests.test_database_setting` checks it and says this when it is wrong.
+* **The app cannot change the server, so it says so:** after install and migrate it prints and logs a warning if the setting is ON, AI Munimji Settings shows the same warning in red at the top while it is ON, and a person whose answer lost to another one given at the same moment reads one plain sentence (nothing is ordered twice). A database that cannot be asked says nothing.
 * The rules package, `ai-munimji-engine`. It is not on PyPI, so before the app is installed or updated it has to be put into the bench's Python environment from a local wheel: see the README, "The engine". If you skip that, installing the app stops with `ai-munimji-engine was not found in the package registry`.
 
 ```

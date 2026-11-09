@@ -348,6 +348,10 @@ const requestStatus = (page, name) =>
       "while Watch stock is ticked the page carries no 'monitoring is off' note"
     );
     check(
+      !/innodb_snapshot_isolation/.test(settingsText),
+      "and no database warning while the database setting is OFF (the dev database is started that way)"
+    );
+    check(
       /Before you do, review/.test(settingsText),
       "and the switch says what to review before it is turned on"
     );

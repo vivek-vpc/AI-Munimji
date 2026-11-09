@@ -3,7 +3,7 @@ from ai_munimji import custom_fields
 app_name = "ai_munimji"
 app_title = "AI Munimji"
 app_publisher = "AI Munimji project"
-app_description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
+app_description = "Watches stock and prepares draft purchase orders for approval"
 app_email = "vivek.vpc1985@gmail.com"
 app_license = "GPL-3.0-or-later"
 
@@ -21,16 +21,19 @@ required_apps = ["erpnext"]
 before_install = "ai_munimji.install.before_install"
 
 # after the DocTypes are synced, at install and at every migrate: the rows that serialise work (stores/locks.py), the stock check's scheduled job (schedule.py, which follows the
-# Settings page) and the notification to the people who answer requests; each one finds what is already there and changes nothing
+# Settings page) and the notification to the people who answer requests; each one finds what is already there and changes nothing. The last one only SAYS, and stops nothing, if the
+# database has innodb_snapshot_isolation ON (dbcheck.py).
 after_install = [
 	"ai_munimji.install.make_locks",
 	"ai_munimji.install.make_schedule",
 	"ai_munimji.install.make_notification",
+	"ai_munimji.install.check_database",
 ]
 after_migrate = [
 	"ai_munimji.install.make_locks",
 	"ai_munimji.install.make_schedule",
 	"ai_munimji.install.make_notification",
+	"ai_munimji.install.check_database",
 ]
 
 # the seven fields this app adds to Purchase Order, Material Request and Stock Entry (ai_munimji/custom_fields.py), written by `bench export-fixtures --app ai_munimji`

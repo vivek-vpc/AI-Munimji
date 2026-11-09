@@ -3,15 +3,17 @@ name = "ai_munimji"
 authors = [
     { name = "AI Munimji project", email = "vivek.vpc1985@gmail.com"}
 ]
-description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
+description = "Watches stock and prepares draft purchase orders for approval"
+license = { text = "GPL-3.0-or-later" }  # the same as app_license in hooks.py and the README; the text is in LICENSE
+classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 requires-python = ">=3.14"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
-    # The rule logic (stock analysis, vendor scoring, the settings models). It is not on PyPI yet: until it is, dev/install-engine.sh puts a local wheel
-    # into the bench first (README, "The engine"). This is the only line to change when the way of getting it changes (PyPI, a git URL, a copy).
-    "ai-munimji-engine>=0.1.0,<0.2",
+    # The rule logic (stock analysis, vendor scoring, the settings models), pinned to the exact version this release was made and tested with. The installer finds it on PyPI once it is
+    # published there; until then dev/install-engine.sh puts a local wheel into the bench first (README, "The engine"). This is the only line to change when the way of getting it changes.
+    "ai-munimji-engine==0.1.0",
 ]
 
 [build-system]
@@ -19,10 +21,11 @@ requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
 
 # Frappe Cloud makes this section mandatory (docs.frappe.io, Cloud, "Versioning", updated 2026-08-05); Frappe's own app template does not write it.
-# Only versions this app has been run on: Frappe 16.55.2, with ERPNext 16.53.0 and 16.54.0 (released 6 Nov 2026).
+# The lower bounds are the oldest versions this app's CI has actually run on: Frappe 16.55.2 and ERPNext 16.54.0, in every one of the 12 CI runs that reached the version line (6 and 9 Nov 2026), which
+# are also the newest stable v16 tags (frappe/frappe and frappe/erpnext on GitHub, read 9 Nov 2026). Do not lower them without running the CI on the older version; the range is not widened beyond what was run.
 [tool.bench.frappe-dependencies]
-frappe = ">=16.55.0,<17.0.0"
-erpnext = ">=16.53.0,<17.0.0"
+frappe = ">=16.55.2,<17.0.0"
+erpnext = ">=16.54.0,<17.0.0"
 
 # These dependencies are only installed when developer mode is enabled
 [tool.bench.dev-dependencies]

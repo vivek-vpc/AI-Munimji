@@ -1,6 +1,6 @@
 # Known limitations of version 0.1
 
-AI Munimji is **not released**; these are the limits of the source as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
+These are the limits of version 0.1.0 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
 
 ## What the ERP client does not do yet
 
@@ -27,8 +27,8 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
 * **Orders made through the app queue.** Making a document from a request takes one row lock per document type until the request ends, so two orders made at the same moment wait for each
   other for the length of one request. Two presses of one button, on any number of workers or servers, make one order.
 * **The locks need MariaDB's `innodb_snapshot_isolation` OFF** ([INSTALL.md](INSTALL.md)), as Frappe's own deployments have it. With it ON, work that overlaps in time fails with MariaDB error 1020 (a press says
-  that another press is being handled, a run of the job records an error); nothing is ordered twice, but the second press or run does not wait its turn. The app does not check this when it is installed;
-  `ai_munimji.tests.test_database_setting` does, and so does the CI.
+  that another press is being handled, a run of the job records an error); nothing is ordered twice, but the second press or run does not wait its turn. The app cannot change the server: it warns
+  after install and migrate and at the top of the Settings page while the setting is ON, and a refused answer reads one plain sentence; `ai_munimji.tests.test_database_setting` and the CI check it too.
 * **A request a person starts and a scheduled run can still meet.** The job takes a lease, so two runs make one proposal; a request that a person starts by hand does not take it, so
   that person and a run, at the same moment, for the same item, could make two proposals. Nothing is ordered by either; the second is answered or dismissed like any other.
 * **The hour that happens twice** when summer time ends: a record made in the second pass of that hour on a site with summer time reads back an hour early ([STORES.md](STORES.md)).
