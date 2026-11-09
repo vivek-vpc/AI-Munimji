@@ -108,6 +108,121 @@ class TestTheScheduledJob(Rolled):
 		self.assertFalse(frappe.db.exists("Notification", install.NOTIFICATION))
 
 
+class TestTheCleanUpJob(Rolled):
+	"""The logs are cleaned up once a day by a job that follows "Keep logs for (days)": running while it is a positive number, stopped while it is 0."""
+
+	def job(self):
+		return frappe.get_doc("Scheduled Job Type", {"method": schedule.CLEAN_UP})
+
+	def save_page(self, keep_logs_days: int):
+		page = frappe.get_doc(SETTINGS)
+		page.keep_logs_days = keep_logs_days
+		page.save()
+
+	def test_it_is_a_daily_job_standing_on_a_scheduler_event_and_running_with_the_default_days(self):
+		install.make_schedule()  # what install and every migrate do
+		job = self.job()
+		self.assertEqual(
+			(job.frequency, job.stopped, job.method, job.create_log),
+			("Daily Long", 0, "ai_munimji.retention.clean_up", 1),
+			"every day, running: the page holds the default of 90 days",
+		)
+		self.assertTrue(
+			job.scheduler_event, "it stands on a Scheduler Event, which is what a migrate leaves alone"
+		)
+
+	def test_it_is_off_unless_the_days_are_a_positive_number(self):
+		self.save_page(0)
+		self.assertEqual(self.job().stopped, 1, "0 keeps everything: nothing is cleaned up by itself")
+		self.save_page(30)
+		self.assertEqual(self.job().stopped, 0)
+		self.save_page(0)
+		self.assertEqual(self.job().stopped, 1)
+
+	def test_a_page_that_holds_no_number_means_the_default_and_runs(self):
+		self.assertEqual(frappe.get_doc("Scheduled Job Type", schedule.sync_clean_up(None)).stopped, 0)
+
+	def test_it_survives_a_migrate_and_is_made_again_if_it_was_lost(self):
+		self.save_page(0)
+		sync_jobs()  # what bench migrate does with the jobs that hooks declare
+		install.make_schedule()  # and the app's own after_migrate hooks
+		self.assertEqual(
+			(self.job().stopped, frappe.db.count("Scheduled Job Type", {"method": schedule.CLEAN_UP})), (1, 1)
+		)
+		frappe.delete_doc("Scheduled Job Type", self.job().name, force=True)
+		install.make_schedule()
+		self.assertEqual(self.job().stopped, 1, "made again from the page, which says 0")
+		self.assertEqual(
+			frappe.db.count(
+				"Scheduler Event", {"scheduled_against": schedule.AGAINST, "method": schedule.CLEAN_UP}
+			),
+			1,
+		)
+
+	def test_the_stock_checks_job_is_not_disturbed(self):
+		before = frappe.get_doc("Scheduled Job Type", {"method": schedule.METHOD}).as_dict()
+		self.save_page(30)
+		after = frappe.get_doc("Scheduled Job Type", {"method": schedule.METHOD}).as_dict()
+		for key in ("frequency", "cron_format", "stopped", "scheduler_event"):
+			self.assertEqual(before[key], after[key], key)
+
+	def test_a_manager_who_holds_no_right_on_job_records_can_set_it(self):
+		frappe.set_user(make_user("cleanup.manager@example.com", ("Munimji Manager",)))
+		self.save_page(0)
+		frappe.set_user("Administrator")
+		self.assertEqual(self.job().stopped, 1)
+
+	def test_uninstall_takes_it_out_with_its_event(self):
+		from ai_munimji import uninstall
+
+		install.make_schedule()
+		uninstall.before_uninstall()
+		self.assertFalse(frappe.db.exists("Scheduled Job Type", {"method": schedule.CLEAN_UP}))
+		self.assertFalse(frappe.db.exists("Scheduler Event", {"method": schedule.CLEAN_UP}))
+
+	def test_what_the_scheduler_runs_deletes_old_logs_and_nothing_a_person_answers_and_not_the_seal(self):
+		from datetime import timedelta
+
+		from ai_munimji_engine.core.common import iso, utcnow
+
+		from ai_munimji import jobs
+		from ai_munimji.stores import frappe_stock_stores
+
+		self.save_page(30)
+		empty_store_tables()
+		core = jobs.system_stores()
+		stock = frappe_stock_stores(core)
+		now = utcnow()
+
+		def ago(days):
+			return iso(now - timedelta(days=days))
+
+		core.agents.add_tool_call(ago(100), "agent", "mcp", "tool-old", "{}", True, 1, None, None)
+		core.agents.add_tool_call(ago(1), "agent", "mcp", "tool-new", "{}", True, 1, None, None)
+		stock.runs.add("run-old", "inventory", ago(100), ago(100), False, "{}")
+		stock.runs.add("run-new", "inventory", ago(1), ago(1), False, "{}")
+		core.approvals.insert(
+			"request", "procurement.po", "{}", None, None, ago(2000), None
+		)  # pending, however old
+		stock.alerts.insert("alert", "BOLT", "BREACH", 2, ago(2000), "{}", "low", None)
+		stock.proposals.insert(
+			"proposal", "w", "BOLT", "awaiting", None, None, None, None, None, None, "", ago(2000)
+		)
+		core.audit.append(ago(2000), "approval", "request", "decided", "d", "0" * 64, "h")
+
+		job = self.job()
+		self.assertEqual(job.stopped, 0)
+		gone = frappe.get_attr(job.method)()  # the call Frappe's scheduler makes, as Administrator
+
+		self.assertEqual((gone["tool_calls"], gone["agent_runs"]), (1, 1))
+		self.assertEqual({r["tool"] for r in core.agents.tool_calls(None, 10)}, {"tool-new"})
+		self.assertEqual(set(core.backend.table("agent_runs").names()), {"run-new"})
+		for engine_table in ("approvals", "alerts", "proposals", "audit_chain"):
+			self.assertEqual(
+				len(core.backend.table(engine_table).names()), 1, f"{engine_table} is never touched"
+			)
+
+
 class TestTheNotification(Rolled):
 	def test_it_goes_to_the_approvers_on_the_system_channel_only(self):
 		note = frappe.get_doc("Notification", install.NOTIFICATION)

@@ -8,6 +8,23 @@ from ai_munimji import wiring
 # What the engine says when an answer lost to another one given at the same moment ("pending": the request was read before the other answer was kept) or could not be applied
 # ("error": the engine puts the database's own words in the message). A person is not shown those words.
 NOT_APPLIED = ("error", "pending")
+MAX_PARAMS_CHARS = 2000  # the longest answer a button sends is a few dozen characters ({"qty": 150}, {"supplier": "SUP-0001"})
+
+
+def read_params(params) -> dict | None:
+	"""The answer's parameters as a button sends them: a JSON object as text, or nothing. Returns the object, or None when nothing was sent. Raises ValueError when what came is not an
+	object (not JSON, a list, a number, a string, null) or is far longer than any button sends: the caller refuses the answer, with a plain sentence."""
+	if params is None or params == "":
+		return None
+	if len(params) > MAX_PARAMS_CHARS:
+		raise ValueError("too long")
+	try:
+		value = json.loads(params)
+	except (TypeError, ValueError, RecursionError):
+		raise ValueError("not JSON") from None
+	if not isinstance(value, dict):
+		raise ValueError("not an object")
+	return value
 
 
 def busy(approval_id: str, action: str, detail: str) -> dict:
@@ -29,15 +46,24 @@ def answer(approval_id: str, action: str, params: str | None = None) -> dict:
 	change_vendor (params: supplier; without it the answer lists the vendors to choose from).
 
 	`approval` is the request to look at next: after a change the engine replaces the request with a revised one and closes this one. When an answer lost to another one given at the same
-	moment, or could not be applied, the status is "busy" and the message is one plain sentence (`busy()`), never the database's words."""
+	moment, or could not be applied, the status is "busy" and the message is one plain sentence (`busy()`), never the database's words. Parameters that are not a JSON object are refused
+	(status "refused") before anything is looked at."""
 	frappe.has_permission(
 		wiring.REQUEST, "read", throw=True
 	)  # whoever may not even look at requests is refused here; what a person may answer is the engine's to decide, from their rights
+	try:
+		given = read_params(params)
+	except ValueError:
+		return {
+			"ok": False,
+			"status": "refused",
+			"message": _(
+				"This answer could not be read, so nothing was done. Reload the page and press the button again."
+			),
+		}
 	services = wiring.person_services()
 	try:
-		result = services.approvals.decide(
-			approval_id, action, wiring.actor_for(), "desk", json.loads(params) if params else None
-		)
+		result = services.approvals.decide(approval_id, action, wiring.actor_for(), "desk", given)
 	except (frappe.QueryDeadlockError, frappe.QueryTimeoutError) as exc:
 		frappe.db.rollback()
 		return busy(approval_id, action, f"{type(exc).__name__}: {exc}")

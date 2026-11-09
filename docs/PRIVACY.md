@@ -53,7 +53,7 @@ Only people on your site with the app's roles (Munimji Viewer, Approver, Manager
 
 ## Keeping and deleting data
 
-- Logs older than the setting are removed by a clean-up that you run by hand in version 0.1: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it.
+- Logs older than the setting "Keep logs for (days)" (90 by default) are removed by a clean-up that runs once a day on your site's scheduler. It runs while that setting is a positive number; with 0 it does not run and every log is kept. You can also run it by hand: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it.
 - If you uninstall the app, its DocTypes and the data in them are removed with it. Database columns that Frappe cannot drop stay in the database, and any Purchase Orders already made stay. See the uninstall notes.
 - Export anything you need to keep before you uninstall.
 

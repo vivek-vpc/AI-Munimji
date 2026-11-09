@@ -4,6 +4,22 @@ What changed in the app for someone who installs it or builds on it. This is the
 
 ## 0.1.0 (9 Nov 2026)
 
+### Fixed after review
+
+* **A wrong answer no longer ends in a server error.** The parameters of an answer (`ai_munimji.api.answer`) that are not a JSON object (text that is not JSON, a list, a number, `null`) or are longer than 2,000
+  characters are refused with the status `refused` and one plain sentence; nothing is read from them and nothing is changed. Before, `json.loads` raised, or the engine failed on a value that has no `.get`.
+* **The Settings page says when items were skipped.** An item the engine cannot analyse is skipped so that the others are looked at; until now only the log knew. The stock check now counts them and keeps
+  "N items could not be analysed" with its Job Run record, and the top of AI Munimji Settings shows it after the run, with the database warning and the "monitoring is off" note, not instead of either.
+  The item codes are in the app's log and in the latest Munimji Agent Run.
+* **A purchase return is not a delivery.** A Purchase Receipt with `is_return = 1` (goods sent back, negative quantity, the same purchase order) is left out of the receipt dates that give a vendor its lead time and
+  on-time rate. Purchase Order has no `is_return` field in v16 (checked on 16.55.2), so the order history is not filtered, and nothing in the app reads a Purchase Invoice.
+* **The logs are cleaned up every day.** The existing clean-up (`ai_munimji.retention.clean_up`) is a daily job (Scheduled Job Type on a Scheduler Event, so a migrate keeps it) that follows **Keep logs for (days)**:
+  it runs while the number is positive (90 by default) and is stopped at 0. It still never touches a request, a proposal, an alert, a notice, a work order or the audit seal. `docs/PRIVACY.md`, `USER_GUIDE.md`,
+  `KNOWN_LIMITATIONS.md`, `INSTALL.md` and `STORES.md` say so.
+* **Engine fixes that this version does not have yet.** Dates that overflowed for very large stock, prices that are not positive numbers, an on-time rate outside 0 to 1, decimal commas in a typed quantity, totals
+  before tax next to totals with tax, and returns in the vendor scorecard are fixed in the engine's repository (its changelog says how). They are not in `ai-munimji-engine` 0.1.0, which this version pins
+  exactly; they reach the app with the next engine release. The pin is unchanged.
+
 ### The release commit
 
 * **Version 0.1.0.** `__version__`, the descriptions in `hooks.py` and `pyproject.toml` (the same sentence as the listing's summary), and the wording of the README, `docs/INSTALL.md` and `docs/KNOWN_LIMITATIONS.md` no longer say

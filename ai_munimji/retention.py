@@ -7,7 +7,8 @@ whatever its age, and never the audit seal: those tables are not in RULES, and a
 How long is the setting "Keep logs for (days)" of AI Munimji Settings (90 by default; 0 keeps them all). The other periods are fixed: a task record a year, a vendor message or reply a year,
 an assistant answer half a year, an inbound message id a fortnight (it only has to outlive a channel's re-delivery of the same message).
 
-It runs in the system mode (jobs.system_stores()) and is called by hand or by the scheduler (Phase 5 adds its schedule): `bench --site <site> execute ai_munimji.retention.clean_up`.
+It runs in the system mode (jobs.system_stores()). The scheduler calls it once a day (schedule.sync_clean_up), while "Keep logs for (days)" is a positive number; with 0 the job is stopped and
+nothing is cleaned up by itself, the fixed periods included. It can also be called by hand: `bench --site <site> execute ai_munimji.retention.clean_up`.
 """
 
 from datetime import timedelta

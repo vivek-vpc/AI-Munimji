@@ -490,7 +490,11 @@ class FrappeERPClient:
 		return offers
 
 	def _first_receipts(self, item_code: str, order_names: list[str]) -> dict[str, date]:
-		"""Purchase order -> the date of its first goods receipt for this item. Unknown (empty) if receipts are closed to this user."""
+		"""Purchase order -> the date of its first goods receipt for this item. Unknown (empty) if receipts are closed to this user.
+
+		A return (a Purchase Receipt with is_return = 1: goods sent back, with a negative quantity and the same purchase order) is not a delivery and is left out: it is neither the first
+		receipt of an order nor a late one. The Purchase Order itself has no is_return field in v16 (checked on 16.55.2), so the order history is not filtered, and nothing in the app reads a
+		Purchase Invoice."""
 		receipts: dict[str, date] = {}
 		for chunk in chunks(order_names, 100):
 			items = self._optional(
@@ -507,7 +511,7 @@ class FrappeERPClient:
 				for pr in self._list(
 					"Purchase Receipt",
 					["name", "posting_date"],
-					[["name", "in", chunk2], ["docstatus", "=", 1]],
+					[["name", "in", chunk2], ["docstatus", "=", 1], ["is_return", "=", 0]],
 				):
 					d, po = to_date(pr.get("posting_date")), prs[pr["name"]]
 					if d is not None and (po not in receipts or d < receipts[po]):

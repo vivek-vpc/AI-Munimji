@@ -1,12 +1,12 @@
 import frappe
 from ai_munimji_engine.core.common import iso, utcnow
 
-from ai_munimji import wiring
+from ai_munimji import last_run, wiring
 from ai_munimji.erp_client import FrappeERPClient
 from ai_munimji.stores import frappe_core_stores, locks
 
 LOG = "ai_munimji"
-STOCK_CHECK = "stock_check"
+STOCK_CHECK = last_run.STOCK_CHECK
 LEASE_MINUTES = 5  # a run that has not ended in this time is taken for dead, and the next tick may go
 
 
@@ -52,7 +52,12 @@ def run_stock_check(clock=None, company: str | None = None, items: list[str] | N
 		inventory = services.inventory.run(item_codes=items)
 		procurement = services.procurement.run()
 		sealed = services.audit.sweep()
-		services.core.jobs.finished(STOCK_CHECK, iso(clock()), True, None)
+		# an item the engine could not analyse is skipped so that the others are looked at; the run went well, and the count is kept with it for the Settings page (last_run.py)
+		skipped = last_run.unanalysed_items(inventory.errors)
+		services.core.jobs.finished(STOCK_CHECK, iso(clock()), True, last_run.note(len(skipped)))
+		if skipped:
+			shown = ", ".join(skipped[:20]) + (f" and {len(skipped) - 20} more" if len(skipped) > 20 else "")
+			frappe.logger(LOG).warning(f"run_stock_check could not analyse {len(skipped)} item(s): {shown}")
 		# no commit here: Frappe's scheduler commits a job that returns, and rolls back one that raises (the failure is recorded below, which is why that one commits)
 		report = {
 			"ran": True,
@@ -65,6 +70,7 @@ def run_stock_check(clock=None, company: str | None = None, items: list[str] | N
 			"considered": procurement.considered,
 			"proposals": procurement.proposed,
 			"manual": procurement.manual,
+			"unanalysed": len(skipped),
 			"errors": [*inventory.errors, *procurement.errors],
 			"actions": [
 				*inventory.actions,
