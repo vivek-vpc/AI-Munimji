@@ -16,7 +16,7 @@ fi
 answers() {
   printf '%s\n' \
     "AI Munimji" \
-    "Stock monitoring and purchase requests for ERPNext (early spike, not released)" \
+    "Watches stock and prepares draft purchase orders for approval" \
     "AI Munimji project" \
     "vivek.vpc1985@gmail.com" \
     "gpl-3.0" \

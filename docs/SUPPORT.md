@@ -15,7 +15,7 @@ Please do not post passwords, API keys or customer data in an issue.
 
 ## Security problems
 
-Do not open a public issue for a security problem. Write to vivek.vpc1985@gmail.com with "AI Munimji security" in the subject, or use the repository's private vulnerability reporting if it is switched on [check]. You will get an acknowledgement; there is no promised fix time.
+Do not open a public issue for a security problem. Write to vivek.vpc1985@gmail.com with "AI Munimji security" in the subject. You will get an acknowledgement; there is no promised fix time. (GitHub's private vulnerability reporting is not available for this repository at the moment.)
 
 ## Before you ask
 

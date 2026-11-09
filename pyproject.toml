@@ -3,7 +3,7 @@ name = "ai_munimji"
 authors = [
     { name = "AI Munimji project", email = "vivek.vpc1985@gmail.com"}
 ]
-description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
+description = "Watches stock and prepares draft purchase orders for approval"
 license = { text = "GPL-3.0-or-later" }  # the same as app_license in hooks.py and the README; the text is in LICENSE
 classifiers = ["License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)"]
 requires-python = ">=3.14"
@@ -11,9 +11,9 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     # "frappe~=16.0.0" # Installed and managed by bench.
-    # The rule logic (stock analysis, vendor scoring, the settings models). It is not on PyPI yet: until it is, dev/install-engine.sh puts a local wheel
-    # into the bench first (README, "The engine"). This is the only line to change when the way of getting it changes (PyPI, a git URL, a copy).
-    "ai-munimji-engine>=0.1.0,<0.2",
+    # The rule logic (stock analysis, vendor scoring, the settings models), pinned to the exact version this release was made and tested with. The installer finds it on PyPI once it is
+    # published there; until then dev/install-engine.sh puts a local wheel into the bench first (README, "The engine"). This is the only line to change when the way of getting it changes.
+    "ai-munimji-engine==0.1.0",
 ]
 
 [build-system]

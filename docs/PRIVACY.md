@@ -28,15 +28,15 @@ The scheduled job reads as the site's Administrator. When a person uses the app,
 In your site's own database, as DocTypes (the full table is in `docs/STORES.md`):
 - purchase requests and proposals: the item, quantity, chosen supplier, the reasons for the choice, costs and the tax figures used;
 - the decisions: who answered, when, and what they decided;
-- a tamper-evident seal over that history;
+- a tamper-evident seal over that history (added by the next run of the scheduled job);
 - a log of what the app did (kept for 90 days by default; the setting is "Keep logs for (days)");
 - its own settings.
 
-Three custom fields are added to Purchase Order, Material Request and Stock Entry, holding the request's reference and the approver's name.
+Seven read-only custom fields are added to Purchase Order, Material Request and Stock Entry. They hold the request's reference and who approved it; Material Request also has a note field.
 
 ## What the app writes to ERPNext
 
-Only **draft** documents, created under the approver's own login. The app never submits a document.
+Draft documents, created under the approver's own login. The app **never submits** a document. An approver can later change the quantity of, or cancel, an order that was made from a request, and that acts on the order as ERPNext allows, including one that has been submitted by a person.
 
 ## What leaves your site
 
@@ -45,7 +45,7 @@ Only **draft** documents, created under the approver's own login. The app never 
 - no e-mail or message is sent. The only notification is shown inside your site, in the Desk bell, to people with the role Munimji Approver;
 - there is no analytics, tracking or telemetry.
 
-If a later version adds anything that sends data out (for example e-mail, chat messages or a hosted AI model), it will be off by default, and this policy will be updated before that version is released.
+If a later version adds anything that sends data out (for example e-mail, chat messages or a hosted AI model), it will be off by default, and this policy will be updated before such a change is made available.
 
 ## Who can see the data
 
@@ -53,7 +53,7 @@ Only people on your site with the app's roles (Munimji Viewer, Approver, Manager
 
 ## Keeping and deleting data
 
-- Logs older than the setting are removed by a clean-up (run by hand in version 0.1). Requests, proposals, alerts and the audit seal are never removed by it.
+- Logs older than the setting are removed by a clean-up that you run by hand in version 0.1: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it.
 - If you uninstall the app, its DocTypes and the data in them are removed with it. Database columns that Frappe cannot drop stay in the database, and any Purchase Orders already made stay. See the uninstall notes.
 - Export anything you need to keep before you uninstall.
 

@@ -3,7 +3,7 @@ from ai_munimji import custom_fields
 app_name = "ai_munimji"
 app_title = "AI Munimji"
 app_publisher = "AI Munimji project"
-app_description = "Stock monitoring and purchase requests for ERPNext. In development, not released."
+app_description = "Watches stock and prepares draft purchase orders for approval"
 app_email = "vivek.vpc1985@gmail.com"
 app_license = "GPL-3.0-or-later"
 

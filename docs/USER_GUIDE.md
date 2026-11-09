@@ -18,7 +18,7 @@ AI Munimji watches your stock and prepares purchase requests for a person to app
 | changes the settings | Munimji Manager | as an approver, if they also answer |
 
 - A person with only a Munimji role sees none of your stock or orders. That is intended.
-- **Database setting.** For two people pressing the same button at the same moment to wait their turn, your MariaDB needs `innodb_snapshot_isolation` set to OFF. Frappe's own Docker files do this. If it is ON, nothing is ordered twice, but the second press is refused with an error. [Confirm for Frappe Cloud before publishing.]
+- **Database setting.** For two people pressing the same button at the same moment to wait their turn, your MariaDB needs `innodb_snapshot_isolation` set to OFF. Frappe's own Docker files do this. If it is ON, AI Munimji warns you after install and on its Settings page; nothing is ordered twice, but the second press gets a short message that another press is being handled. [Confirm for Frappe Cloud before publishing.]
 
 ## First setup
 
@@ -29,15 +29,19 @@ AI Munimji watches your stock and prepares purchase requests for a person to app
 
 ## A request, step by step
 
-1. **A request appears** when an item is below what the rules allow. Approvers see a notification in the Desk bell, once per request.
-2. **Open it** from the list **Munimji Approval Request**. It shows the current stock, how long it will last, how long a new order takes, the chosen supplier and the cost.
-3. **Read why.** The request explains why this supplier was chosen and why each of the others was not.
+There are two answers on the way from low stock to an order.
+
+1. **A reorder request appears** when an item is below what the rules allow. Approvers see a notification in the Desk bell, once per request. Open it from the list **Munimji Approval Request**. Approve it to start the reorder (or dismiss it).
+2. **At the next run of the scheduled job**, the app compares your suppliers and makes a **purchase request**. This one shows the current stock, how long it will last, how long a new order takes, the chosen supplier and the cost.
+3. **Read why.** The purchase request explains why this supplier was chosen and why each of the others was not.
 4. **Answer it:**
    - **Approve** creates a **draft** Purchase Order under your own login, with the request's reference and your name on it.
-   - **Change quantity** (or **Change supplier**) makes a new request with the new figures.
+   - **Change quantity** or **Change vendor** makes a new request with the new figures, and the approvers are told again.
    - **Dismiss** closes it without an order.
+   - **Got it** closes a request that you started by hand.
 5. **The first answer wins.** If two approvers answer at once, the second is told who answered first and nothing is ordered twice.
-6. **Review and submit the draft** in ERPNext as you normally would. The app never submits it.
+6. **Review and submit the draft** in ERPNext as you normally would. The app never submits it. An approver can later change the quantity of, or cancel, an order made from a request.
+7. **The audit seal** over the history is added at the next run of the scheduled job, and the job runs only while Watch stock is ticked.
 
 ## Taxes in a request
 
@@ -52,7 +56,7 @@ A dry run, a stock monitor report, reminders and expiry, e-mail notifications, s
 - **No requests appear:** check that Watch stock is ticked, that an item is really below its limit, and that the Settings page shows no warning. The scheduler needs to be enabled on your site.
 - **"Not permitted" on Approve:** the person needs both the Munimji Approver role and permission to create a Purchase Order in ERPNext (Purchase User).
 - **A person sees no stock in a request:** they need Stock User.
-- **A second press is refused with an error:** see the database setting above.
+- **A second press says another press is being handled:** see the database setting above.
 
 ## Taking it out
 

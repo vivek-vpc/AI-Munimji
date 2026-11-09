@@ -1,10 +1,18 @@
 # Changelog
 
-What changed in the app for someone who installs it or builds on it. AI Munimji is not released and is not on the Frappe Marketplace; nothing below has been shipped to anyone.
+What changed in the app for someone who installs it or builds on it. This is the first version, 0.1.0; the entries below are how it was built up, phase by phase.
 
-## Unreleased
+## 0.1.0 (9 Nov 2026)
 
-### Phase 6: checks a Marketplace review would care about (nothing released)
+### The release commit
+
+* **Version 0.1.0.** `__version__`, the descriptions in `hooks.py` and `pyproject.toml` (the same sentence as the listing's summary), and the wording of the README, `docs/INSTALL.md` and `docs/KNOWN_LIMITATIONS.md` no longer say
+  that the app is in development.
+* **The engine is pinned exactly:** `ai-munimji-engine==0.1.0` in `pyproject.toml`. CI still builds the engine from the `erpnext-ai-agents` repository (`ENGINE_REF`) until it is on PyPI; how to switch is in the pull request.
+* **The pages are in `docs/`:** `PRIVACY.md`, `TERMS.md`, `SUPPORT.md`, `USER_GUIDE.md` (reworded after the app was compared with them: seven custom fields, a change or cancel of an order is said, two answers from low stock to an order,
+  the seal waits for the next run) and `LISTING.md` (the fields of the registry entry); the logo is `docs/img/ai-munimji-logo.png`. The test of the public text no longer needs an exception.
+
+### Phase 6: checks a Marketplace review would care about
 
 * **The database setting.** After install and migrate the app prints and logs a warning if MariaDB has `innodb_snapshot_isolation` ON, and AI Munimji Settings shows the same warning in red at the top
   while it is ON; a database that cannot be asked says nothing. The statement is one fixed, read-only `SHOW VARIABLES` in `dbcheck.py`, the only raw SQL the rules test allows. A person whose answer lost to
@@ -38,7 +46,7 @@ What changed in the app for someone who installs it or builds on it. AI Munimji 
   rights of each role, how a value is kept, the locks and the differences from SQLite are in [docs/STORES.md](docs/STORES.md). The engine's 60 shared store checks pass on them next to
   SQLite and memory.
 * **Munimji Approval Request is the engine's approval record now.** Its placeholder fields from the first experiment (a Select status of Pending / Ordered / Rejected, a link to the draft order,
-  a free-text reason) are gone. **There is no patch to move old values, because nothing was released**: no site holds a request made with the old fields except a development site, and
+  a free-text reason) are gone. **There is no patch to move old values, because no earlier version was released**: no site holds a request made with the old fields except a development site, and
   a development site is rebuilt. (Frappe never drops a column, so a database that had the old fields keeps their empty columns; the uninstall notes say the same of every column the app adds.)
 * **Two presses of one button on two database connections make one order.** The file lock the ERP client had first did not hold even on one server; it is replaced by a row lock and a locking read.
   This needs MariaDB with `innodb_snapshot_isolation = OFF`, as Frappe's own Docker files run it ([docs/INSTALL.md](docs/INSTALL.md)); the first run on GitHub used the stock image (ON) and failed 6 of the 10
