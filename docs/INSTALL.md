@@ -22,7 +22,8 @@ bench --site <your site> install-app ai_munimji
 | The list Munimji Approval Request, and 24 more DocTypes that hold the engine's records: purchase proposals, stock alerts and notices, work orders, the audit seal, the agents' log, locks and the rest (table: [STORES.md](STORES.md)) | DocType |
 | An "approve" permission for that list | Permission Type |
 | Seven read-only fields that carry the request's reference and who approved: `custom_agent_ref` and `custom_agent_approved_by` on Purchase Order, Material Request and Stock Entry, and `custom_agent_note` on Material Request | Custom Field |
-| A scheduled job, every 5 minutes at the soonest (ERPNext's scheduler runs a job every 4 minutes at the soonest) | Scheduled Job Type |
+| The stock check's scheduled job: stopped until Watch stock is ticked, then run at the time of "Check stock at" on the Settings page (ERPNext's scheduler runs a job every 4 minutes at the soonest). It hangs on a Scheduler Event, which is what keeps `bench migrate` from resetting or deleting it | Scheduler Event, Scheduled Job Type |
+| A notification to the people with the role Munimji Approver, in the Desk bell, when a request is made (no e-mail). Made if missing at install and migrate, never overwritten: switch it off or edit it as you like | Notification |
 
 The app adds **no permission rows to any ERPNext DocType**. What a person may see or do in ERPNext is decided by ERPNext's own roles, and the Munimji roles decide only what they may do with the app's own pages.
 
@@ -67,7 +68,7 @@ Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User doe
 
 ## Switching the stock monitor on
 
-**After installing, the stock monitor is off.** Nothing creates requests for your stock until a person has looked at the thresholds and switched it on: open AI Munimji Settings, review the thresholds, then tick Watch stock. While it is off the page says so at the top, and the scheduled job does nothing. (The standalone service starts with its monitor on; the app deliberately does not, see [NAMES.md](NAMES.md).)
+**After installing, the stock monitor is off.** Nothing creates requests for your stock until a person has looked at the thresholds and switched it on: open AI Munimji Settings, review the thresholds, the time in "Check stock at" and who holds the role Munimji Approver (they are told when a request is made), then tick Watch stock. Saving the page starts the scheduled job at that time; unticking it stops the job. While it is off the page says so at the top, and the scheduled job does nothing. (The standalone service starts with its monitor on; the app deliberately does not, see [NAMES.md](NAMES.md).)
 
 ## Settings
 

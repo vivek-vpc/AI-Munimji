@@ -134,8 +134,16 @@ class TestTheStockCheck(ERPNextTestSuite):
 		scheduled = frappe.get_all(
 			"Scheduled Job Type",
 			filters={"method": "ai_munimji.jobs.check_stock"},
-			fields=["frequency", "cron_format", "stopped"],
+			fields=["frequency", "cron_format", "stopped", "scheduler_event"],
+		)
+		page = frappe.get_doc("AI Munimji Settings")
+		self.assertEqual(
+			[(j.frequency, j.cron_format, j.stopped, bool(j.scheduler_event)) for j in scheduled],
+			[("Cron", page.check_cron, 0 if page.enabled else 1, True)],
+			"one job, on the page's schedule, stopped while Watch stock is off, standing on a Scheduler Event",
 		)
 		self.assertEqual(
-			[(j.frequency, j.cron_format, j.stopped) for j in scheduled], [("Cron", "*/5 * * * *", 0)]
+			frappe.get_hooks("scheduler_events").get("cron", {}).get("*/5 * * * *", []),
+			[],
+			"and not declared in hooks.py, where a migrate would reset it",
 		)

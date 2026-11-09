@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "reasoning",
   "kind",
   "status",
   "title",
@@ -30,6 +31,11 @@
   "search_text"
  ],
  "fields": [
+  {
+   "fieldname": "reasoning",
+   "fieldtype": "HTML",
+   "label": "Why this request"
+  },
   {
    "fieldname": "kind",
    "fieldtype": "Data",
@@ -164,7 +170,8 @@
   {
    "fieldname": "details_section",
    "fieldtype": "Section Break",
-   "label": "Details"
+   "label": "The request and the answer, exactly as the engine kept them",
+   "collapsible": 1
   },
   {
    "fieldname": "request_json",
@@ -189,7 +196,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-05 17:47:15.806914",
+ "modified": "2026-11-05 17:47:16.806914",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Approval Request",

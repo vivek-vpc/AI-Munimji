@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-07 09:20+0000\n"
-"PO-Revision-Date: 2026-11-07 09:20+0000\n"
+"POT-Creation-Date: 2026-11-09 06:14+0000\n"
+"PO-Revision-Date: 2026-11-09 06:14+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -64,7 +64,7 @@ msgstr ""
 msgid "ABC class"
 msgstr ""
 
-#: ai_munimji/uninstall.py:72
+#: ai_munimji/uninstall.py:77
 msgid "AI Munimji"
 msgstr ""
 
@@ -73,7 +73,7 @@ msgstr ""
 msgid "AI Munimji Settings"
 msgstr ""
 
-#: ai_munimji/uninstall.py:66
+#: ai_munimji/uninstall.py:71
 msgid "AI Munimji is being removed from this site."
 msgstr ""
 
@@ -130,19 +130,33 @@ msgid "Another press for this request is still being handled. Wait a moment and 
 msgstr ""
 
 #. Label of the answer (Data) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:101
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:107
 msgid "Answer"
 msgstr ""
 
 #. Label of the decided_at (Datetime) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:129
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:135
 msgid "Answered"
 msgstr ""
 
 #. Label of the approver (Data) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:108
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:114
 msgid "Answered by"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:67
+#, python-brace-format
+msgid "Answered: {0}"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:97
+msgid "Approve"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:168
+#, python-brace-format
+msgid "Approve this request? {0}"
 msgstr ""
 
 #. Label of the custom_agent_approved_by (Data) field in DocType 'Stock Entry'
@@ -227,6 +241,16 @@ msgstr ""
 msgid "Change in daily use (%)"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:98
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:143
+msgid "Change quantity"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:99
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:162
+msgid "Change vendor"
+msgstr ""
+
 #. Label of the updated_at (Datetime) field in DocType 'Munimji Cycle Count'
 #. Label of the updated_at (Datetime) field in DocType 'Munimji Delivery Chase'
 #. Label of the updated_at (Datetime) field in DocType 'Munimji Purchase
@@ -261,6 +285,10 @@ msgstr ""
 msgid "Check stock at"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:144
+msgid "Check the vendors again"
+msgstr ""
+
 #. Label of the checked_at (Datetime) field in DocType 'Munimji Receipt Check'
 #: ai_munimji/ai_munimji/doctype/munimji_receipt_check/munimji_receipt_check.json:44
 msgid "Checked at"
@@ -287,23 +315,10 @@ msgstr ""
 msgid "Counter"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:11
-msgid "Create Purchase Order"
-msgstr ""
-
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:13
-#, python-brace-format
-msgid "Create a draft Purchase Order for {0} x {1}? Nothing is submitted."
-msgstr ""
-
 #. Label of the created_at (Datetime) field in DocType 'Munimji Assistant
 #. Answer'
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:40
 msgid "Created at"
-msgstr ""
-
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:23
-msgid "Creating the draft..."
 msgstr ""
 
 #. Label of the default_lead_time_days (Float) field in DocType 'AI Munimji
@@ -319,8 +334,6 @@ msgid "Demand calendar"
 msgstr ""
 
 #. Label of the details_section (Section Break) field in DocType 'Munimji
-#. Approval Request'
-#. Label of the details_section (Section Break) field in DocType 'Munimji
 #. Purchase Proposal'
 #. Label of the details_section (Section Break) field in DocType 'Munimji Quote
 #. Round'
@@ -334,7 +347,6 @@ msgstr ""
 #. Alert'
 #. Label of the details_section (Section Break) field in DocType 'Munimji Work
 #. Order'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:167
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:135
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:114
 #: ai_munimji/ai_munimji/doctype/munimji_receipt_check/munimji_receipt_check.json:52
@@ -348,6 +360,14 @@ msgstr ""
 #. Label of the digest (Data) field in DocType 'Munimji Audit Seal'
 #: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.json:59
 msgid "Digest"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:100
+msgid "Dismiss"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:170
+msgid "Dismiss this request? Nothing will be ordered."
 msgstr ""
 
 #. Label of the document (Data) field in DocType 'Munimji Count Review'
@@ -375,6 +395,10 @@ msgstr ""
 msgid "Due on"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:20
+msgid "Duties and taxes, by vendor"
+msgstr ""
+
 #. Description of the 'Events' (Table) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:130
 msgid "Each event applies to every item. Choosing items or item groups for an event comes later."
@@ -400,13 +424,21 @@ msgstr ""
 msgid "Events"
 msgstr ""
 
-#: ai_munimji/uninstall.py:17
+#: ai_munimji/uninstall.py:18
 msgid "Every Purchase Order, Material Request and Stock Entry that was already made, drafts included, stays as it is. None is changed or deleted."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:19
+msgid "Every vendor's figures"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:85
+msgid "Every vendor's figures, the duties and taxes, and how the score works"
 msgstr ""
 
 #. Label of the expires_at (Datetime) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:122
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:128
 msgid "Expires"
 msgstr ""
 
@@ -454,6 +486,10 @@ msgstr ""
 msgid "From warehouse"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:101
+msgid "Got it"
+msgstr ""
+
 #. Label of the hash (Data) field in DocType 'Munimji Audit Seal'
 #: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.json:72
 msgid "Hash"
@@ -487,7 +523,15 @@ msgstr ""
 msgid "How often stock is checked, and how much of your past use is looked at."
 msgstr ""
 
-#: ai_munimji/uninstall.py:26
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:21
+msgid "How the score works"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:14
+msgid "How the vendors were scored"
+msgstr ""
+
+#: ai_munimji/uninstall.py:27
 msgid "If the standalone service (erp-agents) also works on this site, it needs the seven fields that were just removed. Run erp-agents erp-setup again; it makes them again and finds the columns in place."
 msgstr ""
 
@@ -523,6 +567,10 @@ msgstr ""
 msgid "It was not created by AI Munimji for this request, so it is left alone."
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:53
+msgid "Item"
+msgstr ""
+
 #. Label of the item_code (Link) field in DocType 'Munimji Approval Request'
 #. Label of the item_code (Link) field in DocType 'Munimji Count Review'
 #. Label of the item_code (Link) field in DocType 'Munimji Delivery Chase'
@@ -532,7 +580,7 @@ msgstr ""
 #. Label of the item_code (Link) field in DocType 'Munimji Stock Notice'
 #. Label of the item_code (Link) field in DocType 'Munimji Stock Transfer'
 #. Label of the item_code (Link) field in DocType 'Munimji Work Order'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:68
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:74
 #: ai_munimji/ai_munimji/doctype/munimji_count_review/munimji_count_review.json:28
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:31
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:31
@@ -546,14 +594,14 @@ msgstr ""
 
 #. Label of the keep_logs_days (Int) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:202
-#: ai_munimji/settings_map.py:226
+#: ai_munimji/settings_map.py:231
 msgid "Keep logs for (days)"
 msgstr ""
 
 #. Label of the kind (Data) field in DocType 'Munimji Approval Request'
 #. Label of the kind (Select) field in DocType 'Munimji Calendar Event'
 #. Label of the kind (Data) field in DocType 'Munimji Stock Alert'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:36
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:42
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:29
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:39
 msgid "Kind"
@@ -576,7 +624,7 @@ msgstr ""
 
 #. Label of the last_reminder_at (Datetime) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:135
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:141
 msgid "Last reminder"
 msgstr ""
 
@@ -605,6 +653,11 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:110
 #: ai_munimji/ai_munimji/doctype/munimji_work_order/munimji_work_order.json:55
 msgid "Made"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:169
+#, python-brace-format
+msgid "Mark this request as handled? {0}"
 msgstr ""
 
 #. Label of the message_id (Data) field in DocType 'Munimji Vendor Reply'
@@ -643,7 +696,7 @@ msgid "Munimji Approval Delivery"
 msgstr ""
 
 #. Name of a DocType
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:195
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:202
 msgid "Munimji Approval Request"
 msgstr ""
 
@@ -651,7 +704,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:71
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:143
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:123
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:220
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:227
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:70
 #: ai_munimji/ai_munimji/doctype/munimji_chat_log/munimji_chat_log.json:88
 #: ai_munimji/ai_munimji/doctype/munimji_count_review/munimji_count_review.json:84
@@ -727,7 +780,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:83
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:155
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:135
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:233
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:240
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:82
 #: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.json:94
 #: ai_munimji/ai_munimji/doctype/munimji_chat_log/munimji_chat_log.json:100
@@ -809,7 +862,7 @@ msgstr ""
 
 #. Name of a role
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:111
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:207
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:214
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:110
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:169
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:141
@@ -846,13 +899,21 @@ msgstr ""
 msgid "Munimji request"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:28
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:141
+msgid "New quantity"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:120
 msgid "No answer"
 msgstr ""
 
 #. Label of the base_window_days (Int) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:108
 msgid "Normal use: look back this many days"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:126
+msgid "Not done"
 msgstr ""
 
 #. Label of the status_note (Small Text) field in DocType 'Munimji Approval
@@ -864,13 +925,21 @@ msgstr ""
 #. Label of the status_note (Small Text) field in DocType 'Munimji Stock Alert'
 #. Label of the status_note (Small Text) field in DocType 'Munimji Stock
 #. Transfer'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:161
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:167
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:57
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:129
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:94
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:110
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:104
 msgid "Note"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:15
+msgid "Note to the vendor"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:16
+msgid "Notes"
 msgstr ""
 
 #: ai_munimji/erp_client.py:930
@@ -896,7 +965,7 @@ msgstr ""
 #. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:37
-msgid "Off until you switch it on. Review the thresholds below first: once it is on, requests for purchases start to appear for your real stock. Switching it off again stops that; requests that are already waiting stay as they are."
+msgid "Off until you switch it on. Before you do, review: the thresholds below (minimum quantity and days of cover), the time in \"Check stock at\", and who holds the Munimji Approver role (they are told in their notification bell when a request is made). Once it is on, requests for purchases start to appear for your real stock at that time. Nothing is ordered until a person with that role approves a request, and then only a Draft Purchase Order is made. Switching it off stops the schedule; requests that are already waiting stay as they are."
 msgstr ""
 
 #. Label of the ok (Check) field in DocType 'Munimji Tool Call'
@@ -936,6 +1005,10 @@ msgstr ""
 msgid "Previous hash"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:56
+msgid "Price each"
+msgstr ""
+
 #. Label of the prompt_tokens (Int) field in DocType 'Munimji Agent Task'
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:103
 msgid "Prompt tokens"
@@ -957,11 +1030,15 @@ msgstr ""
 #. Label of the qty (Float) field in DocType 'Munimji Purchase Proposal'
 #. Label of the qty (Float) field in DocType 'Munimji Quote Round'
 #. Label of the qty (Float) field in DocType 'Munimji Stock Transfer'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:86
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:92
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:81
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:38
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:37
 msgid "Qty"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:54
+msgid "Quantity"
 msgstr ""
 
 #. Label of the created_at (Datetime) field in DocType 'Munimji Stock Alert'
@@ -1035,12 +1112,12 @@ msgid "Record"
 msgstr ""
 
 #. Label of the ref_id (Data) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:154
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:160
 msgid "Refers to"
 msgstr ""
 
 #. Label of the ref_type (Data) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:147
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:153
 msgid "Refers to (type)"
 msgstr ""
 
@@ -1057,7 +1134,7 @@ msgstr ""
 
 #. Label of the reminder_count (Int) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:141
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:147
 msgid "Reminders sent"
 msgstr ""
 
@@ -1106,7 +1183,7 @@ msgstr ""
 
 #. Label of the created_at (Datetime) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:114
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:120
 msgid "Requested"
 msgstr ""
 
@@ -1172,6 +1249,10 @@ msgstr ""
 msgid "Sending e-mail"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:118
+msgid "Sending your answer..."
+msgstr ""
+
 #. Label of the sends (Int) field in DocType 'Munimji Delivery Chase'
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:74
 msgid "Sends"
@@ -1210,7 +1291,7 @@ msgstr ""
 
 #. Label of the severity (Data) field in DocType 'Munimji Approval Request'
 #. Label of the severity (Int) field in DocType 'Munimji Stock Alert'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:61
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:67
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:47
 msgid "Severity"
 msgstr ""
@@ -1257,7 +1338,7 @@ msgstr ""
 #. Label of the status (Data) field in DocType 'Munimji Work Order'
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:45
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:61
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:45
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:51
 #: ai_munimji/ai_munimji/doctype/munimji_chat_log/munimji_chat_log.json:52
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:40
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:41
@@ -1287,7 +1368,7 @@ msgstr ""
 #. Label of the supplier (Data) field in DocType 'Munimji Receipt Check'
 #. Label of the supplier (Data) field in DocType 'Munimji Vendor Message'
 #. Label of the supplier (Data) field in DocType 'Munimji Vendor Reply'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:93
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:99
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:24
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:66
 #: ai_munimji/ai_munimji/doctype/munimji_receipt_check/munimji_receipt_check.json:20
@@ -1337,7 +1418,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:95
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:167
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:147
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:246
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:253
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:94
 #: ai_munimji/ai_munimji/doctype/munimji_audit_seal/munimji_audit_seal.json:106
 #: ai_munimji/ai_munimji/doctype/munimji_chat_log/munimji_chat_log.json:112
@@ -1368,6 +1449,10 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:81
+msgid "Taxes are not included in these totals."
+msgstr ""
+
 #. Label of the text_hash (Data) field in DocType 'Munimji Vendor Reply'
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_reply/munimji_vendor_reply.json:60
 msgid "Text hash"
@@ -1375,7 +1460,7 @@ msgstr ""
 
 #. Label of the decision_json (JSON) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:178
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:185
 msgid "The answer, as the engine recorded it"
 msgstr ""
 
@@ -1394,7 +1479,7 @@ msgstr ""
 msgid "The comparison, reasons and tax figures"
 msgstr ""
 
-#: ai_munimji/uninstall.py:14
+#: ai_munimji/uninstall.py:15
 msgid "The database columns custom_agent_ref, custom_agent_approved_by and custom_agent_note on Purchase Order, Material Request and Stock Entry stay, with their values and the index on custom_agent_ref. Frappe never drops a column when a field is deleted, so that no data is lost."
 msgstr ""
 
@@ -1402,7 +1487,7 @@ msgstr ""
 msgid "The delivery record"
 msgstr ""
 
-#: ai_munimji/uninstall.py:20
+#: ai_munimji/uninstall.py:21
 msgid "The empty column approve stays in the tables DocPerm, Custom DocPerm and DocShare, where the permission type approve put it. Frappe does not drop it when the permission type is deleted, and it is shared by name with any other permission type called approve, so it is left alone. Installing again reuses it."
 msgstr ""
 
@@ -1427,12 +1512,22 @@ msgstr ""
 msgid "The longer stretch that tells what normal use is. It must be more than the recent days."
 msgstr ""
 
-#: ai_munimji/uninstall.py:23
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:13
+msgid "The other vendors, and why they were not chosen"
+msgstr ""
+
+#: ai_munimji/uninstall.py:24
 msgid "The package ai-munimji-engine stays in the bench's Python environment. Remove it with: pip uninstall ai-munimji-engine"
 msgstr ""
 
+#. Label of the details_section (Section Break) field in DocType 'Munimji
+#. Approval Request'
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:173
+msgid "The request and the answer, exactly as the engine kept them"
+msgstr ""
+
 #. Label of the request_json (JSON) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:172
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:179
 msgid "The request, as the engine made it"
 msgstr ""
 
@@ -1465,6 +1560,10 @@ msgstr ""
 msgid "The scheduled job reads and proposes; a document is made only as the person who approved it."
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:11
+msgid "The stock, and how long it lasts"
+msgstr ""
+
 #: ai_munimji/stores/core.py:74
 msgid "The system mode is for the scheduled job, which runs as Administrator."
 msgstr ""
@@ -1482,6 +1581,10 @@ msgstr ""
 msgid "The values"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:18
+msgid "The vendors that were checked"
+msgstr ""
+
 #: ai_munimji/erp_client.py:908
 #, python-brace-format
 msgid "The {0} could not be made: {1}"
@@ -1496,7 +1599,7 @@ msgstr ""
 msgid "There are several companies and no default company is set, so nothing was created: it would land in whichever company the signed-in user has."
 msgstr ""
 
-#: ai_munimji/settings_map.py:234
+#: ai_munimji/settings_map.py:240
 msgid "These settings cannot be saved"
 msgstr ""
 
@@ -1509,8 +1612,13 @@ msgstr ""
 msgid "This record is kept by the app's stores and is not edited by hand: use the screen's own buttons."
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:67
+#, python-brace-format
+msgid "This request is {0}."
+msgstr ""
+
 #. Label of the title (Data) field in DocType 'Munimji Approval Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:54
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:60
 msgid "Title"
 msgstr ""
 
@@ -1525,6 +1633,7 @@ msgid "Tool"
 msgstr ""
 
 #. Label of the total (Float) field in DocType 'Munimji Purchase Proposal'
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:57
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:94
 msgid "Total"
 msgstr ""
@@ -1562,6 +1671,10 @@ msgstr ""
 msgid "Use the demand calendar"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:163
+msgid "Use this vendor"
+msgstr ""
+
 #. Description of the 'Delivery time to assume (days)' (Float) field in DocType
 #. 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:78
@@ -1573,9 +1686,18 @@ msgstr ""
 msgid "Variance"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:55
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:156
+msgid "Vendor"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:63
+msgid "Waiting for your answer"
+msgstr ""
+
 #. Label of the warehouse (Link) field in DocType 'Munimji Approval Request'
 #. Label of the warehouse (Link) field in DocType 'Munimji Count Review'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:78
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:84
 #: ai_munimji/ai_munimji/doctype/munimji_count_review/munimji_count_review.json:37
 msgid "Warehouse"
 msgstr ""
@@ -1587,8 +1709,20 @@ msgstr ""
 
 #. Label of the search_text (Long Text) field in DocType 'Munimji Approval
 #. Request'
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:184
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:191
 msgid "What a search looks in"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:91
+msgid "What each button does"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:17
+msgid "What is needed"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:10
+msgid "What is proposed, and what it costs"
 msgstr ""
 
 #. Label of the event_name (Data) field in DocType 'Munimji Calendar Event'
@@ -1657,6 +1791,15 @@ msgstr ""
 msgid "Why"
 msgstr ""
 
+#. Label of the reasoning (HTML) field in DocType 'Munimji Approval Request'
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:37
+msgid "Why this request"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:12
+msgid "Why this vendor"
+msgstr ""
+
 #. Label of the work_order_id (Link) field in DocType 'Munimji Purchase
 #. Proposal'
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:50
@@ -1667,6 +1810,11 @@ msgstr ""
 #. not used)' (Float) field in DocType 'AI Munimji Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:57
 msgid "Worked out from how much of the item you have been using. Leave 0 to not use this rule."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:65
+#, python-brace-format
+msgid "by {0}"
 msgstr ""
 
 #: ai_munimji/erp_client.py:1170
@@ -1782,7 +1930,7 @@ msgstr ""
 msgid "{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
 msgstr ""
 
-#: ai_munimji/settings_map.py:226
+#: ai_munimji/settings_map.py:231
 #, python-brace-format
 msgid "“{0}” cannot be negative (0 keeps the logs for ever)"
 msgstr ""

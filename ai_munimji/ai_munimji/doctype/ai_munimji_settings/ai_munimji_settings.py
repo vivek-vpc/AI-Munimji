@@ -10,3 +10,9 @@ class AIMunimjiSettings(Document):
 		from ai_munimji import settings_map
 
 		settings_map.validate(self)
+
+	def on_update(self):
+		"""Watch stock and Check stock at are the scheduler's own switch and time: the stock check's job follows what is saved here (schedule.py)."""
+		from ai_munimji import schedule
+
+		schedule.sync(bool(self.enabled), self.check_cron)

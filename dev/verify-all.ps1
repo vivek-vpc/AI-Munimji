@@ -24,7 +24,13 @@ function Step($name, [scriptblock]$body) {
 }
 
 if ($Fresh) {
-    Step "destroy the project munimji-dev (containers, volumes, network)" { docker compose -p munimji-dev -f (Join-Path $here "compose.yml") down --volumes --remove-orphans }
+    Step "destroy the project munimji-dev (containers, volumes, network)" {
+        docker compose -p munimji-dev -f (Join-Path $here "compose.yml") down --volumes --remove-orphans
+        # The contract world goes with the site, and its reference day must not outlive it: dev/contract-site.json (generated, git-ignored) keeps the day the world was loaded, the loader
+        # REUSES that day when the file exists (so that a second run finds what it posted), and the shared checks allow one day between it and the day the new items are made. A file
+        # left over from an earlier day made a fresh run fail from the third day on (found on 9 Nov 2026, with the file from 6 Nov).
+        Remove-Item (Join-Path $here "contract-site.json"), (Join-Path $here "contract-rest.json") -ErrorAction SilentlyContinue
+    }
 }
 Step "engine wheel (built from ..\erpnext-ai-agents\engine, a few seconds)" { & (Join-Path $here "build-engine-wheel.ps1") }
 Step "up (images, containers)" { & (Join-Path $here "up.ps1") }

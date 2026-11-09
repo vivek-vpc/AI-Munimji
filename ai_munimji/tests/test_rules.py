@@ -4,7 +4,8 @@
    through a document whose permission was checked.
 2. Every method that a browser or an API client can call (`@frappe.whitelist`) checks the caller's permission as its FIRST statement, and none is open to guests.
 3. `ignore_permissions=True` (and `flags.ignore_permissions = True`, and `frappe.set_user`) is allowed in the install and uninstall hooks only, which create and remove the app's own roles
-   and records from the command line. Nowhere else: not in the ERP client, not in a button, not in a job.
+   and records from the command line, and in `schedule.py`, which keeps the stock check's one scheduled job in step with the Settings page (a Munimji Manager may save that page but holds no
+   right on Frappe's job records). Nowhere else: not in the ERP client, not in a button, not in a job.
 4. The ERP client's system mode, `FrappeERPClient(system=True)`, and the stores' system mode, `frappe_core_stores(system=True)`, are built in the scheduled job module only
    (`jobs.system_erp()`, `jobs.system_stores()`).
 5. The ERP client reads through `frappe.get_list` and the document APIs only: no `frappe.db` call at all, no `get_all`, no cached read (those do not apply the person's permissions).
@@ -23,6 +24,9 @@ from ai_munimji.tests import scan
 SCHEDULED_JOB_MODULES = {"ai_munimji/jobs.py"}
 # Modules that run once, from the command line, when the app is installed or removed.
 LIFECYCLE_MODULES = {"ai_munimji/install.py", "ai_munimji/uninstall.py"}
+# The one module besides those that writes with ignore_permissions: the stock check's job record, set from the Settings page (schedule.py says why).
+SCHEDULE_MODULES = {"ai_munimji/schedule.py"}
+BYPASS_MODULES = LIFECYCLE_MODULES | SCHEDULE_MODULES
 ERP_CLIENT_MODULE = "ai_munimji/erp_client.py"
 STORE_PREFIX = "ai_munimji/stores/"
 STORE_EXCEPTIONS = {
@@ -136,9 +140,9 @@ def scan_source(source: str, filename: str) -> Found:
 			)
 			if bypass:
 				found.ignore_permissions += 1
-				if filename not in LIFECYCLE_MODULES:
+				if filename not in BYPASS_MODULES:
 					found.problems.append(
-						f"{filename}:{node.lineno}: ignore_permissions / set_user is allowed only in {sorted(LIFECYCLE_MODULES)}"
+						f"{filename}:{node.lineno}: ignore_permissions / set_user is allowed only in {sorted(BYPASS_MODULES)}"
 					)
 			if _is_system_client(node):
 				found.system_clients += 1
@@ -166,9 +170,9 @@ def scan_source(source: str, filename: str) -> Found:
 				and any(isinstance(t, ast.Attribute) and t.attr == "ignore_permissions" for t in targets)
 			):
 				found.ignore_permissions += 1
-				if filename not in LIFECYCLE_MODULES:
+				if filename not in BYPASS_MODULES:
 					found.problems.append(
-						f"{filename}:{node.lineno}: flags.ignore_permissions is allowed only in {sorted(LIFECYCLE_MODULES)}"
+						f"{filename}:{node.lineno}: flags.ignore_permissions is allowed only in {sorted(BYPASS_MODULES)}"
 					)
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
 			for decorator in node.decorator_list:
@@ -235,7 +239,13 @@ class TestTheReadsRule(unittest.TestCase):
 		)
 		self.assertIn(ERP_CLIENT_MODULE, scanned)
 		self.assertIn("ai_munimji/stores/table.py", scanned)
-		for module in SCHEDULED_JOB_MODULES | LIFECYCLE_MODULES | STORE_EXCEPTIONS | {ERP_CLIENT_MODULE}:
+		for module in (
+			SCHEDULED_JOB_MODULES
+			| LIFECYCLE_MODULES
+			| SCHEDULE_MODULES
+			| STORE_EXCEPTIONS
+			| {ERP_CLIENT_MODULE}
+		):
 			self.assertTrue(
 				(scan.ROOT / module).exists(), f"{module} is named in the rules but does not exist"
 			)
@@ -254,6 +264,11 @@ class TestTheReadsRule(unittest.TestCase):
 				self.assertTrue(scan_source(source, module).problems, f"{module}: {source}")
 			self.assertEqual(
 				scan_source(source, "ai_munimji/install.py").problems, [], "the install hook may"
+			)
+			self.assertEqual(
+				scan_source(source, "ai_munimji/schedule.py").problems,
+				[],
+				"the schedule module may: it is the named exception",
 			)
 		for source in (
 			"import frappe\nfrappe.get_doc({}).insert(ignore_permissions=False)\n",
