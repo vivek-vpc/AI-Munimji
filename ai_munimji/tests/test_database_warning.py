@@ -97,7 +97,10 @@ class TestSayingSo(IntegrationTestCase):
 		)
 		text = open(script, encoding="utf-8").read()
 		self.assertIn("snapshot_isolation_warning", text)
-		self.assertIn("set_headline_alert", text)
+		self.assertIn("frm.set_intro(", text)
+		# the intro IS Frappe's dashboard headline: a separate headline call would wipe the "monitoring is off" note, or be wiped by it (found by the browser round trip)
+		for clobbering in ("set_headline_alert", "clear_headline", "set_headline("):
+			self.assertNotIn(clobbering, text)
 
 
 class TestTheSentenceAPersonReads(IntegrationTestCase):
