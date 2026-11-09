@@ -13,6 +13,7 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
+      # as frappe_docker starts MariaDB 11.8; the stock image has it ON, and then a locking read of a row another connection changed fails with error 1020 (docs/INSTALL.md)
       - --innodb-snapshot-isolation=OFF
     environment:
       # a throw-away development password; the database is not published outside the compose network

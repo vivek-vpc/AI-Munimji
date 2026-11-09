@@ -13,6 +13,8 @@ What changed in the app for someone who installs it or builds on it. AI Munimji 
   a free-text reason) are gone. **There is no patch to move old values, because nothing was released**: no site holds a request made with the old fields except a development site, and
   a development site is rebuilt. (Frappe never drops a column, so a database that had the old fields keeps their empty columns; the uninstall notes say the same of every column the app adds.)
 * **Two presses of one button on two database connections make one order.** The file lock the ERP client had first did not hold even on one server; it is replaced by a row lock and a locking read.
+  This needs MariaDB with `innodb_snapshot_isolation = OFF`, as Frappe's own Docker files run it ([docs/INSTALL.md](docs/INSTALL.md)); the first run on GitHub used the stock image (ON) and failed 6 of the 10
+  overlapping-work tests, which is how it was found. CI now sets it, and a test says what is wrong when it is not.
 * **The audit seal is append only for every role**, is the same chain as the standalone service's (a known history gives the same four hashes), and a tampered record is found.
 * **The app's records are changed by the app only** (a plain API call that edits a request's status is refused for every role).
 * **The scheduled job runs the engine's stock check**: it reads in the system mode, proposes, and takes a lease so that two runs make one proposal. Watch stock stays off by default.

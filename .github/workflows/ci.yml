@@ -113,6 +113,14 @@ jobs:
           bench set-config -g redis_queue redis://127.0.0.1:11000
           bench set-config -g redis_socketio redis://127.0.0.1:13000
 
+      - name: Run MariaDB the way Frappe's own deployments run it (snapshot isolation off)
+        # MariaDB 11.8 refuses a locking read of a row that another connection changed after the transaction's snapshot (error 1020, "Record has changed since last read"),
+        # unless innodb_snapshot_isolation is OFF. frappe_docker (pwd.yml and every MariaDB override) and Frappe's Pilot set it OFF; so does dev/compose.yml. The service container above is the
+        # stock image, which has it ON, and there the app's parallel-press and two-ticks tests fail (6 of 10). It is a dynamic variable and new connections read it, so it is set before any site is made.
+        run: |
+          mariadb --host 127.0.0.1 --user root --password=root --execute "SET GLOBAL innodb_snapshot_isolation=OFF"
+          mariadb --host 127.0.0.1 --user root --password=root --execute "SELECT @@version, @@global.innodb_snapshot_isolation"
+
       - name: Put the engine into the bench's environment
         # The app's dependency line names the engine, which is not on PyPI; it is found in the environment. The environment already holds Frappe's pinned pydantic and PyYAML.
         run: |
