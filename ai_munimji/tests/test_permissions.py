@@ -12,20 +12,57 @@ MODULE = "AI Munimji"
 
 SETTINGS = "AI Munimji Settings"
 REQUEST = "Munimji Approval Request"
+SEAL = "Munimji Audit Seal"
 
+V, A, M, S = "Munimji Viewer", "Munimji Approver", "Munimji Manager", "System Manager"
+# What a letter grants. Written here again, not read from ai_munimji/stores/specs.py: the files are made from the specs, and this test is what says the files are right.
+RIGHTS = {
+	"r": {"read"},
+	"w": {"write"},
+	"c": {"create"},
+	"d": {"delete"},
+	"x": {"report", "export"},
+	"a": {"approve"},
+}
+
+# a screen a person looks at and answers: the Viewer reads, the Approver and the Manager answer, System Manager can do what the Manager does
+SCREEN = {V: "rx", A: "rwcx", M: "rwcx", S: "rwcx"}
 # THE rights, written out. Everything not listed for a role is NOT granted, including the rights that a permission row gives by default (write, create, delete, report, export,
 # share, print, email). A new DocType of this app, or a role added to one, fails the tests below until it is listed here on purpose.
+EXPECTED_LETTERS: dict[str, dict[str, str]] = {
+	SETTINGS: {M: "rw", S: "rw"},
+	REQUEST: {V: "rx", A: "rwcxa", M: "rwcxa", S: "rwcxa"},
+	"Munimji Approval Delivery": {V: "r", A: "r", M: "r", S: "r"},
+	SEAL: {
+		M: "r",
+		S: "r",
+	},  # no role may write, create or delete a row of it; the scheduled job (Administrator) appends
+	"Munimji Settings Override": {V: "r", A: "r", M: "rwcd", S: "rwcd"},
+	"Munimji Settings Change": {M: "rc", S: "r"},
+	"Munimji Work Order": SCREEN,
+	"Munimji Agent Task": {A: "c", M: "rc", S: "r"},
+	"Munimji Tool Call": {A: "c", M: "rc", S: "r"},
+	"Munimji Job Run": {M: "r", S: "r"},
+	"Munimji Inbound Seen": {M: "r", S: "r"},
+	"Munimji Stock Alert": SCREEN,
+	"Munimji Stock Notice": SCREEN,
+	"Munimji Purchase Proposal": SCREEN,
+	"Munimji Agent Run": {A: "c", M: "rc", S: "r"},
+	"Munimji Assistant Answer": {A: "rwcd", M: "rwcd", S: "r"},
+	"Munimji Chat Log": {A: "c", M: "rc", S: "r"},
+	"Munimji Vendor Message": {A: "rwc", M: "rwc", S: "r"},
+	"Munimji Vendor Reply": {A: "rwc", M: "rwc", S: "r"},
+	"Munimji Delivery Chase": SCREEN,
+	"Munimji Receipt Check": SCREEN,
+	"Munimji Quote Round": SCREEN,
+	"Munimji Stock Transfer": SCREEN,
+	"Munimji Cycle Count": {A: "rwc", M: "rwc", S: "r"},
+	"Munimji Count Review": {A: "rwc", M: "rwc", S: "r"},
+	"Munimji Lock": {A: "wc", M: "wc"},
+}
 EXPECTED: dict[str, dict[str, set[str]]] = {
-	SETTINGS: {
-		"Munimji Manager": {"read", "write"},
-		"System Manager": {"read", "write"},
-	},
-	REQUEST: {
-		"Munimji Viewer": {"read", "report", "export"},
-		"Munimji Approver": {"read", "write", "report", "export", "approve"},
-		"Munimji Manager": {"read", "write", "create", "delete", "report", "export", "approve"},
-		"System Manager": {"read", "write", "create", "delete", "report", "export", "approve"},
-	},
+	doctype: {role: set().union(*(RIGHTS[letter] for letter in letters)) for role, letters in roles.items()}
+	for doctype, roles in EXPECTED_LETTERS.items()
 }
 CHILD_TABLES = {
 	"Munimji Calendar Event"
@@ -134,9 +171,20 @@ class TestTheRightsOfEveryRole(IntegrationTestCase):
 		for role in ROLES:
 			self.assertEqual(frappe.db.get_value("Role", role, ["disabled", "desk_access"]), (0, 1), role)
 
+	def test_no_role_may_change_or_delete_a_row_of_the_audit_seal(self):
+		for row in doctype_files()[SEAL]["permissions"]:
+			self.assertFalse(granted(row) & {"write", "delete", "create", "import"}, row["role"])
+
+	def test_no_doctype_of_the_stores_can_be_renamed_by_hand_or_tracks_changes_in_a_second_place(self):
+		for doctype, data in doctype_files().items():
+			if doctype in (SETTINGS,) or doctype in CHILD_TABLES:
+				continue
+			self.assertEqual(data.get("allow_rename"), 0, doctype)
+			self.assertEqual(data.get("track_changes"), 0, doctype)
+
 
 class TestWhatPeopleCanReallyDo(IntegrationTestCase):
-	"""The same table seen from the other side: a person with one role, asked by Frappe itself."""
+	"""The same table seen from the other side: a person with one role, asked by Frappe itself, on every DocType of the app."""
 
 	def setUp(self):
 		self.viewer = make_user("munimji.viewer@example.com", ("Munimji Viewer",))
@@ -147,9 +195,36 @@ class TestWhatPeopleCanReallyDo(IntegrationTestCase):
 			"munimji.stock@example.com", ("Stock User", "Purchase User", "Purchase Manager")
 		)  # ERPNext's roles, none of ours
 		self.nobody = make_user("munimji.nobody@example.com", ())
+		self.roles = {
+			self.viewer: {V},
+			self.approver: {A},
+			self.manager: {M},
+			self.sysmgr: {S},
+			self.stock_user: set(),
+			self.nobody: set(),
+		}
 
 	def can(self, user: str, doctype: str, right: str) -> bool:
 		return bool(frappe.has_permission(doctype, right, user=user))
+
+	def test_every_person_gets_on_every_doctype_what_the_table_gives_their_role_and_nothing_else(self):
+		every_right = {
+			"read",
+			"write",
+			"create",
+			"delete",
+			"report",
+			"export",
+			"approve",
+			"share",
+			"print",
+			"email",
+		}
+		for doctype, per_role in EXPECTED.items():
+			for user, roles in self.roles.items():
+				expected = set().union(*(per_role.get(role, set()) for role in roles))
+				got = {right for right in every_right if self.can(user, doctype, right)}
+				self.assertEqual(got, expected, f"{user} on {doctype}")
 
 	def test_only_a_munimji_manager_and_a_system_manager_can_open_the_settings(self):
 		for user, expected in (
@@ -170,38 +245,11 @@ class TestWhatPeopleCanReallyDo(IntegrationTestCase):
 		with self.set_user(self.manager):
 			frappe.get_doc(SETTINGS).check_permission("write")
 
-	def test_the_requests_can_be_read_by_the_three_roles_and_by_no_one_else(self):
-		for user, expected in (
-			(self.viewer, True),
-			(self.approver, True),
-			(self.manager, True),
-			(self.sysmgr, True),
-			(self.stock_user, False),
-			(self.nobody, False),
-		):
-			self.assertEqual(self.can(user, REQUEST, "read"), expected, user)
-
-	def test_who_may_change_create_delete_and_approve_requests(self):
-		table = {
-			#             write  create delete approve
-			self.viewer: (False, False, False, False),
-			self.approver: (True, False, False, True),
-			self.manager: (True, True, True, True),
-			self.sysmgr: (True, True, True, True),
-			self.stock_user: (False, False, False, False),
-			self.nobody: (False, False, False, False),
-		}
-		for user, expected in table.items():
-			self.assertEqual(
-				tuple(self.can(user, REQUEST, right) for right in ("write", "create", "delete", "approve")),
-				expected,
-				user,
-			)
-
-	def test_nobody_can_share_print_or_email_a_request(self):
-		for user in (self.viewer, self.approver, self.manager, self.sysmgr):
-			for right in ("share", "print", "email"):
-				self.assertFalse(self.can(user, REQUEST, right), f"{user}: {right}")
+	def test_nobody_can_share_print_or_email_a_record_of_the_app(self):
+		for doctype in EXPECTED:
+			for user in self.roles:
+				for right in ("share", "print", "email"):
+					self.assertFalse(self.can(user, doctype, right), f"{user}: {right} on {doctype}")
 
 	def test_the_erpnext_roles_of_the_install_notes_are_what_let_a_person_see_stock_and_make_orders(self):
 		# docs/INSTALL.md says: Stock User to see stock, Purchase User and Purchase Manager to make a Purchase Order. Asked of ERPNext, here.

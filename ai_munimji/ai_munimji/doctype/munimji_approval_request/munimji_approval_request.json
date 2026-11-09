@@ -1,98 +1,199 @@
 {
  "actions": [],
- "allow_bulk_edit": 1,
- "allow_rename": 1,
- "autoname": "format:MAR-{#####}",
+ "allow_rename": 0,
+ "autoname": "Prompt",
  "creation": "2026-11-05 17:47:10.827362",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "kind",
+  "status",
+  "title",
+  "severity",
   "item_code",
   "warehouse",
   "qty",
   "supplier",
-  "reason",
-  "column_break_status",
-  "status",
-  "approved_by",
-  "purchase_order"
+  "answer",
+  "approver",
+  "created_at",
+  "expires_at",
+  "decided_at",
+  "last_reminder_at",
+  "reminder_count",
+  "ref_type",
+  "ref_id",
+  "status_note",
+  "details_section",
+  "request_json",
+  "decision_json",
+  "search_text"
  ],
  "fields": [
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
+   "fieldname": "kind",
+   "fieldtype": "Data",
+   "label": "Kind",
+   "read_only": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Item",
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status",
+   "read_only": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "severity",
+   "fieldtype": "Data",
+   "label": "Severity",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item code",
+   "read_only": 1,
    "options": "Item",
-   "reqd": 1
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "search_index": 1
   },
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Warehouse",
+   "read_only": 1,
    "options": "Warehouse",
-   "reqd": 1
+   "in_list_view": 1
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Quantity",
-   "non_negative": 1,
-   "reqd": 1
+   "label": "Qty",
+   "read_only": 1,
+   "in_list_view": 1
   },
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
-   "options": "Supplier"
+   "read_only": 1,
+   "options": "Supplier",
+   "in_list_view": 1
   },
   {
-   "fieldname": "reason",
-   "fieldtype": "Small Text",
-   "label": "Why this request exists"
+   "fieldname": "answer",
+   "fieldtype": "Data",
+   "label": "Answer",
+   "read_only": 1,
+   "in_standard_filter": 1
   },
   {
-   "fieldname": "column_break_status",
-   "fieldtype": "Column Break"
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "label": "Answered by",
+   "read_only": 1
   },
   {
-   "default": "Pending",
-   "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldname": "created_at",
+   "fieldtype": "Datetime",
+   "label": "Requested",
+   "read_only": 1,
    "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "options": "Pending\nOrdered\nRejected",
+   "search_index": 1
+  },
+  {
+   "fieldname": "expires_at",
+   "fieldtype": "Datetime",
+   "label": "Expires",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "decided_at",
+   "fieldtype": "Datetime",
+   "label": "Answered",
    "read_only": 1
   },
   {
-   "fieldname": "approved_by",
-   "fieldtype": "Link",
-   "label": "Approved by",
-   "options": "User",
+   "fieldname": "last_reminder_at",
+   "fieldtype": "Datetime",
+   "label": "Last reminder",
    "read_only": 1
   },
   {
-   "fieldname": "purchase_order",
-   "fieldtype": "Link",
-   "label": "Draft Purchase Order",
-   "no_copy": 1,
-   "options": "Purchase Order",
+   "fieldname": "reminder_count",
+   "fieldtype": "Int",
+   "label": "Reminders sent",
    "read_only": 1
+  },
+  {
+   "fieldname": "ref_type",
+   "fieldtype": "Data",
+   "label": "Refers to (type)",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "ref_id",
+   "fieldtype": "Data",
+   "label": "Refers to",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status_note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "request_json",
+   "fieldtype": "JSON",
+   "label": "The request, as the engine made it",
+   "read_only": 1
+  },
+  {
+   "fieldname": "decision_json",
+   "fieldtype": "JSON",
+   "label": "The answer, as the engine recorded it",
+   "read_only": 1
+  },
+  {
+   "fieldname": "search_text",
+   "fieldtype": "Long Text",
+   "label": "What a search looks in",
+   "read_only": 1,
+   "hidden": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-05 17:47:13.806914",
+ "modified": "2026-11-05 17:47:15.806914",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Approval Request",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -109,7 +210,7 @@
   },
   {
    "approve": 1,
-   "create": 0,
+   "create": 1,
    "delete": 0,
    "email": 0,
    "export": 1,
@@ -123,7 +224,7 @@
   {
    "approve": 1,
    "create": 1,
-   "delete": 1,
+   "delete": 0,
    "email": 0,
    "export": 1,
    "print": 0,
@@ -136,7 +237,7 @@
   {
    "approve": 1,
    "create": 1,
-   "delete": 1,
+   "delete": 0,
    "email": 0,
    "export": 1,
    "print": 0,
@@ -148,9 +249,9 @@
   }
  ],
  "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 0,
+ "title_field": "title"
 }

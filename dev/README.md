@@ -33,6 +33,11 @@ Day to day:
 .\dev\exec.ps1 bash /workspace/ai_munimji/dev/check-uninstall.sh      # install, migrate twice, uninstall, install again, on a new site (about 5 minutes)
 .\dev\verify-all.ps1 -Fresh           # everything from nothing, with a timing table (about 25 minutes)
 .\dev\down.ps1                        # stop the containers, keep the data
+.\dev\precommit.ps1                    # the repository's formatters and linters (ruff, prettier, eslint) on the files git shows as changed
+python dev/scripts/make_doctypes.py     # write the DocType files and the table of docs/STORES.md from ai_munimji/stores/specs.py (--check changes nothing)
+.\dev\permissions-http.ps1             # who sees and answers what, asked over HTTP as five real people (starts the bench if it is not running)
+.\dev\world-tests.ps1                   # the Frappe client and the stores on real data (the contract world must be loaded: -Load)
+.\dev\scripts\bench_tests.ps1 <module>   # one module of the app's tests on the test site, with a short verdict
 .\dev\destroy.ps1                     # remove containers, network and the two volumes of this project (asks first)
 ```
 
@@ -59,8 +64,11 @@ After you change a DocType file, bring the sites up to date with `bench --site <
 
 These are the first experiment's, kept so that the app can be tried end to end. They are marked in the code with the words "replaced in Phase 5".
 
-* `ai_munimji/jobs.py` (`check_stock`): the scheduled job. It asks for a purchase where a warehouse holds no more than `min_qty`. Phase 5 replaces it with the engine's stock analysis.
-* The list **Munimji Approval Request**: its form, the "Create Purchase Order" button and `create_draft_purchase_order`.
-* `scripts/seed.py`, `scripts/reset_demo.py`, `roundtrip.ps1` and `browser/round-trip.cjs`, which exist for the two above.
+* `ai_munimji/jobs.py` (`check_stock`): the scheduled entry. It runs the engine's stock check (`run_stock_check`) every 5 minutes at the soonest, and only while Watch stock is ticked. Phase 5 gives it
+  the schedule the settings page names.
+* The list **Munimji Approval Request**: its form has one button, "Create Purchase Order", which calls `ai_munimji.api.answer`. Phase 5 builds the approval form with the reasoning, the inbox and
+  the notifications.
+* `scripts/seed.py`, `scripts/reset_demo.py`, `roundtrip.ps1` and `browser/round-trip.cjs`, which exist for the two above (the demo's requests are made by `reset_demo.py`, which does what the job and
+  a person's approval would, so that the round trips do not depend on when the scheduler ticks).
 
 Everything else (settings, roles, fields, uninstall, the engine dependency, the tests that read the code) is the app proper.

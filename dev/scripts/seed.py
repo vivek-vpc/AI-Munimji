@@ -67,6 +67,31 @@ for code, (name, quantity) in ITEMS.items():
 
 		make_stock_entry(item_code=code, qty=quantity, to_warehouse=WAREHOUSE, rate=5, company=COMPANY)
 
+# a past order per item, so that the engine has a price to compare when it prepares a purchase (a supplier with no history has none)
+for code in ITEMS:
+	if not frappe.db.exists("Purchase Order Item", {"item_code": code, "docstatus": 1}):
+		past = add_days(nowdate(), -40)
+		order = frappe.get_doc(
+			{
+				"doctype": "Purchase Order",
+				"supplier": SUPPLIER,
+				"company": COMPANY,
+				"transaction_date": past,
+				"schedule_date": add_days(past, 7),
+				"items": [
+					{
+						"item_code": code,
+						"qty": 10,
+						"rate": 5,
+						"warehouse": WAREHOUSE,
+						"schedule_date": add_days(past, 7),
+					}
+				],
+			}
+		)
+		order.insert()
+		order.submit()
+
 for email, (first_name, roles) in USERS.items():
 	if not frappe.db.exists("User", email):
 		user = frappe.get_doc(
@@ -82,8 +107,8 @@ for email, (first_name, roles) in USERS.items():
 		user.new_password = PASSWORD
 		user.insert(ignore_permissions=True)
 
-# The placeholder job (jobs.py, replaced in Phase 5) asks for a purchase where stock is at or below min_qty, and a new site has 0 there ("not used") and the monitor OFF.
-# For the demo both are set, as a person would after reviewing the thresholds.
+# A new site has no quantity ("not used") and the monitor OFF. For the demo both are set, as a person would after reviewing the thresholds; the demo's requests are made by reset_demo.py,
+# which does what the stock job and a person's approval would, so that the round trips do not depend on when the scheduler ticks.
 settings = frappe.get_doc("AI Munimji Settings")
 settings.min_qty = 10
 settings.enabled = 1

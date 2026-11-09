@@ -20,6 +20,10 @@ required_apps = ["erpnext"]
 # the roles must exist before the DocTypes are synced (their permission rows name them), so they are made before the install
 before_install = "ai_munimji.install.before_install"
 
+# the rows that serialise work (stores/locks.py) exist after the DocTypes are synced, at install and at every migrate
+after_install = "ai_munimji.install.make_locks"
+after_migrate = "ai_munimji.install.make_locks"
+
 # the seven fields this app adds to Purchase Order, Material Request and Stock Entry (ai_munimji/custom_fields.py), written by `bench export-fixtures --app ai_munimji`
 # and filtered by name so that no other Custom Field of the site is exported with them
 fixtures = [

@@ -27,7 +27,9 @@
   "stock_alerts",
   "stock_alert_repeat_days",
   "suppliers_section",
-  "fallback_supplier"
+  "fallback_supplier",
+  "housekeeping_section",
+  "keep_logs_days"
  ],
  "fields": [
   {
@@ -186,13 +188,25 @@
    "fieldtype": "Link",
    "label": "Supplier to use when an item has none",
    "options": "Supplier"
+  },
+  {
+   "fieldname": "housekeeping_section",
+   "fieldtype": "Section Break",
+   "label": "Housekeeping"
+  },
+  {
+   "default": "90",
+   "description": "What the agents did, the chat log and the ids of handled messages older than this are deleted by the clean-up. 0 keeps them all. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age.",
+   "fieldname": "keep_logs_days",
+   "fieldtype": "Int",
+   "label": "Keep logs for (days)"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-06 10:30:00.000000",
+ "modified": "2026-11-07 15:00:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",

@@ -1,6 +1,8 @@
 # Rebuilds the development environment from nothing and runs every check, printing how long each step took:
-#   destroy (this project only) -> engine wheel -> up -> bootstrap -> seed -> test site -> gate -> Semgrep -> bench start -> round trip (HTTP) -> round trip (browser) -> stop bench
-#   -> contract data -> world tests -> uninstall check, and with -WithRest the standalone service's REST client over HTTP on the same data (about 8 minutes) before the uninstall check
+#   destroy (this project only) -> engine wheel -> up -> bootstrap -> seed -> test site -> gate (the app's tests, which include the engine's 60 store checks on the DocType stores)
+#   -> Semgrep -> secrets scan of the history -> bench start -> round trip (HTTP) -> round trip (browser) -> who sees what over HTTP as five people -> stop bench
+#   -> contract data -> world tests (the Frappe client, the parallel presses, the whole way from the stock to a draft order) -> uninstall check, and with -WithRest the standalone service's
+#   REST client over HTTP on the same data (about 8 minutes) before the uninstall check
 #   .\dev\verify-all.ps1 -Fresh      # without -Fresh it keeps what exists and only runs the steps
 # It removes the containers and volumes of the compose project "munimji-dev" ONLY when you pass -Fresh. Images stay on the machine.
 param([switch]$Fresh, [switch]$WithRest)
@@ -31,6 +33,7 @@ Step "seed the dev site" { & $exec bash /workspace/ai_munimji/dev/run-script.sh 
 Step "test site (ERPNext + app)" { & $exec bash /workspace/ai_munimji/dev/make-site.sh test.localhost app | Out-Host }
 Step "gate: tests, bandit, pip-audit" { & $exec bash /workspace/ai_munimji/dev/gate.sh | Out-Host }
 Step "semgrep with Frappe's rules" { & (Join-Path $here "semgrep.ps1") | Out-Host }
+Step "secrets scan of the repository's whole history (gitleaks)" { & (Join-Path $here "secrets-scan.ps1") | Out-Host }
 Step "bench start (background)" {
     docker exec -d -u frappe munimji-dev-frappe-1 bash -c "cd /home/frappe/dev/frappe-bench && exec bench start --no-dev > /home/frappe/dev/bench-start.log 2>&1"
     for ($i = 0; $i -lt 60; $i++) { try { if ((Invoke-WebRequest -UseBasicParsing -Uri "http://localhost:8000/api/method/ping" -TimeoutSec 3).StatusCode -eq 200) { return } } catch { }; Start-Sleep -Seconds 2 }
@@ -42,9 +45,11 @@ Step "put the demo back, then the round trip in a browser" {
     & $exec bash /workspace/ai_munimji/dev/run-script.sh /workspace/ai_munimji/dev/scripts/reset_demo.py | Out-Null
     & $exec bash -c "cd /workspace/ai_munimji/dev/browser && (test -d node_modules || npm ci --no-audit --no-fund) && node round-trip.cjs" | Out-Host
 }
+Step "who sees and answers what, over HTTP, as five people (list view, form, REST, guessed names, changes, a User Permission)" { & (Join-Path $here "permissions-http.ps1") | Out-Host }
 Step "stop bench" { & $exec bash -c "pkill -INT -f 'honcho start'; sleep 4; pkill -f 'bench serve'; pkill -f 'frappe serve'; pkill -f socketio.js; pkill -f 'bench worker'; pkill -f 'bench schedule'; pkill -f 'esbuild --watch'; true" | Out-Null; $global:LASTEXITCODE = 0 }
 # after the demo round trips, not before: the contract data has items that are low on stock, and the scheduled job (the monitor is on in the seeded dev site) would make
-# requests for them while the round trip looks for its own
+# requests for them while the round trip looks for its own. (The parallel and end-to-end world tests commit, and empty the app's records when they are done: the demo's requests are gone
+# after this step; .\dev\scripts\reset_demo.py makes them again.)
 Step "contract data on the dev site (the engine test-kit's world)" { & $exec bash /workspace/ai_munimji/dev/run-script.sh /workspace/ai_munimji/dev/scripts/load_contract_world.py | Out-Host }
 Step "world tests: the Frappe client on real data, as real users" { & (Join-Path $here "world-tests.ps1") | Out-Host }
 if ($WithRest) {

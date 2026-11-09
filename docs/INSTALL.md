@@ -5,6 +5,7 @@ AI Munimji is **not released**. It is not on the Frappe Marketplace and you cann
 ## What you need first
 
 * A bench with Frappe 16 and ERPNext 16 and a site with ERPNext installed (`required_apps` in `hooks.py` says ERPNext is a must).
+* **MariaDB with `innodb_snapshot_isolation = OFF`.** Frappe's own Docker files (frappe_docker) and its Pilot start MariaDB 11.8 this way; the stock MariaDB 11.8 image has it ON. With it ON a locking read of a row that another connection changed since the transaction began fails with error 1020 ("Record has changed since last read"), so two presses of one button, or two runs of the job at the same moment, fail instead of waiting (the app's parallel tests fail 6 of 10, measured on 9 Nov 2026). Everything that does not run at the same moment works either way. Set it in the server's `[mysqld]` section; on a running server `SET GLOBAL innodb_snapshot_isolation=OFF` is read by new connections. `ai_munimji.tests.test_database_setting` checks it and says this when it is wrong.
 * The rules package, `ai-munimji-engine`. It is not on PyPI, so before the app is installed or updated it has to be put into the bench's Python environment from a local wheel: see the README, "The engine". If you skip that, installing the app stops with `ai-munimji-engine was not found in the package registry`.
 
 ```
@@ -18,7 +19,7 @@ bench --site <your site> install-app ai_munimji
 |---|---|
 | Three roles: Munimji Viewer, Munimji Approver, Munimji Manager | Role |
 | The page AI Munimji Settings (Search "AI Munimji Settings"), with a calendar table | Single DocType |
-| The list Munimji Approval Request | DocType |
+| The list Munimji Approval Request, and 24 more DocTypes that hold the engine's records: purchase proposals, stock alerts and notices, work orders, the audit seal, the agents' log, locks and the rest (table: [STORES.md](STORES.md)) | DocType |
 | An "approve" permission for that list | Permission Type |
 | Seven read-only fields that carry the request's reference and who approved: `custom_agent_ref` and `custom_agent_approved_by` on Purchase Order, Material Request and Stock Entry, and `custom_agent_note` on Material Request | Custom Field |
 | A scheduled job, every 5 minutes at the soonest (ERPNext's scheduler runs a job every 4 minutes at the soonest) | Scheduled Job Type |
@@ -34,7 +35,9 @@ The app adds **no permission rows to any ERPNext DocType**. What a person may se
 | changes the settings, and may delete requests | Munimji Manager | the same as an approver if they also answer requests |
 | everything | System Manager | none |
 
-A person with only a Munimji role reads nothing of ERPNext's (no Item, Bin, Stock Ledger Entry or Purchase Order). That is intended.
+A person with only a Munimji role reads nothing of ERPNext's (no Item, Bin, Stock Ledger Entry or Purchase Order). That is intended. A person with an ERPNext role and none of the Munimji roles sees none of the app's records: the Munimji roles are what open them. What each role may do to each of the app's records is the table in [STORES.md](STORES.md), pinned by `ai_munimji/tests/test_permissions.py`.
+
+The app's records are changed by the app only, whatever a person's rights: an Approver answers a request through the app, not by editing its status, and the audit seal is appended to by the scheduled job alone.
 
 Approving needs two things at once: the Munimji "approve" right, and the right to create a Purchase Order in ERPNext. Someone who has one without the other is refused, and nothing is created.
 
@@ -68,7 +71,7 @@ Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User doe
 
 ## Settings
 
-Open AI Munimji Settings as a Munimji Manager or System Manager. The values are checked by the same rules as the standalone service uses for its `settings.yaml`, so a value is accepted here exactly when the service accepts it there. The time zone is the one in System Settings. There are no secrets in version 0.1.
+Open AI Munimji Settings as a Munimji Manager or System Manager. The values are checked by the same rules as the standalone service uses for its `settings.yaml`, so a value is accepted here exactly when the service accepts it there. The time zone is the one in System Settings. **Keep logs for (days)** says how long the clean-up (`ai_munimji.retention.clean_up`) keeps what the agents did and the chat log: 90 by default, 0 keeps them; it never deletes a request, a proposal, an alert or the audit seal. There are no secrets in version 0.1.
 
 ## Taking it out
 

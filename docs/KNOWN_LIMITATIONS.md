@@ -18,6 +18,27 @@ The rules in `ai-munimji-engine` ask the ERP through one interface (the "port").
 
 `get_documents` reads Purchase Order, Material Request and Purchase Receipt (the documents the stock rules look at). Asked for any other DocType it raises the same error.
 
+## Where the app keeps its records
+
+The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in practice:
+
+* **A person's answer is sealed by the next run of the job**, not at the instant of the answer (the standalone service seals at once). A person's session never holds the right to append to
+  the audit seal. Until the run, `verify` reports the answer as "not sealed yet".
+* **Orders made through the app queue.** Making a document from a request takes one row lock per document type until the request ends, so two orders made at the same moment wait for each
+  other for the length of one request. Two presses of one button, on any number of workers or servers, make one order.
+* **The locks need MariaDB's `innodb_snapshot_isolation` OFF** ([INSTALL.md](INSTALL.md)), as Frappe's own deployments have it. With it ON, work that overlaps in time fails with MariaDB error 1020 (a press says
+  that another press is being handled, a run of the job records an error); nothing is ordered twice, but the second press or run does not wait its turn. The app does not check this when it is installed;
+  `ai_munimji.tests.test_database_setting` does, and so does the CI.
+* **A request a person starts and a scheduled run can still meet.** The job takes a lease, so two runs make one proposal; a request that a person starts by hand does not take it, so
+  that person and a run, at the same moment, for the same item, could make two proposals. Nothing is ordered by either; the second is answered or dismissed like any other.
+* **The hour that happens twice** when summer time ends: a record made in the second pass of that hour on a site with summer time reads back an hour early ([STORES.md](STORES.md)).
+* **An item that a request points at cannot be deleted** in ERPNext until the request is gone (the Link field); renaming an item updates the requests.
+* **The follow-up stores** (messages to vendors and their replies, delivery chases, receipt checks, quote rounds, stock transfers, cycle counts, the assistant's answers and chat log) have
+  their DocTypes, their tests and their permissions, but the rules that use them are not part of version 0.1, so nothing writes to them yet and no screen shows them.
+* **The Desk screens and the real schedule are not built.** The request form has one button (a draft Purchase Order for a purchase request); the approval form with the reasoning, the inbox,
+  notifications and the job's own schedule are the next phase. The clean-up of old logs exists and is run by hand.
+* **Searching the requests** narrows them in the database and then applies the engine's rules to what is left; over many thousands of requests that is slower than SQLite's scan.
+
 ## Taxes
 
 * Reading **Tax Rules needs the Accounts Manager role**; a Purchase User does not have it, and the app adds no permission rows to ERPNext. The scheduled job runs as Administrator, reads the tax setup, and keeps the figures with the request. A person who changes the quantity or the vendor gets a recalculation from those kept figures.
