@@ -163,7 +163,7 @@ STALE = (
 
 
 class TestTheReleaseWording(unittest.TestCase):
-	"""Version 0.1.0 is the first version. The files that describe the app to a person no longer say that it is in development or not released (the release commit,
+	"""Version 0.1.1 is the version that is released. The files that describe the app to a person no longer say that it is in development or not released (the release commit,
 	docs/RELEASE_CHECKLIST.md), and the version is the same everywhere it is written."""
 
 	def test_no_file_that_describes_the_app_says_it_is_in_development_or_not_released(self):
@@ -180,7 +180,7 @@ class TestTheReleaseWording(unittest.TestCase):
 
 		from ai_munimji import __version__
 
-		self.assertEqual(__version__, "0.1.0")
+		self.assertEqual(__version__, "0.1.1")
 		self.assertIn(f"## {__version__} (", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
 		pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 		self.assertIn(
@@ -195,6 +195,28 @@ class TestTheReleaseWording(unittest.TestCase):
 			).group(1),
 			"one description for pyproject.toml and hooks.py",
 		)
+
+	def test_every_page_that_names_the_version_of_the_app_names_this_one(self):
+		"""The pages that say which version they describe (README, the install notes, the limitations, the release checklist, the registry file in the listing) say the version of
+		`ai_munimji/__init__.py`. The changelog is history and names every version."""
+		from ai_munimji import __version__
+
+		named = 0
+		for relative in (
+			"README.md",
+			"docs/INSTALL.md",
+			"docs/KNOWN_LIMITATIONS.md",
+			"docs/RELEASE_CHECKLIST.md",
+			"docs/LISTING.md",
+		):
+			text = (ROOT / relative).read_text(encoding="utf-8")
+			found = re.findall(r'[Vv]ersion \*{0,2}(\d+\.\d+\.\d+)|"version": "(\d+\.\d+\.\d+)"', text)
+			versions = {a or b for a, b in found}
+			named += len(found)
+			self.assertEqual(
+				versions - {__version__}, set(), f"{relative} names a version that is not {__version__}"
+			)
+		self.assertGreaterEqual(named, 5, "the scan sees the places that name the version")
 
 
 class TestWhatThePublicTextSaysAboutTheApp(unittest.TestCase):

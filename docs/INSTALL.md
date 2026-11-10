@@ -1,6 +1,6 @@
 # Installing AI Munimji, and who needs which role
 
-These notes are for version **0.1.0** of AI Munimji, for people who install it from the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
+These notes are for version **0.1.1** of AI Munimji, for people who install it from the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
 
 ## What you need first
 

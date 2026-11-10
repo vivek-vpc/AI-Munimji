@@ -1,6 +1,6 @@
 # Known limitations of version 0.1
 
-These are the limits of version 0.1.0 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
+These are the limits of version 0.1.1 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
 
 ## What the ERP client does not do yet
 

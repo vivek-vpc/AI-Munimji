@@ -1,8 +1,8 @@
 # Changelog
 
-What changed in the app for someone who installs it or builds on it. This is the first version, 0.1.0; the entries below are how it was built up, phase by phase.
+What changed in the app for someone who installs it or builds on it. 0.1.0 (9 Nov 2026) was the first version; it was made but not tagged or submitted, and 0.1.1 is the version to install. The entries under 0.1.0 are how it was built up, phase by phase.
 
-## 0.1.0 (9 Nov 2026)
+## 0.1.1 (10 Nov 2026)
 
 ### Fixed after review
 
@@ -16,9 +16,12 @@ What changed in the app for someone who installs it or builds on it. This is the
 * **The logs are cleaned up every day.** The existing clean-up (`ai_munimji.retention.clean_up`) is a daily job (Scheduled Job Type on a Scheduler Event, so a migrate keeps it) that follows **Keep logs for (days)**:
   it runs while the number is positive (90 by default) and is stopped at 0. It still never touches a request, a proposal, an alert, a notice, a work order or the audit seal. `docs/PRIVACY.md`, `USER_GUIDE.md`,
   `KNOWN_LIMITATIONS.md`, `INSTALL.md` and `STORES.md` say so.
-* **Engine fixes that this version does not have yet.** Dates that overflowed for very large stock, prices that are not positive numbers, an on-time rate outside 0 to 1, decimal commas in a typed quantity, totals
-  before tax next to totals with tax, and returns in the vendor scorecard are fixed in the engine's repository (its changelog says how). They are not in `ai-munimji-engine` 0.1.0, which this version pins
-  exactly; they reach the app with the next engine release. The pin is unchanged.
+* **The engine fixes, with the engine 0.1.1 they are in.** Dates that overflowed for very large stock, prices that are not positive numbers, an on-time rate outside 0 to 1, decimal commas in a typed quantity,
+  totals before tax next to totals with tax, and returns in the vendor scorecard are fixed in `ai-munimji-engine` 0.1.1 (the engine's changelog says how). The app pins it exactly, `ai-munimji-engine==0.1.1`
+  in `pyproject.toml`, so it installs only once 0.1.1 is on PyPI. 0.1.0 of the engine is on PyPI and has none of these fixes.
+* **Version 0.1.1.** `__version__`, the README, `docs/INSTALL.md`, `docs/KNOWN_LIMITATIONS.md`, `docs/LISTING.md` (the registry file's `version`) and `docs/RELEASE_CHECKLIST.md` name it.
+
+## 0.1.0 (9 Nov 2026)
 
 ### The release commit
 
