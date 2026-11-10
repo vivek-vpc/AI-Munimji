@@ -39,7 +39,7 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
 * **Deferred on purpose, not built in version 0.1:**
   * a **dry run** (see what the check would do, without making anything);
   * a **stock monitor view** (a report of every item and why it is or is not low);
-  * an **inbox** beyond the standard list view of Munimji Approval Request (no workspace, no dashboard);
+  * an **inbox** beyond the standard list view of Munimji Approval Request: the AI Munimji home page is shortcuts to the standard lists, with a count on three of them (no charts, no dashboard);
   * **reminders and expiry**: a request waits until someone answers it; none is reminded or closed by the clock, though the records carry the columns for it;
   * **e-mail notifications**: the one notification is in the Desk bell, to the role Munimji Approver, once per request; a request that is changed is a new request and is announced again;
   * a **volume test** of the stores with many thousands of records;

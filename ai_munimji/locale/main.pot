@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-09 17:22+0000\n"
-"PO-Revision-Date: 2026-11-09 17:22+0000\n"
+"POT-Creation-Date: 2026-11-10 13:45+0000\n"
+"PO-Revision-Date: 2026-11-10 13:45+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -25,6 +25,21 @@ msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:38
 msgid "1 item could not be analysed in the last stock check and was skipped."
+msgstr ""
+
+#. Header text in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
+msgid "<span class=\"h4\"><b>Past requests</b></span>"
+msgstr ""
+
+#. Header text in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
+msgid "<span class=\"h4\"><b>Setup</b></span>"
+msgstr ""
+
+#. Header text in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
+msgid "<span class=\"h4\"><b>What needs you</b></span>"
 msgstr ""
 
 #. Description of the 'Ask when stock is at or below this quantity (0 = not
@@ -68,17 +83,28 @@ msgstr ""
 msgid "ABC class"
 msgstr ""
 
-#: ai_munimji/uninstall.py:77
+#. Title of a Sidebar
+#. Name of a Workspace
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:210
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:13
+#: ai_munimji/uninstall.py:82
 msgid "AI Munimji"
 msgstr ""
 
 #. Name of a DocType
+#. Label of a shortcut in the AI Munimji Workspace
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:212
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:91
 msgid "AI Munimji Settings"
 msgstr ""
 
-#: ai_munimji/uninstall.py:71
+#: ai_munimji/uninstall.py:76
 msgid "AI Munimji is being removed from this site."
+msgstr ""
+
+#. Paragraph text in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
+msgid "AI Munimji watches your stock and prepares purchase orders. Nothing is ordered until a person presses Approve."
 msgstr ""
 
 #. Description of the 'Munimji note' (Small Text) field in DocType 'Material
@@ -116,6 +142,13 @@ msgstr ""
 msgid "Agent"
 msgstr ""
 
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:99
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:67
+msgid "All requests"
+msgstr ""
+
 #. Label of the use_lead_time_rule (Check) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:67
@@ -147,6 +180,13 @@ msgstr ""
 #. Label of the approver (Data) field in DocType 'Munimji Approval Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:114
 msgid "Answered by"
+msgstr ""
+
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:67
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:51
+msgid "Answered requests"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:79
@@ -389,6 +429,13 @@ msgstr ""
 msgid "Draft Stock Entry"
 msgstr ""
 
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:179
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:83
+msgid "Draft purchase orders"
+msgstr ""
+
 #. Label of the dry_run (Check) field in DocType 'Munimji Agent Run'
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:42
 msgid "Dry run"
@@ -438,6 +485,13 @@ msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:112
 msgid "Every vendor's figures, the duties and taxes, and how the score works"
+msgstr ""
+
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:83
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:59
+msgid "Expired or withdrawn"
 msgstr ""
 
 #. Label of the expires_at (Datetime) field in DocType 'Munimji Approval
@@ -507,6 +561,11 @@ msgstr ""
 #. Label of the holder (Data) field in DocType 'Munimji Lock'
 #: ai_munimji/ai_munimji/doctype/munimji_lock/munimji_lock.json:17
 msgid "Holder"
+msgstr ""
+
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:19
+msgid "Home"
 msgstr ""
 
 #. Label of the housekeeping_section (Section Break) field in DocType 'AI
@@ -1027,6 +1086,11 @@ msgstr ""
 msgid "Provider"
 msgstr ""
 
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:147
+msgid "Purchase proposals"
+msgstr ""
+
 #. Label of the purpose (Data) field in DocType 'Munimji Vendor Message'
 #. Label of the purpose (Data) field in DocType 'Munimji Vendor Reply'
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_message/munimji_vendor_message.json:25
@@ -1202,6 +1266,11 @@ msgstr ""
 msgid "Requested by"
 msgstr ""
 
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:36
+msgid "Requests"
+msgstr ""
+
 #. Label of the approvals_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:139
@@ -1297,6 +1366,11 @@ msgstr ""
 msgid "Set by AI Munimji when a request is turned into this stock transfer. Do not edit."
 msgstr ""
 
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:196
+msgid "Settings"
+msgstr ""
+
 #. Label of the severity (Data) field in DocType 'Munimji Approval Request'
 #. Label of the severity (Int) field in DocType 'Munimji Stock Alert'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:67
@@ -1366,12 +1440,26 @@ msgstr ""
 
 #. Label of the alerts_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:164
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:131
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:75
 msgid "Stock alerts"
+msgstr ""
+
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:116
+msgid "Stock and orders"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:28
 msgid "Stock monitoring is off. Review the thresholds below, then switch on Watch stock."
+msgstr ""
+
+#. Label of a Sidebar Item
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:163
+msgid "Stock transfers"
 msgstr ""
 
 #. Label of the supplier (Link) field in DocType 'Munimji Approval Request'
@@ -1711,7 +1799,11 @@ msgstr ""
 msgid "Vendor"
 msgstr ""
 
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:72
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:51
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:43
 msgid "Waiting for your answer"
 msgstr ""
 
@@ -1953,6 +2045,24 @@ msgstr ""
 #: ai_munimji/settings_map.py:207
 #, python-brace-format
 msgid "{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
+msgstr ""
+
+#. Count format of shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:82
+#, python-brace-format
+msgid "{} drafts"
+msgstr ""
+
+#. Count format of shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:74
+#, python-brace-format
+msgid "{} open"
+msgstr ""
+
+#. Count format of shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:42
+#, python-brace-format
+msgid "{} waiting"
 msgstr ""
 
 #: ai_munimji/settings_map.py:231

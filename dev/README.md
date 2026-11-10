@@ -43,6 +43,10 @@ python dev/scripts/make_doctypes.py     # write the DocType files and the table 
 
 `development.localhost` resolves to your own machine in current browsers; no hosts-file change is needed. The ports are published on 127.0.0.1 only.
 
+* **`bench start` says "address already in use :::9000" and stops:** a `bench start` from earlier is still running in the container and is serving the site already. Stop it with `docker exec munimji-dev-frappe-1 pkill -f honcho` if you want a fresh one.
+* **The app's place on the Desk** (the tile, the sidebar, the home page) is three exported files: `ai_munimji/dock/`, `ai_munimji/ai_munimji/sidebar/` and `ai_munimji/ai_munimji/workspace/`. On the development site (developer mode) they are written by Frappe when the record is saved on the Desk, so edit them there and look at the diff. `tests/test_desk.py` checks that they agree with `hooks.py` and with the DocTypes.
+* **Do not run `bench uninstall-app ai_munimji` on the development site:** in developer mode Frappe deletes the exported Workspace and Sidebar files from the app's folder (`git checkout -- ai_munimji` brings them back). Use `check-uninstall.sh`, which works on a separate site.
+
 After you change a DocType file, bring the sites up to date with `bench --site <site> migrate` (the test site is `test.localhost`).
 
 ## What is in it

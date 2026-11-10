@@ -45,6 +45,22 @@ fixtures = [
 	}
 ]
 
+# The Desk (Frappe 16)
+# --------------------
+
+# The app's tile on the apps screen. The rail behind it, the module's sidebar and the home page are shipped as files: ai_munimji/dock/ai_munimji/, ai_munimji/ai_munimji/sidebar/
+# and ai_munimji/ai_munimji/workspace/ (tests/test_desk.py checks that they agree). Only people with one of the app's roles see the tile. The logo is set here and NOT through
+# app_logo_url, which the last app to set it would take over for the whole navbar.
+add_to_apps_screen = [
+	{
+		"name": "ai_munimji",
+		"logo": "/assets/ai_munimji/images/ai-munimji-logo.png",
+		"title": "AI Munimji",
+		"route": "/desk/ai-munimji",
+		"has_permission": "ai_munimji.permissions.check_app_permission",
+	}
+]
+
 # Uninstallation
 # ------------
 
