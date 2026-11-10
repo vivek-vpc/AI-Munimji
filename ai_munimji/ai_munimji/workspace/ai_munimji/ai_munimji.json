@@ -1,0 +1,100 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"munimji-intro\", \"type\": \"paragraph\", \"data\": {\"text\": \"AI Munimji watches your stock and prepares purchase orders. Nothing is ordered until a person presses Approve.\", \"col\": 12}}, {\"id\": \"munimji-h1\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eWhat needs you\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"munimji-s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Waiting for your answer\", \"col\": 4}}, {\"id\": \"munimji-s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Stock alerts\", \"col\": 4}}, {\"id\": \"munimji-s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Draft purchase orders\", \"col\": 4}}, {\"id\": \"munimji-sp1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"munimji-h2\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003ePast requests\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"munimji-s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Answered requests\", \"col\": 4}}, {\"id\": \"munimji-s5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Expired or withdrawn\", \"col\": 4}}, {\"id\": \"munimji-s6\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All requests\", \"col\": 4}}, {\"id\": \"munimji-sp2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"munimji-h3\", \"type\": \"header\", \"data\": {\"text\": \"\\u003cspan class=\\\"h4\\\"\\u003e\\u003cb\\u003eSetup\\u003c/b\\u003e\\u003c/span\\u003e\", \"col\": 12}}, {\"id\": \"munimji-s7\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"AI Munimji Settings\", \"col\": 4}}]",
+ "creation": "2026-11-10 18:49:09.464400",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "clipboard-check",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "AI Munimji",
+ "link_type": "DocType",
+ "links": [],
+ "modified": "2026-11-10 18:49:09.464400",
+ "modified_by": "Administrator",
+ "module": "AI Munimji",
+ "name": "AI Munimji",
+ "number_cards": [],
+ "owner": "Administrator",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Munimji Viewer"
+  },
+  {
+   "role": "Munimji Approver"
+  },
+  {
+   "role": "Munimji Manager"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 100.0,
+ "shortcuts": [
+  {
+   "doc_view": "List",
+   "format": "{} waiting",
+   "label": "Waiting for your answer",
+   "link_to": "Munimji Approval Request",
+   "stats_filter": "[[\"Munimji Approval Request\", \"status\", \"=\", \"pending\"]]",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "format": "",
+   "label": "Answered requests",
+   "link_to": "Munimji Approval Request",
+   "stats_filter": "[[\"Munimji Approval Request\", \"status\", \"=\", \"decided\"]]",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "format": "",
+   "label": "Expired or withdrawn",
+   "link_to": "Munimji Approval Request",
+   "stats_filter": "[[\"Munimji Approval Request\", \"status\", \"in\", [\"expired\", \"cancelled\"]]]",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "format": "",
+   "label": "All requests",
+   "link_to": "Munimji Approval Request",
+   "stats_filter": "",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "format": "{} open",
+   "label": "Stock alerts",
+   "link_to": "Munimji Stock Alert",
+   "stats_filter": "[[\"Munimji Stock Alert\", \"status\", \"=\", \"awaiting\"]]",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "List",
+   "format": "{} drafts",
+   "label": "Draft purchase orders",
+   "link_to": "Purchase Order",
+   "stats_filter": "[[\"Purchase Order\", \"custom_agent_ref\", \"is\", \"set\"], [\"Purchase Order\", \"docstatus\", \"=\", 0]]",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "format": "",
+   "label": "AI Munimji Settings",
+   "link_to": "AI Munimji Settings",
+   "stats_filter": "",
+   "type": "DocType"
+  }
+ ],
+ "standard": 1,
+ "title": "AI Munimji",
+ "type": "Workspace"
+}

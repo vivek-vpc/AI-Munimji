@@ -47,6 +47,11 @@ def before_uninstall():
 	if frappe.db.exists("Notification", NOTIFICATION):
 		frappe.delete_doc("Notification", NOTIFICATION, force=True, ignore_permissions=True)
 
+	# the app's rail on the Desk, and any arrangement of it that the site or a person made. The Workspace and the Sidebar are linked to the module and go with it; a Dock is linked to the app,
+	# which Frappe does not follow, so it would stay behind (dev/check-uninstall.sh counts it). Deleting a Dock only clears Frappe's cache: it touches no file.
+	for name in frappe.db.get_values("Dock", {"app": "ai_munimji"}, "name", pluck=True):
+		frappe.delete_doc("Dock", name, force=True, ignore_permissions=True)
+
 	for name in CUSTOM_FIELDS:
 		if frappe.db.exists("Custom Field", name):
 			frappe.delete_doc("Custom Field", name, force=True, ignore_permissions=True)

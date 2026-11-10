@@ -19,7 +19,8 @@ bench --site <your site> install-app ai_munimji
 | What | Where |
 |---|---|
 | Three roles: Munimji Viewer, Munimji Approver, Munimji Manager | Role |
-| The page AI Munimji Settings (Search "AI Munimji Settings"), with a calendar table | Single DocType |
+| AI Munimji on the Desk: a tile on the apps screen (shown to people with a Munimji role and to System Managers), a sidebar, and a home page of shortcuts to the lists that need attention (requests waiting for an answer, stock alerts, draft purchase orders, past requests, Settings), each with a count where that helps. Each person sees only the rows they may open | Dock, Sidebar, Workspace |
+| The page AI Munimji Settings (in the AI Munimji sidebar, or search "AI Munimji Settings"), with a calendar table | Single DocType |
 | The list Munimji Approval Request, and 24 more DocTypes that hold the engine's records: purchase proposals, stock alerts and notices, work orders, the audit seal, the agents' log, locks and the rest (table: [STORES.md](STORES.md)) | DocType |
 | An "approve" permission for that list | Permission Type |
 | Seven read-only fields that carry the request's reference and who approved: `custom_agent_ref` and `custom_agent_approved_by` on Purchase Order, Material Request and Stock Entry, and `custom_agent_note` on Material Request | Custom Field |

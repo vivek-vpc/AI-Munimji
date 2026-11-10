@@ -4,6 +4,15 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 
 ## 0.1.1 (10 Nov 2026)
 
+### Added
+
+* **AI Munimji is on the Desk.** Until now a person had to know to search for "Munimji Approval Request". The app now ships what Frappe 16.55 uses to put an app on the Desk: a **tile on the apps screen**
+  (hook `add_to_apps_screen`, shown only to people with a Munimji role and to System Managers, with a small copy of the logo in `public/images/`), the app's **Dock** record (`dock/ai_munimji/`), a module
+  **Sidebar** and a public **Workspace** page "AI Munimji" (`ai_munimji/sidebar/`, `ai_munimji/workspace/`). The home page has shortcuts to **Waiting for your answer** (with the count), **Stock alerts** (count),
+  **Draft purchase orders** (count), **Answered requests**, **Expired or withdrawn**, **All requests** and **Settings**; the sidebar has the same lists, plus purchase proposals and stock transfers. Each person
+  sees only the rows they may open (a viewer sees no Settings and no Purchase Orders). They are Frappe's own exported files, installed by `bench migrate`; uninstalling removes them (`tests/test_desk.py`, and the
+  uninstall check counts them). It needs Frappe 16.55.2 or later, which `pyproject.toml` already requires.
+
 ### Fixed after review
 
 * **A wrong answer no longer ends in a server error.** The parameters of an answer (`ai_munimji.api.answer`) that are not a JSON object (text that is not JSON, a list, a number, `null`) or are longer than 2,000

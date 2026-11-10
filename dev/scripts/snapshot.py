@@ -43,6 +43,15 @@ snapshot = {
 	},
 	"doctypes_of_the_module": names("DocType", module="AI Munimji"),
 	"module_def": names("Module Def", name="AI Munimji"),
+	# the app's place on the Desk (Frappe 16.55 and later: the Dock and Sidebar DocTypes exist)
+	"desk_records": {
+		doctype: names(doctype, **{field: value})
+		for doctype, field, value in (
+			("Workspace", "module", "AI Munimji"),
+			("Sidebar", "module", "AI Munimji"),
+			("Dock", "app", "ai_munimji"),
+		)
+	},
 	"permission_types": names("Permission Type", doc_type=["like", "Munimji%"]),
 	"permission_types_all": names("Permission Type"),
 	"docperm_approve_columns": {
@@ -94,6 +103,8 @@ snapshot = {
 			"Module Def",
 			"Permission Type",
 			"Workspace",
+			"Sidebar",
+			"Dock",
 			"Version",
 		)
 	},

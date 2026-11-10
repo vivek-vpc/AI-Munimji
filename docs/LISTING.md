@@ -107,6 +107,7 @@ Use fictional items and suppliers. No real names, addresses or e-mail addresses.
 6. The Change quantity dialog.
 7. The request after approval, with the draft order's number shown on it.
 8. The draft Purchase Order, showing the request reference and the approver.
+9. The AI Munimji home page (the shortcuts, with the count of requests waiting) and, if you like, the apps screen with the AI Munimji tile.
 
 Each image: at least 1280 px wide, light theme, no browser toolbars, a short caption.
 

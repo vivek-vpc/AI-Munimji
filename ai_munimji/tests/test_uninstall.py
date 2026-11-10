@@ -44,6 +44,8 @@ class TestTheUninstallStep(IntegrationTestCase):
 			"custom_agent_note",
 			"approve",
 			"scheduled job",
+			"Dock",
+			"Workspace",
 			"AI Munimji Settings",
 			"Munimji Approval Request",
 			"Munimji Calendar Event",
