@@ -11,6 +11,7 @@ import frappe
 from ai_munimji_engine.packs.stock_procurement.inventory.alerts import ACTIVE as ALERT_ACTIVE
 from erpnext.tests.utils import ERPNextTestSuite
 from frappe.boot import get_bootinfo
+from frappe.desk import desktop
 
 from ai_munimji import hooks
 from ai_munimji.permissions import APP_ROLES, check_app_permission
@@ -197,3 +198,36 @@ class TestWhatPeopleSeeOnTheDesk(ERPNextTestSuite):
 			shown = {r["label"] for r in sidebar["items"] if r["type"] == "Link"}
 			self.assertEqual(shown, everything - hidden, user)
 		self.assertNotIn(NAME, self.boot(self.nobody).get("module_sidebars", {}))
+
+	def shortcuts_on_the_home_page(self, user: str) -> set[str]:
+		"""The shortcuts of the home page that Frappe keeps for this person: it drops those whose list they may not open, and leaves every heading and every other block as it is."""
+		with self.set_user(user):
+			frappe.clear_cache(user=user)
+			page = desktop.get_desktop_page(json.dumps({"name": NAME, "title": NAME}))
+		return {s["label"] for s in page["shortcuts"]["items"]}
+
+	def test_no_heading_of_the_home_page_is_left_with_nothing_under_it_for_anyone(self):
+		blocks = json.loads(self.workspace["content"])
+		for user in (self.viewer, self.approver, self.manager, self.sysmgr):
+			kept = self.shortcuts_on_the_home_page(user)
+			heading, under = None, {}
+			for block in blocks:
+				if block["type"] == "header":
+					heading = block["data"]["text"]
+					under[heading] = 0
+				elif block["type"] == "spacer":
+					heading = None
+				elif block["type"] == "shortcut" and heading and block["data"]["shortcut_name"] in kept:
+					under[heading] += 1
+			self.assertTrue(under, "the home page has headings")
+			for text, shown in under.items():
+				self.assertGreater(shown, 0, f"{user} sees the heading {text!r} with nothing under it")
+
+	def test_the_settings_shortcut_is_on_the_home_page_of_a_manager_and_of_nobody_else(self):
+		for user, shown in (
+			(self.manager, True),
+			(self.sysmgr, True),
+			(self.viewer, False),
+			(self.approver, False),
+		):
+			self.assertEqual(SETTINGS in self.shortcuts_on_the_home_page(user), shown, user)

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-10 13:45+0000\n"
-"PO-Revision-Date: 2026-11-10 13:45+0000\n"
+"POT-Creation-Date: 2026-11-10 14:27+0000\n"
+"PO-Revision-Date: 2026-11-10 14:27+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -30,11 +30,6 @@ msgstr ""
 #. Header text in the AI Munimji Workspace
 #: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
 msgid "<span class=\"h4\"><b>Past requests</b></span>"
-msgstr ""
-
-#. Header text in the AI Munimji Workspace
-#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:3
-msgid "<span class=\"h4\"><b>Setup</b></span>"
 msgstr ""
 
 #. Header text in the AI Munimji Workspace
