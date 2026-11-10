@@ -21,12 +21,13 @@ def make_locks():
 
 
 def make_schedule():
-	"""The stock check's scheduled job (schedule.py), at install and at every migrate: it follows what the Settings page holds, so a schedule a person has set survives a migrate, and a
-	site that never saved the page gets the job stopped (Watch stock is off by default)."""
+	"""The stock check's scheduled job and the daily clean-up of the logs (schedule.py), at install and at every migrate: they follow what the Settings page holds, so a schedule a person
+	has set survives a migrate. A site that never saved the page gets the stock check stopped (Watch stock is off by default) and the clean-up running (Keep logs for (days) is 90 by default)."""
 	from ai_munimji import schedule
 
 	settings = frappe.get_single("AI Munimji Settings")
 	schedule.sync(bool(settings.enabled), settings.check_cron)
+	schedule.sync_clean_up(settings.keep_logs_days)
 
 
 def check_database():

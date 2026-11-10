@@ -26,6 +26,7 @@ AI Munimji watches your stock and prepares purchase requests for a person to app
 2. Review the thresholds, the **Check stock at** time and the demand calendar.
 3. Check who holds the role **Munimji Approver**. They are told in the Desk bell when a request is made.
 4. Tick **Watch stock** and save. The monitor is off until you do. Saving starts the scheduled job at the time you set (ERPNext's scheduler runs jobs at least 4 minutes apart).
+5. Check **Keep logs for (days)**. It is 90 by default. A clean-up runs once a day and removes the logs of what the app did that are older than this; it never removes a request, a proposal, an alert or the audit seal. Set it to 0 to keep every log; the clean-up then does not run.
 
 ## A request, step by step
 
@@ -57,6 +58,7 @@ A dry run, a stock monitor report, reminders and expiry, e-mail notifications, s
 - **"Not permitted" on Approve:** the person needs both the Munimji Approver role and permission to create a Purchase Order in ERPNext (Purchase User).
 - **A person sees no stock in a request:** they need Stock User.
 - **A second press says another press is being handled:** see the database setting above.
+- **The Settings page says "N items could not be analysed":** the last stock check skipped those items and looked at all the others. Open the latest Munimji Agent Run to see which items and why. The note goes at the next check that analyses every item.
 
 ## Taking it out
 

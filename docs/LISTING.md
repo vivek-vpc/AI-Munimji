@@ -37,7 +37,7 @@ Two files go into the registry pull request:
   "name": "ai_munimji",
   "releases": [
     {
-      "version": "0.1.0",
+      "version": "0.1.1",
       "branch": "main",
       "commit": "[the full 40-character SHA of the release commit]",
       "frappe_core": "[copied exactly from pyproject.toml: [tool.bench.frappe-dependencies].frappe]",
@@ -126,8 +126,8 @@ Each image: at least 1280 px wide, light theme, no browser toolbars, a short cap
 
 ## 6. Publishing steps (registry)
 
-1. Engine first: tag `engine-v0.1.0` in `erpnext-ai-agents`, approve the publish, check the package on PyPI.
-2. App release commit (Claude Code, per `docs/RELEASE_CHECKLIST.md`): exact engine pin, version 0.1.0, "not released" wording changed, logo added at `docs/img/`. CI green on that commit.
+1. Engine first: tag `engine-v0.1.1` in `erpnext-ai-agents`, approve the publish, check the package on PyPI.
+2. App release commit (Claude Code, per `docs/RELEASE_CHECKLIST.md`): exact engine pin `ai-munimji-engine==0.1.1`, version 0.1.1, "not released" wording changed, logo added at `docs/img/`. CI green on that commit.
 3. Make `AI-Munimji` public. Check that the logo URL, the documentation page and the licence open in a private browser window.
 4. Run the registry's check locally against the release commit (clone `frappe/marketplace`, see its `docs/marketplace-check`). Fix what it finds.
 5. Fork `frappe/marketplace`, add the two files above, open the pull request. Read the check's comment on it; comment `/rereview` to run it again.

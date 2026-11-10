@@ -1,6 +1,6 @@
 # AI Munimji
 
-A Frappe app for ERPNext v16 that watches stock and prepares draft purchase orders for a person to approve. This is version 0.1.0, the first version: it covers stock monitoring, supplier comparison and approval, and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) lists what it does not do yet. It has been run only on Frappe 16.55.2 and ERPNext 16.54.0 (earlier checks were on 16.53.0), in a development container and in CI.
+A Frappe app for ERPNext v16 that watches stock and prepares draft purchase orders for a person to approve. This is version 0.1.1: it covers stock monitoring, supplier comparison and approval, and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) lists what it does not do yet. It has been run only on Frappe 16.55.2 and ERPNext 16.54.0 (earlier checks were on 16.53.0), in a development container and in CI.
 
 The rules the app is built to:
 
@@ -9,7 +9,7 @@ The rules the app is built to:
 * ERPNext receives **draft** documents, with the approver recorded and the request's reference in a field. The app never submits one. An approver can later change the quantity of, or cancel, an order made from a request.
 * Every method a browser can call checks the caller's permission first, and only the scheduled job reads with `frappe.get_all`. A test enforces both (`ai_munimji/tests/test_rules.py`).
 
-## What is in version 0.1.0
+## What is in version 0.1.1
 
 | | |
 |---|---|

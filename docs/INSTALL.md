@@ -1,6 +1,6 @@
 # Installing AI Munimji, and who needs which role
 
-These notes are for version **0.1.0** of AI Munimji, for people who install it from the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
+These notes are for version **0.1.1** of AI Munimji, for people who install it from the source on their own bench. It has been run only on **Frappe 16.55.2 and ERPNext 16.54.0** (version 16 of both; no other major version has been tried; earlier checks were on ERPNext 16.53.0, and the permission results below were measured again on 16.54.0 and are the same).
 
 ## What you need first
 
@@ -73,7 +73,7 @@ Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User doe
 
 ## Settings
 
-Open AI Munimji Settings as a Munimji Manager or System Manager. The values are checked by the same rules as the standalone service uses for its `settings.yaml`, so a value is accepted here exactly when the service accepts it there. The time zone is the one in System Settings. **Keep logs for (days)** says how long the clean-up (`ai_munimji.retention.clean_up`) keeps what the agents did and the chat log: 90 by default, 0 keeps them; it never deletes a request, a proposal, an alert or the audit seal. There are no secrets in version 0.1.
+Open AI Munimji Settings as a Munimji Manager or System Manager. The values are checked by the same rules as the standalone service uses for its `settings.yaml`, so a value is accepted here exactly when the service accepts it there. The time zone is the one in System Settings. **Keep logs for (days)** says how long what the agents did and the chat log are kept: 90 by default. A clean-up (`ai_munimji.retention.clean_up`) runs once a day while this is a positive number and removes what is older; with 0 it does not run and every log is kept. It never deletes a request, a proposal, an alert or the audit seal. There are no secrets in version 0.1.
 
 ## Taking it out
 

@@ -116,8 +116,8 @@ stock to a draft Purchase Order is one test on real data (`tests/world/test_end_
 
 ## Volume and retention
 
-`ai_munimji/retention.py` (`bench --site <site> execute ai_munimji.retention.clean_up`) deletes what has served its purpose and what no person answers: runs, tool calls and the chat log older
+`ai_munimji/retention.py` (once a day by the scheduler, while Keep logs for (days) is a positive number; by hand with `bench --site <site> execute ai_munimji.retention.clean_up`) deletes what has served its purpose and what no person answers: runs, tool calls and the chat log older
 than **Keep logs for (days)** on the settings page (90 by default; 0 keeps them), task records and vendor messages and replies after a year (never a task still running or an open
 conversation), assistant answers after half a year, the ids of handled messages after a fortnight, and clears the trace of old tasks. It never touches a request, a proposal, an alert, a notice, a
-work order, a transfer or anything else a person looks at or answers, whatever its age, and never the audit seal; a test fails if one of those tables is on its list or loses a record. Its
-schedule is Phase 5's.
+work order, a transfer or anything else a person looks at or answers, whatever its age, and never the audit seal; a test fails if one of those tables is on its list or loses a record. With
+0 the daily job is stopped and nothing is cleaned up by itself.

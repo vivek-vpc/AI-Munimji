@@ -1,6 +1,6 @@
 # Known limitations of version 0.1
 
-These are the limits of version 0.1.0 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
+These are the limits of version 0.1.1 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
 
 ## What the ERP client does not do yet
 
@@ -45,7 +45,7 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
   * a **volume test** of the stores with many thousands of records;
   * **sealing at the moment of the answer**: the job seals what was answered at its next run (above).
 
-  The clean-up of old logs exists and is run by hand; it has no schedule yet.
+  The clean-up of old logs runs once a day while "Keep logs for (days)" is a positive number. With 0 it does not run, so nothing is cleaned up by itself, the records with a fixed period (task records, vendor messages, the ids of handled messages) included; it can still be run by hand.
 * **Searching the requests** narrows them in the database and then applies the engine's rules to what is left; over many thousands of requests that is slower than SQLite's scan.
 
 ## Taxes

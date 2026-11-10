@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-09 09:27+0000\n"
-"PO-Revision-Date: 2026-11-09 09:27+0000\n"
+"POT-Creation-Date: 2026-11-09 17:22+0000\n"
+"PO-Revision-Date: 2026-11-09 17:22+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -21,6 +21,10 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:47
 #, python-format
 msgid "+40 means 40% more use each day during the event, -20 means 20% less."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:38
+msgid "1 item could not be analysed in the last stock check and was skipped."
 msgstr ""
 
 #. Description of the 'Ask when stock is at or below this quantity (0 = not
@@ -124,7 +128,7 @@ msgstr ""
 msgid "An item that is still low gets the same alert again after this many days. A worse level is always sent at once."
 msgstr ""
 
-#: ai_munimji/erp_client.py:900
+#: ai_munimji/erp_client.py:904
 #, python-brace-format
 msgid "Another press for this request is still being handled. Wait a moment and look at the {0} before pressing again."
 msgstr ""
@@ -150,11 +154,11 @@ msgstr ""
 msgid "Answered: {0}"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:132
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:134
 msgid "Approve"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:223
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:225
 #, python-brace-format
 msgid "Approve this request? {0}"
 msgstr ""
@@ -241,13 +245,13 @@ msgstr ""
 msgid "Change in daily use (%)"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:133
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:191
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:135
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:193
 msgid "Change quantity"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:134
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:216
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:136
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:218
 msgid "Change vendor"
 msgstr ""
 
@@ -285,7 +289,7 @@ msgstr ""
 msgid "Check stock at"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:192
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:194
 msgid "Check the vendors again"
 msgstr ""
 
@@ -362,11 +366,11 @@ msgstr ""
 msgid "Digest"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:135
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:137
 msgid "Dismiss"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:225
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:227
 msgid "Dismiss this request? Nothing will be ordered."
 msgstr ""
 
@@ -432,7 +436,7 @@ msgstr ""
 msgid "Every vendor's figures"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:110
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:112
 msgid "Every vendor's figures, the duties and taxes, and how the score works"
 msgstr ""
 
@@ -486,7 +490,7 @@ msgstr ""
 msgid "From warehouse"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:136
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:138
 msgid "Got it"
 msgstr ""
 
@@ -540,30 +544,30 @@ msgstr ""
 msgid "Intent"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1169
+#: ai_munimji/erp_client.py:1173
 #, python-brace-format
 msgid "It could not be {0}: {1}"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1088
+#: ai_munimji/erp_client.py:1092
 msgid "It has been cancelled."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1094
+#: ai_munimji/erp_client.py:1098
 #, python-brace-format
 msgid "It has {0} lines for {1}, so change it in the form."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1086
+#: ai_munimji/erp_client.py:1090
 msgid "It is no longer there."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1090
+#: ai_munimji/erp_client.py:1094
 #, python-brace-format
 msgid "It is {0}; reopen it first."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1075
+#: ai_munimji/erp_client.py:1079
 msgid "It was not created by AI Munimji for this request, so it is left alone."
 msgstr ""
 
@@ -655,7 +659,7 @@ msgstr ""
 msgid "Made"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:224
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:226
 #, python-brace-format
 msgid "Mark this request as handled? {0}"
 msgstr ""
@@ -899,11 +903,11 @@ msgstr ""
 msgid "Munimji request"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:184
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:186
 msgid "New quantity"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:159
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:161
 msgid "No answer"
 msgstr ""
 
@@ -912,7 +916,7 @@ msgstr ""
 msgid "Normal use: look back this many days"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:165
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:167
 msgid "Not done"
 msgstr ""
 
@@ -942,7 +946,7 @@ msgstr ""
 msgid "Notes"
 msgstr ""
 
-#: ai_munimji/erp_client.py:930
+#: ai_munimji/erp_client.py:934
 #, python-brace-format
 msgid "Nothing was created: the supplier's currency could not be worked out ({0})."
 msgstr ""
@@ -977,6 +981,10 @@ msgstr ""
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:150
 msgid "One reminder goes to the approvers if there is still no answer after this long."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:44
+msgid "Open the latest Munimji Agent Run to see which."
 msgstr ""
 
 #. Label of the ref_id (Data) field in DocType 'Munimji Vendor Message'
@@ -1056,31 +1064,31 @@ msgstr ""
 msgid "Read this many days of history"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1225
+#: ai_munimji/erp_client.py:1229
 msgid "Reading a supplier's contact details"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1210
+#: ai_munimji/erp_client.py:1214
 msgid "Reading goods receipts for the delivery and invoice checks"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1222
+#: ai_munimji/erp_client.py:1226
 msgid "Reading item alternatives"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1213
+#: ai_munimji/erp_client.py:1217
 msgid "Reading stock counts"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1216
+#: ai_munimji/erp_client.py:1220
 msgid "Reading the value of stock"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1219
+#: ai_munimji/erp_client.py:1223
 msgid "Reading when each item was last bought"
 msgstr ""
 
-#: ai_munimji/erp_client.py:741
+#: ai_munimji/erp_client.py:745
 #, python-brace-format
 msgid "Reading {0}"
 msgstr ""
@@ -1245,11 +1253,11 @@ msgstr ""
 msgid "Send stock alerts"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1230
+#: ai_munimji/erp_client.py:1234
 msgid "Sending e-mail"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:157
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:159
 msgid "Sending your answer..."
 msgstr ""
 
@@ -1307,7 +1315,7 @@ msgstr ""
 msgid "Snoozed until"
 msgstr ""
 
-#: ai_munimji/api.py:20
+#: ai_munimji/api.py:37
 msgid "Someone else is answering this request at the same moment, or your answer could not be applied just now. Nothing was changed. Reload the page and look at the request: if it was answered you will see who answered first, and if it is still waiting you can answer it again."
 msgstr ""
 
@@ -1362,7 +1370,7 @@ msgstr ""
 msgid "Stock alerts"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:30
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:28
 msgid "Stock monitoring is off. Review the thresholds below, then switch on Watch stock."
 msgstr ""
 
@@ -1391,7 +1399,7 @@ msgstr ""
 msgid "Supplier name"
 msgstr ""
 
-#: ai_munimji/erp_client.py:521
+#: ai_munimji/erp_client.py:525
 msgid "Supplier quotations"
 msgstr ""
 
@@ -1453,7 +1461,7 @@ msgstr ""
 msgid "Task"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:104
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:106
 msgid "Taxes are not included in these totals."
 msgstr ""
 
@@ -1472,7 +1480,7 @@ msgstr ""
 msgid "The audit seal is append only: a row is never changed or deleted."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1126
+#: ai_munimji/erp_client.py:1130
 #, python-brace-format
 msgid "The change was refused: {0}"
 msgstr ""
@@ -1491,7 +1499,7 @@ msgstr ""
 msgid "The database has innodb_snapshot_isolation switched ON. When two people answer the same request at the same moment, the second one is not made to wait: that answer is refused, and the person is asked to look again. Set innodb_snapshot_isolation = OFF in the database server's configuration (Frappe's own Docker files do) and restart the server."
 msgstr ""
 
-#: ai_munimji/erp_client.py:497
+#: ai_munimji/erp_client.py:501
 msgid "The delivery record"
 msgstr ""
 
@@ -1564,7 +1572,7 @@ msgstr ""
 msgid "The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
 msgstr ""
 
-#: ai_munimji/erp_client.py:828
+#: ai_munimji/erp_client.py:832
 msgid "The scheduled job reads and proposes; a document is made only as the person who approved it."
 msgstr ""
 
@@ -1580,7 +1588,7 @@ msgstr ""
 msgid "The system mode of the ERP client is only for the scheduled job, which runs as Administrator."
 msgstr ""
 
-#: ai_munimji/erp_client.py:972
+#: ai_munimji/erp_client.py:976
 msgid "The two warehouses are the same."
 msgstr ""
 
@@ -1593,17 +1601,17 @@ msgstr ""
 msgid "The vendors that were checked"
 msgstr ""
 
-#: ai_munimji/erp_client.py:908
+#: ai_munimji/erp_client.py:912
 #, python-brace-format
 msgid "The {0} could not be made: {1}"
 msgstr ""
 
-#: ai_munimji/erp_client.py:906
+#: ai_munimji/erp_client.py:910
 #, python-brace-format
 msgid "The {0} was refused: {1}"
 msgstr ""
 
-#: ai_munimji/erp_client.py:878
+#: ai_munimji/erp_client.py:882
 msgid "There are several companies and no default company is set, so nothing was created: it would land in whichever company the signed-in user has."
 msgstr ""
 
@@ -1611,7 +1619,11 @@ msgstr ""
 msgid "These settings cannot be saved"
 msgstr ""
 
-#: ai_munimji/erp_client.py:833
+#: ai_munimji/api.py:61
+msgid "This answer could not be read, so nothing was done. Reload the page and press the button again."
+msgstr ""
+
+#: ai_munimji/erp_client.py:837
 #, python-brace-format
 msgid "This client makes documents as the person signed in, {0}; it cannot act for {1}."
 msgstr ""
@@ -1679,7 +1691,7 @@ msgstr ""
 msgid "Use the demand calendar"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:217
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:219
 msgid "Use this vendor"
 msgstr ""
 
@@ -1695,7 +1707,7 @@ msgid "Variance"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:61
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:204
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:206
 msgid "Vendor"
 msgstr ""
 
@@ -1721,7 +1733,7 @@ msgstr ""
 msgid "What a search looks in"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:124
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:126
 msgid "What each button does"
 msgstr ""
 
@@ -1825,11 +1837,11 @@ msgstr ""
 msgid "by {0}"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1170
+#: ai_munimji/erp_client.py:1174
 msgid "cancelled"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1170
+#: ai_munimji/erp_client.py:1174
 msgid "deleted"
 msgstr ""
 
@@ -1838,16 +1850,16 @@ msgstr ""
 msgid "festival"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1237
+#: ai_munimji/erp_client.py:1241
 msgid "insufficient permission"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1007
+#: ai_munimji/erp_client.py:1011
 #, python-brace-format
 msgid "no exchange rate from {0} to {1} is set up"
 msgstr ""
 
-#: ai_munimji/erp_client.py:1237
+#: ai_munimji/erp_client.py:1241
 msgid "no reason was given"
 msgstr ""
 
@@ -1861,15 +1873,15 @@ msgstr ""
 msgid "promotion"
 msgstr ""
 
-#: ai_munimji/erp_client.py:942
+#: ai_munimji/erp_client.py:946
 msgid "purchase order"
 msgstr ""
 
-#: ai_munimji/erp_client.py:965
+#: ai_munimji/erp_client.py:969
 msgid "purchase requisition"
 msgstr ""
 
-#: ai_munimji/erp_client.py:978
+#: ai_munimji/erp_client.py:982
 msgid "stock transfer"
 msgstr ""
 
@@ -1878,12 +1890,12 @@ msgstr ""
 msgid "{0} could not be read: {1} is not open to this user."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1105
+#: ai_munimji/erp_client.py:1109
 #, python-brace-format
 msgid "{0} has already been invoiced against it, so it cannot be for less than that."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1099
+#: ai_munimji/erp_client.py:1103
 #, python-brace-format
 msgid "{0} have already been received against it, so it cannot be for less than that."
 msgstr ""
@@ -1898,12 +1910,17 @@ msgstr ""
 msgid "{0} is not supported in this version of AI Munimji."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1123
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:39
+#, python-brace-format
+msgid "{0} items could not be analysed in the last stock check and were skipped."
+msgstr ""
+
+#: ai_munimji/erp_client.py:1127
 #, python-brace-format
 msgid "{0} may not change a purchase order: {1}"
 msgstr ""
 
-#: ai_munimji/erp_client.py:904
+#: ai_munimji/erp_client.py:908
 #, python-brace-format
 msgid "{0} may not create a {1}: {2}"
 msgstr ""
@@ -1913,12 +1930,12 @@ msgstr ""
 msgid "{0} may not read {1}."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1067
+#: ai_munimji/erp_client.py:1071
 #, python-brace-format
 msgid "{0} may not see purchase orders ({1})."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1165
+#: ai_munimji/erp_client.py:1169
 #, python-brace-format
 msgid "{0} may not {1} a purchase order: {2}"
 msgstr ""
@@ -1928,7 +1945,7 @@ msgstr ""
 msgid "{0} may not {1} {2} records (the DocType's permission rows decide)."
 msgstr ""
 
-#: ai_munimji/erp_client.py:1153
+#: ai_munimji/erp_client.py:1157
 #, python-brace-format, python-format
 msgid "{0}% of it has been received and {1}% billed, so it has to be dealt with in ERPNext (cancel the receipt or invoice first)."
 msgstr ""
