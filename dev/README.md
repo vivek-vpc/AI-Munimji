@@ -84,6 +84,7 @@ stops if the site's name does not start with `scale`):
 | `check-uninstall.sh`, `scripts/snapshot.py`, `scripts/diff_snapshots.py`, `scripts/check_coexistence.py`, `scripts/standalone_fields.py` | the uninstall check, with a site that already has the standalone service's fields |
 | `verify-all.ps1` | all of it from nothing |
 | `roundtrip.ps1`, `browser/round-trip.cjs`, `scripts/seed.py`, `scripts/reset_demo.py` | the end-to-end trial of the placeholder below |
+| `demo.ps1`, `browser/demo-flow.cjs`, `scripts/seed_demo_flow.py` | the flow of a request on demo data, to follow in the browser: the data, the walkthrough, and (`-Run`) the same walk in the headless browser with the time of each step |
 | `images.lock` | the image digests that were really used (written by `up.ps1`) |
 | `timings.log` | how long each step took (not in git) |
 
