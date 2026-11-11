@@ -2,6 +2,28 @@
 
 What changed in the app for someone who installs it or builds on it. 0.1.0 (9 Nov 2026) was the first version; it was made but not tagged or submitted, and 0.1.1 is the version to install. The entries under 0.1.0 are how it was built up, phase by phase.
 
+## Unreleased
+
+### Fixed after the production-readiness review: scale and concurrency
+
+Measured on a site of 30,000 items and 5.3 million stock ledger entries; the numbers, the method and the tools to repeat it are in `docs/SCALE_MEASUREMENTS.md`. The stock check needs `ai-munimji-engine` 0.1.2
+(batches and `get_items`); `pyproject.toml` still pins 0.1.1 and is not changed here.
+
+* **The stock check no longer is one transaction for the whole site.** It works through the items in batches of 200 and, after each batch, commits, renews its lease and writes how far it has got in its Job Run
+  (new column "How far it got"). Before, every record it changed stayed row-locked for the whole run, so a person answering a request the run had touched waited until the run ended or was told "busy" (at 30,000 items
+  the run took 9 minutes and 12 of 20 answers waited the database's whole 50 seconds and failed); a failure near the end threw everything away; and a run longer than the scheduler's 300 seconds never completed. Now the
+  scheduled entry (`jobs.check_stock`) queues the run on the long queue with a timeout of six hours; a run that dies half way keeps the batches before it, and run again raises each request once; a run whose
+  lease another run has taken stops. Its memory no longer holds every item's whole analysis.
+* **The stock ledger is read for what is asked, not for everything.** `get_consumption` lets the database add up each item's movements of a day; an item's first movement is looked up for the items that need it, once,
+  and kept in Frappe's cache (it was a GROUP BY over the whole ledger on every run and on every answer to a reorder request); one item is read without listing all of them (`get_items`).
+* **The audit sweep costs what is new.** A closed request and a settings change carry the flag `sealed` (new, the app's own column), set when their entry is appended; the sweep asks for those that do not, 500 at a time,
+  and a run sweeps up to 50 times. With 200,000 sealed requests and nothing new it read 400,001 rows in 8 to 11 seconds; it now reads 1 to 3 rows. A patch sets the flag on a site sealed before it; a site where it
+  is missing is put right by the sweeps themselves, and nothing is sealed twice.
+* **The clean-up of the logs makes progress.** It removes at most 5,000 records a run, oldest first, in batches of 100 with a commit after each, and only as fast as the workers take the background job that Frappe queues for
+  every deleted document (it waits up to 30 seconds for room, and ends its run if there is none). A backlog of 150,000 would have taken 104 minutes in one transaction, past the job's time limit, and rolled back every day.
+* **A schedule that can start the check less than 15 minutes after the last start is refused** on the Settings page, with a sentence that says so; one saved by an earlier version is not followed (the job runs at
+  the default time and the log says so).
+
 ## 0.1.1 (10 Nov 2026)
 
 ### Added

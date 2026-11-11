@@ -70,7 +70,7 @@ Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User doe
 
 ## Switching the stock monitor on
 
-**After installing, the stock monitor is off.** Nothing creates requests for your stock until a person has looked at the thresholds and switched it on: open AI Munimji Settings, review the thresholds, the time in "Check stock at" and who holds the role Munimji Approver (they are told when a request is made), then tick Watch stock. Saving the page starts the scheduled job at that time; unticking it stops the job. While it is off the page says so at the top, and the scheduled job does nothing. (The standalone service starts with its monitor on; the app deliberately does not, see [NAMES.md](NAMES.md).)
+**After installing, the stock monitor is off.** Nothing creates requests for your stock until a person has looked at the thresholds and switched it on: open AI Munimji Settings, review the thresholds, the time in "Check stock at" and who holds the role Munimji Approver (they are told when a request is made), then tick Watch stock. Saving the page starts the scheduled job at that time; unticking it stops the job. The schedule may not start the check less than 15 minutes after the last start (the page refuses it with a sentence that says so): every check reads all of the site's stock, and on a large site it takes minutes. The run is queued on the `long` queue, so the site needs a worker for it ([KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md), "The stock check on a large site"). While it is off the page says so at the top, and the scheduled job does nothing. (The standalone service starts with its monitor on; the app deliberately does not, see [NAMES.md](NAMES.md).)
 
 ## Settings
 
