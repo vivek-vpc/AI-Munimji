@@ -24,6 +24,20 @@ Measured on a site of 30,000 items and 5.3 million stock ledger entries; the num
 * **A schedule that can start the check less than 15 minutes after the last start is refused** on the Settings page, with a sentence that says so; one saved by an earlier version is not followed (the job runs at
   the default time and the log says so).
 
+### Added after the production-readiness review: the flow a person can follow
+
+From the use of the app: after approving a "Reorder suggested" request nothing visible happened until the next scheduled check, the person was not told what to do next, and the draft Purchase Order's number was not shown anywhere. The stock check needs `ai-munimji-engine` 0.1.2 (`ProcurementAgent.run(work_orders=)`, with the batch parameters above); `pyproject.toml` still pins 0.1.1 and is not changed here.
+
+* **The vendors are compared within about a minute of approving a reorder.** The answer queues a job (long queue, after the commit) that compares the vendors for that one reorder, as Administrator, under the stock check's lease; the purchase request appears in Munimji Approval Request. If the job cannot take the lease, the next scheduled check does it, and no reorder gets two purchase requests. (`hand_off.py`, `jobs.run_vendor_comparison`)
+* **Every answer is followed by one plain sentence** saying what happens next and where to look: "Approved. The vendors are being compared; the purchase request will appear in Munimji Approval Request in about a minute.", "Draft Purchase Order PO-... made. Review and submit it in ERPNext." (the number is a link), "Closed. Nothing was ordered." (`next_step.py`)
+* **A Flow block on every request** of the flow: Reorder request -> Purchase request -> Draft Purchase Order, each step a link, the request on the screen marked, a changed request showing what replaced it, and the draft order's number kept on the approved request. An item with no vendor history says that no comparison was possible and to order it in ERPNext by hand, then press "Got it". (`flow.py`, `api.flow`)
+* **A "Run the check now" button on AI Munimji Settings** for Munimji Managers and System Managers: it queues the stock check, refuses a second press while one is queued or running, and the page shows when the last check ran, how far it got and how many requests it made (new column "Requests it made" on the Job Run; `bench migrate` adds it). (`api.run_check_now`, `api.check_status`)
+* **A "How a request flows" section** on the Settings page, in the user guide and in the listing text.
+* **No pop-up of "not found" lines after pressing Approve.** Asking Frappe for a record that is not there (most settings overrides are not set) also put "Munimji Settings Override ... not found" among the messages
+  the browser shows with the reply, five times over, on top of the new sentence. The stores now take that message back (`stores/missing.py`). Found while following the flow in the browser.
+* **Following it yourself:** `dev\demo.ps1` puts a small demo supply chain on the development site (one item bought from three suppliers with different prices and delivery times, one late, with 90 days
+  of usage; one item with no supplier) and prints the walkthrough; `-Run` walks through it in the container's headless browser as the manager and the approver and says how long each step took.
+
 ## 0.1.1 (10 Nov 2026)
 
 ### Added

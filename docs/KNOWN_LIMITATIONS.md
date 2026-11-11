@@ -66,6 +66,13 @@ The numbers are in [SCALE_MEASUREMENTS.md](SCALE_MEASUREMENTS.md): a site of 30,
   A request carries the flag `sealed` (the app's own column) once its entry is in the chain; a site restored from a backup that predates the flag is put right by the first sweeps, and nothing is sealed twice.
 * **The daily clean-up of the logs removes at most 5,000 records a run, oldest first, in batches of 100 with a commit after each**, so a first backlog is cleared over several days instead of failing every day. Frappe queues one background job for every document that is deleted and refuses to queue more than `max_queued_jobs` (500 by default), so the clean-up waits (up to 30 seconds) for your workers to take the jobs of the last batches, and ends its run if they have not: it goes on at the next run. A site whose workers are always busy clears a backlog slowly, and says nothing.
 
+## After an approval: the vendor comparison and the flow
+
+* **The vendors are compared within about a minute of approving a reorder, in the background.** The answer queues a job on the long queue once it is committed; the job runs as Administrator in the system mode (it reads the tax figures, which a person's session may not), under the same lease as the stock check, for that one reorder. Your site needs a worker for the `long` queue.
+* **If the job cannot take the lease, the next scheduled check compares the vendors.** That is the case while a stock check is running, and when the queue cannot be reached or Watch stock is off. The sentence the person reads after the answer says so, and the Flow block of the reorder request says what is still waited for. The scheduled check makes no second purchase request for a reorder the job has made.
+* **The Flow block asks again every 5 seconds, for up to 3 minutes,** while the purchase request is being made; after that the page has to be reloaded.
+* **"Run the check now" uses the settings as last saved,** refuses while a check is queued or running, and may be pressed by a Munimji Manager or a System Manager only. A check queued by it and one queued by the scheduler are the same job: only one of them waits in the queue.
+
 ## Taxes
 
 * Reading **Tax Rules needs the Accounts Manager role**; a Purchase User does not have it, and the app adds no permission rows to ERPNext. The scheduled job runs as Administrator, reads the tax setup, and keeps the figures with the request. A person who changes the quantity or the vendor gets a recalculation from those kept figures.
