@@ -4,6 +4,7 @@ Every table is seeded with records of many ages, including very old ones in the 
 """
 
 from datetime import UTC, datetime, timedelta
+from unittest import mock
 
 import frappe
 from ai_munimji_engine.core.common import iso
@@ -15,6 +16,7 @@ from ai_munimji.stores.specs import TABLES
 from ai_munimji.tests.helpers import empty_store_tables
 
 NOW = datetime(2026, 11, 7, 9, 0, tzinfo=UTC)
+THE_REAL_LOOK_AT_THE_QUEUE = retention.room_in_the_queue  # the tests below replace it, and one of them is about it
 
 
 def ago(days: float) -> str:
@@ -35,6 +37,10 @@ class TestTheCleanUp(IntegrationTestCase):
 		self.core = jobs.system_stores()
 		self.stock = frappe_stock_stores(self.core)
 		self.seed()
+		# the clean-up commits after every batch; this test's own transaction (its savepoint, below) must not be committed
+		self.commits = mock.patch.object(jobs, "commit").start()
+		self.room = mock.patch.object(retention, "room_in_the_queue", return_value=True).start()  # the queue of the site the tests run on is not what they are about
+		self.addCleanup(mock.patch.stopall)
 
 	def tearDown(self):
 		frappe.db.rollback(save_point=self.savepoint)
@@ -217,3 +223,128 @@ class TestTheCleanUp(IntegrationTestCase):
 		page.keep_logs_days = -1
 		with self.assertRaises(frappe.ValidationError):
 			page.save()
+
+
+class TestABacklogIsClearedInBatchesThatEachStay(IntegrationTestCase):
+	"""A site that has never been cleaned up holds a backlog of any size. One transaction for all of it ran out of time and rolled back everything, every day (finding A4 of the
+	production-readiness review). Now a run removes at most a cap, oldest first, in batches with a commit after each, and the next run goes on."""
+
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		frappe.set_user("Administrator")
+
+	def setUp(self):
+		frappe.set_user("Administrator")
+		self.savepoint = f"backlog_{frappe.generate_hash(length=8)}"
+		frappe.db.savepoint(self.savepoint)
+		empty_store_tables()
+		self.core = jobs.system_stores()
+		self.commits = mock.patch.object(jobs, "commit").start()
+		self.room = mock.patch.object(retention, "room_in_the_queue", return_value=True).start()  # the queue of the site the tests run on is not what they are about
+		self.addCleanup(mock.patch.stopall)
+		for n in range(25):  # tool calls 100 days old and more, one a minute apart: number 0 is the oldest
+			self.core.agents.add_tool_call(
+				iso(NOW - timedelta(days=100, minutes=25 - n)),
+				"agent",
+				"mcp",
+				f"tool-{n:02d}",
+				"{}",
+				True,
+				1,
+				None,
+				None,
+			)
+
+	def tearDown(self):
+		frappe.db.rollback(save_point=self.savepoint)
+
+	def tools_left(self) -> list[str]:
+		return sorted(r["tool"] for r in self.core.agents.tool_calls(None, 100))
+
+	def test_a_run_removes_at_most_the_cap_and_the_oldest_first(self):
+		gone = retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4)
+		self.assertEqual(gone["tool_calls"], 10)
+		self.assertEqual(
+			gone["left_for_the_next_run"],
+			1,
+			"it says that it stopped at the cap, and that one table (the tool calls) may hold more",
+		)
+		self.assertEqual(self.tools_left(), [f"tool-{n:02d}" for n in range(10, 25)], "the ten oldest went")
+
+	def test_every_batch_is_committed_so_that_a_failure_takes_back_one_batch_at_most(self):
+		retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4)
+		batches = self.commits.call_count
+		self.assertGreaterEqual(
+			batches, 3, "10 records in batches of 4: 4, 4 and 2, each followed by a commit"
+		)
+
+	def test_the_next_run_goes_on_and_a_run_with_nothing_left_removes_nothing(self):
+		totals = []
+		for _ in range(5):
+			totals.append(retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4).get("tool_calls", 0))
+		self.assertEqual(
+			totals, [10, 10, 5, 0, 0], "a backlog of 25 is gone after three runs, always making progress"
+		)
+		self.assertEqual(self.tools_left(), [])
+
+	def test_a_run_that_fails_in_the_middle_keeps_the_batches_before_it(self):
+		table = self.core.backend.table("tool_calls")
+		real, seen = table.remove, []
+
+		def remove_but_fail_on_the_tenth(name):
+			seen.append(name)
+			if len(seen) == 10:
+				raise RuntimeError("the database went away")
+			return real(name)
+
+		with mock.patch.object(type(table), "remove", lambda self, name: remove_but_fail_on_the_tenth(name)):
+			with self.assertRaises(RuntimeError):
+				retention.clean_up(keep_days=90, now=NOW, cap=20, batch=4)
+		self.assertEqual(
+			self.commits.call_count, 2, "the first two batches of four were committed before the failure"
+		)
+		self.assertEqual(
+			self.tools_left(), [f"tool-{n:02d}" for n in range(9, 25)], "nine went (it failed on the tenth)"
+		)
+
+	def test_no_table_is_starved_by_a_big_one(self):
+		for n in range(10):
+			self.core.inbound.claim("whatsapp", f"m-{n}", iso(NOW - timedelta(days=30, minutes=n)))
+		gone = retention.clean_up(keep_days=90, now=NOW, cap=12, batch=4)
+		self.assertEqual(
+			(gone["tool_calls"], gone["inbound_seen"]),
+			(8, 4),
+			"the tables take turns: four of each, and again four of the tool calls",
+		)
+
+	def test_the_run_ends_when_the_workers_have_not_taken_the_jobs_the_deletions_queue_and_leaves_the_rest(self):
+		with (
+			mock.patch.object(retention, "room_in_the_queue", return_value=False),
+			mock.patch.object(retention.time, "sleep") as slept,
+		):
+			gone = retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4)
+		self.assertEqual(gone["tool_calls"], 0, "nothing was deleted into a queue that could not take the jobs")
+		self.assertEqual(gone["left_for_the_next_run"], len(retention.RULES), "no table was looked at: every one is left for the next run")
+		self.assertEqual(slept.call_count, retention.QUEUE_WAIT_SECONDS, "it waited for the workers first")
+		self.assertEqual(len(self.tools_left()), 25)
+
+	def test_the_run_waits_for_the_workers_and_then_goes_on(self):
+		answers = iter([False, False, True] + [True] * 50)
+		with (
+			mock.patch.object(retention, "room_in_the_queue", side_effect=lambda needed: next(answers)),
+			mock.patch.object(retention.time, "sleep") as slept,
+		):
+			gone = retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4)
+		self.assertEqual(gone["tool_calls"], 10)
+		self.assertEqual(slept.call_count, 2, "two looks found no room, the third did")
+
+	def test_there_is_room_while_the_queue_plus_the_batch_stays_under_frappes_own_limit(self):
+		for queued, wanted, room in ((300, 100, True), (450, 100, False), (0, 499, True), (0, 500, False)):
+			with (
+				mock.patch("frappe.utils.background_jobs.get_queue", return_value=mock.Mock(count=queued)),
+				mock.patch("frappe.conf", frappe._dict(max_queued_jobs=500)),
+			):
+				self.assertEqual(
+					THE_REAL_LOOK_AT_THE_QUEUE(wanted), room, f"{queued} queued, {wanted} to queue, limit 500"
+				)

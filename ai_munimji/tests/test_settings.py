@@ -190,6 +190,47 @@ class TestTheSettingsAreTheEnginesSettings(IntegrationTestCase):
 			"the page also asks croniter, which Frappe's scheduler uses",
 		)
 
+	def test_a_schedule_that_can_start_the_check_less_than_15_minutes_after_the_last_start_is_refused(self):
+		too_often = {
+			"* * * * *": "1 minute",
+			"*/5 * * * *": "5 minutes",
+			"*/14 * * * *": "14 minutes",
+			"0,10 * * * *": "10 minutes",
+			"3,17 * * * *": "14 minutes",
+			"0,59 0,23 * * *": "1 minute",  # 23:59, and 00:00 the next day
+			"0,5 9 * * mon-fri": "5 minutes",
+			"0,5 9 1 * *": "5 minutes",
+		}
+		for expression, apart in too_often.items():
+			self.assertFalse(page_accepts(check_cron=expression), expression)
+			with self.assertRaises(frappe.ValidationError) as caught:
+				new_page(check_cron=expression).validate()
+			words = str(caught.exception)
+			self.assertIn(expression, words)
+			self.assertIn(f"only {apart} after the last start", words, expression)
+			self.assertIn("at least 15 minutes between starts", words, expression)
+		for expression in (
+			"*/15 * * * *",
+			"0,15 * * * *",
+			"0 * * * *",
+			"30 7 * * 1",
+			"0 6 * * *",
+			"0,59 0,23 1 * *",  # 23:59 and 00:00 are a minute apart only if two days in a row can both run, and day 1 never follows a day 1
+			"0 0,23 * * *",
+		):
+			self.assertTrue(page_accepts(check_cron=expression), expression)
+		self.assertEqual(settings_map.MIN_MINUTES_BETWEEN_CHECKS, 15)
+
+	def test_the_shortest_gap_of_a_schedule(self):
+		gap = settings_map.shortest_gap_minutes
+		self.assertEqual(gap("* * * * *"), 1)
+		self.assertEqual(gap("*/20 * * * *"), 20)
+		self.assertEqual(gap("0,59 0,23 * * *"), 1)
+		self.assertEqual(gap("0 6 * * *"), 24 * 60, "one run a day: a day apart")
+		self.assertEqual(gap("0 6 * * 1"), float("inf"), "one run a week: no two runs within a day or two")
+		self.assertEqual(gap("0 6,18 * * *"), 12 * 60)
+		self.assertEqual(gap("0 0,23 * * *"), 60, "23:00, and 00:00 the next day")
+
 	def test_what_the_standalone_accepts_loads_into_the_page_and_comes_back_unchanged(self):
 		values = engine_defaults()
 		values["policy"].update(

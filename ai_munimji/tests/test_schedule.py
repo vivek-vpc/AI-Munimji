@@ -3,6 +3,8 @@
 The job is a Scheduled Job Type linked to a Scheduler Event (schedule.py says why it is not a hook). What a tick then does, with real stock, is in tests/world/test_flow.py.
 """
 
+from unittest import mock
+
 import frappe
 from frappe.core.doctype.scheduled_job_type.scheduled_job_type import sync_jobs
 from frappe.tests import IntegrationTestCase
@@ -51,6 +53,21 @@ class TestTheScheduledJob(Rolled):
 		self.assertEqual((job.cron_format, job.stopped), ("30 7 * * 1", 0), "on, at the page's time")
 		self.save_page(0, "30 7 * * 1")
 		self.assertEqual(self.job().stopped, 1, "off again stops it")
+
+	def test_a_schedule_saved_before_the_limit_existed_does_not_start_back_to_back_runs(self):
+		# an earlier version accepted any expression the scheduler could read: write one straight into the page, as that version left it
+		frappe.db.set_single_value(SETTINGS, {"enabled": 1, "check_cron": "* * * * *"})
+		frappe.clear_document_cache(SETTINGS, SETTINGS)
+		schedule.sync(True, frappe.get_doc(SETTINGS).check_cron)
+		job = self.job()
+		self.assertEqual(
+			(job.cron_format, job.stopped),
+			(schedule.DEFAULT_CRON, 0),
+			"the job runs at the default time, not every minute, and the page still says what it said",
+		)
+		self.assertEqual(frappe.get_doc(SETTINGS).check_cron, "* * * * *", "left for a person to correct")
+		with self.assertRaises(frappe.ValidationError):
+			self.save_page(1, "* * * * *")
 
 	def test_an_edited_schedule_survives_a_migrate(self):
 		self.save_page(1, "15 5 * * *")
@@ -212,7 +229,10 @@ class TestTheCleanUpJob(Rolled):
 
 		job = self.job()
 		self.assertEqual(job.stopped, 0)
-		gone = frappe.get_attr(job.method)()  # the call Frappe's scheduler makes, as Administrator
+		with mock.patch.object(
+			jobs, "commit"
+		):  # the clean-up commits after each batch; this test's own transaction must stay open for its rollback
+			gone = frappe.get_attr(job.method)()  # the call Frappe's scheduler makes, as Administrator
 
 		self.assertEqual((gone["tool_calls"], gone["agent_runs"]), (1, 1))
 		self.assertEqual({r["tool"] for r in core.agents.tool_calls(None, 10)}, {"tool-new"})

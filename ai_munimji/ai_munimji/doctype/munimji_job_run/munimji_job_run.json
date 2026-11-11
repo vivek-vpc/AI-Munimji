@@ -8,6 +8,7 @@
  "field_order": [
   "last_start",
   "last_end",
+  "progress",
   "row_json"
  ],
  "fields": [
@@ -26,6 +27,13 @@
    "in_list_view": 1
   },
   {
+   "fieldname": "progress",
+   "fieldtype": "Data",
+   "label": "How far it got",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
    "fieldname": "row_json",
    "fieldtype": "JSON",
    "label": "The row, as the engine kept it",
@@ -35,7 +43,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-07 12:00:00.000000",
+ "modified": "2026-11-07 12:00:01.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Job Run",

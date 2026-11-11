@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from unittest import mock
 
 import frappe
@@ -17,11 +18,21 @@ WAREHOUSE = "_Test Warehouse - _TC"
 REQUEST = "Munimji Approval Request"
 
 
+@contextmanager
 def free_lease():
-	"""The lease commits what is pending, and these tests have pending writes (their item, their stock entry); the lease itself is tested below and in world/test_end_to_end.py."""
-	return mock.patch.multiple(
-		locks, lease=mock.Mock(return_value=True), release=mock.Mock(return_value=None)
-	)
+	"""The lease commits what is pending, and so does the run at the end of each batch; these tests have pending writes (their item, their stock entry) that their own rollback must still
+	take back. So the lease, its renewal and the batch commit are replaced here; the lease itself is tested below and in world/test_end_to_end.py, and the batches, with real commits, in
+	test_batched_run.py."""
+	with (
+		mock.patch.multiple(
+			locks,
+			lease=mock.Mock(return_value=True),
+			release=mock.Mock(return_value=None),
+			renew=mock.Mock(return_value=None),
+		),
+		mock.patch.object(jobs, "commit"),
+	):
+		yield
 
 
 class TestTheStockCheck(ERPNextTestSuite):
@@ -112,7 +123,12 @@ class TestTheStockCheck(ERPNextTestSuite):
 		released = mock.Mock(return_value=None)
 		# no commit and no rollback of the test's own transaction: the job's commit and rollback are what they would do to the site, and are not what is looked at here
 		with (
-			mock.patch.multiple(locks, lease=mock.Mock(return_value=True), release=released),
+			mock.patch.multiple(
+				locks,
+				lease=mock.Mock(return_value=True),
+				release=released,
+				renew=mock.Mock(return_value=None),
+			),
 			mock.patch.object(frappe.db, "commit"),
 			mock.patch.object(frappe.db, "rollback"),
 			mock.patch.object(InventoryAgent, "run", boom),

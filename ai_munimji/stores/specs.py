@@ -12,6 +12,8 @@ Two ways of keeping a row, chosen per table:
 Kinds of column: data (140 characters), text (Small Text), long (Long Text), json (the engine's JSON text, kept byte for byte), int, float, check (0 or 1), datetime, date.
 A float that the engine may leave empty (`null=True`) is stored as a number plus a note of which were empty, because a Frappe number column cannot hold NULL.
 A `derived` column is not part of the engine's row: it is worked out from the row when it is written, for the list view and the filters.
+An `internal` column is not part of the engine's row either, and is not worked out from it: it is what the app keeps beside the row (whether a request has been sealed, how far a job
+got), changed only by the app's stores (`DocTable.set_internal`), so that it survives every write of the engine's row.
 """
 
 from dataclasses import dataclass, field
@@ -26,6 +28,7 @@ class Col:
 	null: bool = False
 	flags: str = ""  # l: in the list view, f: a standard filter, i: indexed, u: unique, h: hidden
 	derived: bool = False
+	internal: bool = False  # the app's own bookkeeping, not part of the engine's row: never in a row the engine reads or writes, only set by the app's stores through `DocTable.set_internal`
 
 	@property
 	def title(self) -> str:
@@ -131,6 +134,9 @@ TABLES: tuple[Table, ...] = (
 			j("request_json", "", label="The request, as the engine made it"),
 			j("decision_json", "", label="The answer, as the engine recorded it"),
 			lg("search_text", "h", derived=True, label="What a search looks in"),
+			ck(
+				"sealed", "ih", internal=True, label="Sealed"
+			),  # the audit sweep looks only at closed requests that are not sealed yet (stores/core.py)
 		),
 		perms=ANSWER,
 		person=True,
@@ -197,6 +203,7 @@ TABLES: tuple[Table, ...] = (
 			d("field", "f"),
 			j("old_json", "", label="Before"),
 			j("new_json", "", label="After"),
+			ck("sealed", "ih", internal=True, label="Sealed"),  # see the approvals table
 		),
 		numbered=True,
 		perms={MANAGER: "rc", SYSTEM: "r"},
@@ -254,7 +261,11 @@ TABLES: tuple[Table, ...] = (
 	Table(
 		"Munimji Job Run",
 		"job_runs",
-		(dt("last_start", "l"), dt("last_end", "l")),
+		(
+			dt("last_start", "l"),
+			dt("last_end", "l"),
+			d("progress", "l", internal=True, label="How far it got"),
+		),
 		key=("job",),
 		json_row=True,
 		perms=READ_ONLY_FOR_PEOPLE,

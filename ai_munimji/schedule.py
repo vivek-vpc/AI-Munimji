@@ -41,8 +41,26 @@ def sync(enabled: bool, cron: str | None) -> str:
 
 	A Munimji Manager may save the Settings page but holds no right on Frappe's job records, so this is the one place, besides the install hooks, that writes with ignore_permissions
 	(tests/test_rules.py names it). It writes two jobs (this one and the clean-up's), whose methods are constants of this module and whose schedule croniter has already read
-	(settings_map.validate)."""
+	(settings_map.validate).
+
+	A page saved by an earlier version may still hold a schedule that starts the check more often than the page now allows (it was never refused). The job does not follow it: it runs at the
+	page's default time and the saved expression is left for a person to correct, with a warning in the log, so that an old setting cannot start back-to-back runs of the whole stock."""
+	from croniter import croniter
+
+	from ai_munimji import (
+		settings_map,  # here: this module must still load, for the uninstall, in a bench from which the engine has been removed
+	)
+
 	cron = (cron or "").strip() or DEFAULT_CRON
+	if (
+		len(cron.split()) == 5
+		and croniter.is_valid(cron)
+		and settings_map.shortest_gap_minutes(cron) < settings_map.MIN_MINUTES_BETWEEN_CHECKS
+	):
+		frappe.logger("ai_munimji").warning(
+			f"the saved schedule “{cron}” starts the stock check more often than every {settings_map.MIN_MINUTES_BETWEEN_CHECKS} minutes; the job runs at {DEFAULT_CRON} until it is changed"
+		)
+		cron = DEFAULT_CRON
 	return _ensure(METHOD, {"frequency": "Cron", "cron_format": cron, "stopped": 0 if enabled else 1})
 
 

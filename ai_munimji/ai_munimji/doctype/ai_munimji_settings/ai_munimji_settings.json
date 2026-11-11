@@ -88,7 +88,7 @@
   },
   {
    "default": "0 6 * * *",
-   "description": "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest.",
+   "description": "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest, and the check reads all your stock, so a schedule that can start it less than 15 minutes after the last start is refused.",
    "fieldname": "check_cron",
    "fieldtype": "Data",
    "label": "Check stock at"
@@ -206,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 09:00:00.000000",
+ "modified": "2026-11-09 09:00:01.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",

@@ -198,14 +198,60 @@ def problems(values: dict[str, dict]) -> list[str]:
 	return found
 
 
+MIN_MINUTES_BETWEEN_CHECKS = 15  # the stock check reads the whole stock: a schedule that starts it more often is refused (docs/KNOWN_LIMITATIONS.md)
+
+
+def shortest_gap_minutes(expression: str) -> float:
+	"""The shortest time, in minutes, between two runs of a schedule in cron form; infinity when it never runs twice within a day or two. Exact: it looks at the minutes of one firing day,
+	and at the step from the last run of a day to the first of the next only when two days in a row can both be firing days. Stops as soon as it has seen a gap short enough to be refused."""
+	from datetime import datetime, timedelta
+	from itertools import pairwise
+
+	from croniter import croniter
+
+	minute, hour, day, month, weekday = expression.split()
+	start = datetime(2026, 1, 1)
+	runs = croniter(f"{minute} {hour} * * *", start - timedelta(seconds=1))
+	times = []
+	while (at := runs.get_next(datetime)) < start + timedelta(days=1):
+		times.append(at.hour * 60 + at.minute)
+		if len(times) > 1 and times[-1] - times[-2] < MIN_MINUTES_BETWEEN_CHECKS:
+			break
+	gap = min((b - a for a, b in pairwise(times)), default=float("inf"))
+	if gap < MIN_MINUTES_BETWEEN_CHECKS or len(times) < 1:
+		return gap
+	firing_days = croniter(f"0 0 {day} {month} {weekday}", start - timedelta(seconds=1))
+	previous, looked = None, 0
+	while (
+		looked < 800
+	):  # more than two years of firing days: a day pattern that never meets itself on the next day does not meet itself later
+		at = firing_days.get_next(datetime)
+		looked += 1
+		if previous is not None and (at - previous) <= timedelta(days=1):
+			return min(gap, 24 * 60 - times[-1] + times[0])
+		previous = at
+		if at > start + timedelta(days=800):
+			break
+	return gap
+
+
 def cron_problem(expression: str) -> str | None:
-	"""The engine only counts the five fields; Frappe's scheduler reads the expression with croniter, so a schedule it cannot read is refused here."""
+	"""The engine only counts the five fields; Frappe's scheduler reads the expression with croniter, so a schedule it cannot read is refused here, and so is one that starts the
+	stock check more often than every MIN_MINUTES_BETWEEN_CHECKS minutes (every run reads all the stock of the site)."""
 	from croniter import croniter
 
 	if not croniter.is_valid(expression):
 		return _(
 			"{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
 		).format(label_of("check_cron"), expression)
+	if len(expression.split()) != 5:
+		return None  # the engine refuses anything but five fields, and says so
+	gap = shortest_gap_minutes(expression)
+	if gap < MIN_MINUTES_BETWEEN_CHECKS:
+		apart = _("1 minute") if gap == 1 else _("{0} minutes").format(int(gap))
+		return _(
+			"{0}: “{1}” can start the stock check again only {2} after the last start. Every check reads all your stock, so there must be at least {3} minutes between starts. 0 * * * * is every hour and 0 6 * * * is every day at 6 in the morning"
+		).format(label_of("check_cron"), expression, apart, MIN_MINUTES_BETWEEN_CHECKS)
 	return None
 
 

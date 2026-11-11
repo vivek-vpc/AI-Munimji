@@ -28,7 +28,8 @@
   "details_section",
   "request_json",
   "decision_json",
-  "search_text"
+  "search_text",
+  "sealed"
  ],
  "fields": [
   {
@@ -191,12 +192,20 @@
    "label": "What a search looks in",
    "read_only": 1,
    "hidden": 1
+  },
+  {
+   "fieldname": "sealed",
+   "fieldtype": "Check",
+   "label": "Sealed",
+   "read_only": 1,
+   "search_index": 1,
+   "hidden": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-05 17:47:16.806914",
+ "modified": "2026-11-05 17:47:17.806914",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Approval Request",

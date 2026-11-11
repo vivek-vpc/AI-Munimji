@@ -14,7 +14,8 @@ shares the database. That is what these functions give:
     nothing else; the caller reads the document through the permission rules.
   * `next_number(doctype)`: 1, 2, 3 ... for the tables whose rows the engine numbers. The counter is a Lock record too, so it is rolled back with the transaction (a database sequence
     would not be) and two connections never get the same number.
-  * `lease(name, holder, minutes)` / `release(name, holder)`: "one scheduled run at a time" that survives a worker that dies: the lease expires.
+  * `lease(name, holder, minutes)` / `release(name, holder)`: "one scheduled run at a time" that survives a worker that dies: the lease expires. `renew(name, holder, minutes)` moves the end
+    of a lease the run still holds, at the end of each batch of a long run, and says `LeaseLost` if another run has taken it in the meantime.
 """
 
 import hashlib
@@ -125,6 +126,21 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 	row.save()
 	frappe.db.commit()  # nosemgrep: frappe-manual-commit - a lease nobody else can see is no lease: the commit is the point
 	return True
+
+
+class LeaseLost(RuntimeError):
+	"""The lease this run held now belongs to another run: this one was away for longer than the lease lasts, and must stop."""
+
+
+def renew(name: str, holder: str, minutes: float) -> None:
+	"""Move the end of the lease `name` to `minutes` from now. It does not commit: the caller commits with what it has written, so that the renewal and the work it vouches for are
+	kept together. Raises LeaseLost when `holder` no longer holds it (it expired and another run took it)."""
+	row = _take_row(lease_name(name))
+	if row.holder != holder:
+		raise LeaseLost(f"the lease {name} is held by {row.holder or 'nobody'} now, not by {holder}")
+	row.until = now_datetime() + timedelta(minutes=minutes)
+	row.flags.munimji_store = True
+	row.save()
 
 
 def release(name: str, holder: str) -> None:
