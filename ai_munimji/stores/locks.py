@@ -15,7 +15,7 @@ shares the database. That is what these functions give:
   * `next_number(doctype)`: 1, 2, 3 ... for the tables whose rows the engine numbers. The counter is a Lock record too, so it is rolled back with the transaction (a database sequence
     would not be) and two connections never get the same number.
   * `lease(name, holder, minutes)` / `release(name, holder)`: "one scheduled run at a time" that survives a worker that dies: the lease expires. `renew(name, holder, minutes)` moves the end
-    of a lease the run still holds, at the end of each batch of a long run, and says `LeaseLost` if another run has taken it in the meantime.
+    of a lease the run still holds, at the end of each batch of a long run, and says `LeaseLost` if another run has taken it in the meantime. `held(name)` says whether somebody holds one now.
 """
 
 import hashlib
@@ -24,6 +24,7 @@ from datetime import timedelta
 import frappe
 from frappe.utils import now_datetime
 
+from ai_munimji.stores import missing
 from ai_munimji.stores.specs import TABLES
 
 LOCK = "Munimji Lock"
@@ -60,6 +61,7 @@ def _row(name: str, for_update: bool = True):
 	try:
 		return frappe.get_doc(LOCK, name, for_update=for_update)
 	except frappe.DoesNotExistError:
+		missing.not_there()
 		return None
 
 
@@ -126,6 +128,12 @@ def lease(name: str, holder: str, minutes: float) -> bool:
 	row.save()
 	frappe.db.commit()  # nosemgrep: frappe-manual-commit - a lease nobody else can see is no lease: the commit is the point
 	return True
+
+
+def held(name: str) -> bool:
+	"""Whether somebody holds the lease `name` now (it has an owner whose time has not run out). A look only: it takes nothing and locks nothing."""
+	row = _row(lease_name(name), for_update=False)
+	return bool(row and row.holder and row.until and row.until > now_datetime())
 
 
 class LeaseLost(RuntimeError):

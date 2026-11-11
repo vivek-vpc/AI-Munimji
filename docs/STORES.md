@@ -27,7 +27,7 @@ is **the app's own**, not part of the engine's row: it is never in a row the eng
 | Munimji Work Order | `work_orders` | columns | type, status, (item_code), source, created_at, updated_at | payload_json | V rx; A rwcx; M rwcx; S rwcx | yes |
 | Munimji Agent Task | `agent_tasks` | json row | agent, task, status, approval_id, asked_by, started_at, finished_at, provider, model, remote, prompt_tokens, output_tokens, llm_seconds | the whole row (`row_json`) | A c; M rc; S r | no |
 | Munimji Tool Call | `tool_calls` | json row | id, at, actor, tool, task_id, ok | the whole row (`row_json`) | A c; M rc; S r | no |
-| Munimji Job Run | `job_runs` | json row | last_start, last_end, [progress] | the whole row (`row_json`) | M r; S r | no |
+| Munimji Job Run | `job_runs` | json row | last_start, last_end, [progress], [requests_made] | the whole row (`row_json`) | M r; S r | no |
 | Munimji Inbound Seen | `inbound_seen` | json row | channel, external_id, seen_at | the whole row (`row_json`) | M r; S r | no |
 | Munimji Stock Alert | `alerts` | columns | item_code, kind, severity, status, created_at, updated_at, approval_id, snoozed_until, suppress_until, cooldown_until, run_id, status_note, reasoning_text | analysis_json | V rx; A rwcx; M rwcx; S rwcx | yes |
 | Munimji Stock Notice | `stock_notices` | columns | item_code, level, status, created_at, updated_at, approval_id, snoozed_until | none | V rx; A rwcx; M rwcx; S rwcx | yes |

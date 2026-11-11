@@ -79,6 +79,8 @@ def fields_of(table) -> list[dict]:
 	out = []
 	if table.doctype == APPROVAL:
 		# the form's first thing is the request in words, drawn from the stored JSON by the form's script (munimji_approval_request.js); the columns come after it
+		# the Flow block (reorder request -> purchase request -> Draft Purchase Order, flow.py), put there by the form's script from ai_munimji.api.flow
+		out.append({"fieldname": "flow", "fieldtype": "HTML", "label": "Flow"})
 		out.append({"fieldname": "reasoning", "fieldtype": "HTML", "label": "Why this request"})
 	if table.numbered:
 		out.append(

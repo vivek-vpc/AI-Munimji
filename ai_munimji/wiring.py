@@ -24,6 +24,7 @@ from frappe.utils import get_system_timezone
 
 from ai_munimji import settings_map
 from ai_munimji.erp_client import FrappeERPClient
+from ai_munimji.hand_off import HandOff
 from ai_munimji.stores import frappe_core_stores, frappe_stock_stores
 
 SETTINGS = "AI Munimji Settings"
@@ -44,6 +45,7 @@ class Services:
 	procurement: ProcurementAgent
 	audit: AuditChain
 	clock: Any
+	hand_off: Any = None  # a person's services only: what became of the vendor comparison for a reorder they approved (hand_off.py)
 
 
 def build(erp, core, clock=None, settings_doc=None) -> Services:
@@ -101,5 +103,10 @@ def actor_for(user: str | None = None, via: str = "desk") -> Actor:
 
 
 def person_services(clock=None) -> Services:
-	"""The services as a signed-in person runs them: ERPNext is read and written as that person, and the records are kept through the permissions of their roles."""
-	return build(FrappeERPClient(), frappe_core_stores(), clock)
+	"""The services as a signed-in person runs them: ERPNext is read and written as that person, and the records are kept through the permissions of their roles.
+
+	A reorder this person approves makes a work order, and the vendors for it are compared in the background once the answer is committed (hand_off.py), not at the next scheduled check."""
+	services = build(FrappeERPClient(), frappe_core_stores(), clock)
+	services.hand_off = HandOff()
+	services.workorders.subscribe(services.hand_off)
+	return services

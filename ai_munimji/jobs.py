@@ -1,5 +1,6 @@
 import frappe
 from ai_munimji_engine.core.common import iso, utcnow
+from frappe import _
 
 from ai_munimji import last_run, wiring
 from ai_munimji.erp_client import FrappeERPClient
@@ -94,6 +95,128 @@ def check_stock() -> int:
 	return 0
 
 
+def queue_stock_check() -> str:
+	"""Queue the stock check for the "Run the check now" button. Returns "queued", or why it was not: "off" (Watch stock is off), "queued_already" (a check is waiting in the queue) or
+	"running" (one is under way). The scheduled entry (`check_stock`) uses the same job id, so a check the scheduler queued counts too."""
+	if not frappe.get_cached_doc("AI Munimji Settings").enabled:
+		return "off"
+	state = check_state()
+	if state != "idle":
+		return "queued_already" if state == "queued" else "running"
+	job = frappe.enqueue(
+		"ai_munimji.jobs.run_stock_check_now",
+		queue=QUEUE,
+		timeout=RUN_TIMEOUT,
+		job_id=QUEUE_JOB_ID,
+		deduplicate=True,
+	)
+	return (
+		"queued" if job is not None else "queued_already"
+	)  # no job back: another press queued one in the meantime
+
+
+def check_state() -> str:
+	"""Whether a stock check is "queued" (waiting for a worker), "running" (a worker has it, or a run holds the lease) or "idle". The queue is asked first, then the lease: a check started
+	from the command line holds the lease without being in the queue."""
+	from frappe.utils.background_jobs import JobStatus, get_job_status
+
+	status = get_job_status(QUEUE_JOB_ID)
+	if status == JobStatus.QUEUED:
+		return "queued"
+	if status == JobStatus.STARTED or locks.held(STOCK_CHECK):
+		return "running"
+	return "idle"
+
+
+def check_status() -> dict:
+	"""What the Settings page says about the stock check, as the signed-in person may read it: {"state": "idle" | "queued" | "running", "busy": bool, "rows": [[label, value], ...]}. The rows
+	say when the last check ran, how far it got and how many requests it made, in plain words; a person who may not read the record sees only the state."""
+	state = check_state()
+	out: dict = {"state": state, "busy": state != "idle", "rows": []}
+	try:
+		core = frappe_core_stores()
+		row, extra = core.jobs.get(STOCK_CHECK), core.jobs.app_columns(STOCK_CHECK)
+	except frappe.PermissionError:
+		return out
+	if state == "queued":
+		out["rows"].append([_("Now"), _("A stock check is waiting for a worker to start it.")])
+	if not row or not row.get("last_start"):
+		out["rows"].append([_("Last check"), _("The stock check has not run yet.")])
+		return out
+	from ai_munimji.stores import convert
+
+	def when(text):
+		moment = convert.to_datetime(text)
+		return frappe.utils.format_datetime(moment, "d MMM yyyy, HH:mm") if moment else ""
+
+	progress = (extra or {}).get("progress") or ""
+	if state == "running":
+		out["rows"].append([_("Now"), _("A stock check is running.")])
+		out["rows"].append([_("How far it has got"), progress or _("Starting")])
+		return out
+	started = when(row["last_start"])
+	last = _("{0} (finished {1})").format(started, when(row["last_end"])) if row.get("last_end") else started
+	out["rows"].append([_("Last check"), last])
+	if row.get("last_ok") == 0:
+		out["rows"].append([_("How far it got"), progress or _("It stopped before it began")])
+		out["rows"].append([_("What went wrong"), row.get("last_error") or _("The reason was not recorded.")])
+	else:
+		out["rows"].append([_("How far it got"), progress or _("Finished")])
+		made = (extra or {}).get("requests_made")
+		out["rows"].append([_("Requests it made"), str(made if made is not None else 0)])
+		if row.get("last_error"):
+			out["rows"].append([_("Note"), row["last_error"]])
+	return out
+
+
+def run_stock_check_now() -> dict:
+	"""The queued job of the "Run the check now" button. Frappe runs a queued job as the person who queued it, and the check reads and writes in the system mode, which is Administrator's alone
+	(the scheduler's own jobs are Administrator's already), so it becomes Administrator here, in the worker, before anything is read."""
+	frappe.set_user("Administrator")
+	return run_stock_check()
+
+
+def run_vendor_comparison(work_order_id: str, clock=None, company: str | None = None) -> dict:
+	"""Compare the vendors for ONE reorder a person has just approved, and make the purchase request for it (Group 2, F1; queued by hand_off.py after the answer is committed).
+
+	It runs as Administrator in the system mode, like the scheduled check: the tax figures kept with the comparison are read with rights a person's session does not have, so it is not run in the
+	person's own session. It takes the stock check's lease, so it never runs beside a check (two runs would compare the same reorder twice); when it cannot get it, it does nothing and the next
+	scheduled check compares the vendors, which is what the person was told (next_step.py). The work order is claimed in the same transaction as the request it leads to, so the scheduled check
+	that follows finds nothing waiting for this reorder and makes no second request. Does nothing while Watch stock is off."""
+	frappe.set_user("Administrator")
+	if not frappe.get_cached_doc("AI Munimji Settings").enabled:
+		return {"ran": False, "why": "Watch stock is off", "requests": 0}
+	holder = frappe.generate_hash(length=10)
+	if not locks.lease(STOCK_CHECK, holder, LEASE_MINUTES):
+		frappe.logger(LOG).info(
+			f"run_vendor_comparison: a stock check is under way, so work order {work_order_id} waits for the next scheduled check"
+		)
+		return {"ran": False, "why": "another run is under way", "requests": 0}
+	try:
+		services = system_services(clock, company)
+		report = services.procurement.run(work_orders=[work_order_id])
+		if report.errors:
+			frappe.logger(LOG).warning(
+				f"run_vendor_comparison could not compare the vendors for work order {work_order_id}: {report.errors}"
+			)
+		frappe.logger(LOG).info(
+			f"run_vendor_comparison for work order {work_order_id}: {report.proposed} request(s), {report.manual} that need a person to order by hand"
+		)
+		return {
+			"ran": True,
+			"requests": report.proposed + report.manual,
+			"proposals": report.proposed,
+			"manual": report.manual,
+			"errors": list(report.errors),
+		}
+	except Exception:
+		frappe.db.rollback()  # the work order stays waiting: the next scheduled check compares the vendors
+		frappe.log_error(title="AI Munimji: the vendor comparison failed")
+		raise
+	finally:
+		locks.release(STOCK_CHECK, holder)
+
+
 def run_stock_check(
 	clock=None,
 	company: str | None = None,
@@ -132,8 +255,12 @@ def run_stock_check(
 		sealed = seal_what_is_new(services, checkpoint)
 		# an item the engine could not analyse is skipped so that the others are looked at; the run went well, and the count is kept with it for the Settings page (last_run.py)
 		skipped = last_run.unanalysed_items(inventory.errors)
+		made = inventory.new_alerts + inventory.new_notices + procurement.proposed + procurement.manual
 		services.core.jobs.finished(STOCK_CHECK, iso(clock()), True, last_run.note(len(skipped)))
 		services.core.jobs.progress(STOCK_CHECK, PROGRESS["finished"])
+		services.core.jobs.requests_made(
+			STOCK_CHECK, made
+		)  # the Settings page says it next to when the check ran
 		if skipped:
 			shown = ", ".join(skipped[:20]) + (f" and {len(skipped) - 20} more" if len(skipped) > 20 else "")
 			frappe.logger(LOG).warning(f"run_stock_check could not analyse {len(skipped)} item(s): {shown}")
@@ -141,10 +268,7 @@ def run_stock_check(
 		# wrote (the failure is recorded below, which is why that one commits)
 		report = {
 			"ran": True,
-			"requests": inventory.new_alerts
-			+ inventory.new_notices
-			+ procurement.proposed
-			+ procurement.manual,
+			"requests": made,
 			"alerts": inventory.new_alerts,
 			"notices": inventory.new_notices,
 			"considered": procurement.considered,

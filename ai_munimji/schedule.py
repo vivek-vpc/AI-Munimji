@@ -64,6 +64,20 @@ def sync(enabled: bool, cron: str | None) -> str:
 	return _ensure(METHOD, {"frequency": "Cron", "cron_format": cron, "stopped": 0 if enabled else 1})
 
 
+def next_check():
+	"""When the scheduled stock check starts next, as the site's wall clock (what the Settings page's "Check stock at" says), or None while Watch stock is off or the schedule cannot be read."""
+	from datetime import datetime
+
+	from croniter import croniter
+	from frappe.utils import now_datetime
+
+	page = frappe.get_cached_doc(AGAINST)
+	cron = (page.check_cron or "").strip() or DEFAULT_CRON
+	if not page.enabled or len(cron.split()) != 5 or not croniter.is_valid(cron):
+		return None
+	return croniter(cron, now_datetime()).get_next(datetime)
+
+
 def sync_clean_up(keep_logs_days: int | None) -> str:
 	"""Make the daily clean-up of the logs exist, running while "Keep logs for (days)" is a positive number and stopped while it is 0 (keep everything). A page that holds no number (saved before
 	the field existed) means the default, as retention.clean_up reads it. "Daily Long": the clean-up deletes record by record and may take longer than a short job is allowed. It never

@@ -146,6 +146,35 @@ function answers(request) {
 		.sort((a, b) => order.indexOf(a.action) - order.indexOf(b.action));
 }
 
+const FLOW_POLL_LIMIT = 40; // a purchase request takes about a minute; the form stops asking after this many tries
+
+// The Flow block: reorder request -> purchase request -> Draft Purchase Order, written (and escaped) on the server. While the purchase request is still being made the server says when to
+// ask again, and the block is asked for again then, only while the form is on screen.
+function show_flow(frm, tries) {
+	const field = frm.fields_dict.flow;
+	if (!field || frm.is_new()) {
+		return;
+	}
+	clearTimeout(frm.__flow_timer);
+	frappe
+		.call({ method: "ai_munimji.api.flow", args: { approval_id: frm.doc.name }, type: "GET" })
+		.then((r) => {
+			const flow = r.message || {};
+			field.$wrapper.html(flow.html || "");
+			if (
+				flow.refresh_in &&
+				(tries || 0) < FLOW_POLL_LIMIT &&
+				field.$wrapper.is(":visible")
+			) {
+				frm.__flow_timer = setTimeout(
+					() => show_flow(frm, (tries || 0) + 1),
+					flow.refresh_in * 1000
+				);
+			}
+		})
+		.catch(() => field.$wrapper.html(""));
+}
+
 function send(frm, action, params) {
 	return frappe
 		.call({
@@ -167,7 +196,11 @@ function finish(frm, result) {
 		frappe.msgprint({ title: __("Not done"), message: esc(result.message), indicator: "red" });
 		return frm.reload_doc();
 	}
-	frappe.show_alert({ message: esc(result.message), indicator: "green" });
+	// the server says what happens next in one sentence, and sends it again with the draft order's number as a link (already escaped there); the engine's own words stand where it has none
+	frappe.show_alert(
+		{ message: result.message_html || esc(result.message), indicator: "green" },
+		15
+	);
 	if (result.approval && result.approval !== frm.doc.name) {
 		// a change replaces the request with a revised one and closes this one: open the revised one
 		return frappe.set_route("Form", "Munimji Approval Request", result.approval);
@@ -238,6 +271,7 @@ frappe.ui.form.on("Munimji Approval Request", {
 			return;
 		}
 		const request = stored(frm.doc.request_json);
+		show_flow(frm, 0);
 		frm.fields_dict.reasoning.$wrapper.html(reasoning_html(frm, request));
 		if (
 			frm.doc.status !== "pending" ||

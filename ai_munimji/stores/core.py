@@ -509,6 +509,10 @@ class FrappeWorkOrderStore(_Store):
 	def set_status(self, wo_id: str, status: str, now: str) -> None:
 		self.w.change(wo_id, lambda r: {**r, "status": status, "updated_at": now})
 
+	def with_source(self, source: str) -> list[Row]:
+		"""The work orders made from this source ("inventory_alert:<id>"), newest first. Not part of the engine's contract: the flow block of a request follows a reorder to its work order with it."""
+		return self.w.find([["source", "=", source]], order_by="created_at desc, creation desc")
+
 
 # ---------------------------------------------------------------------------------------------------------------------- the agents' log
 class FrappeAgentLogStore(_Store):
@@ -788,6 +792,14 @@ class FrappeJobRunStore(_Store):
 	def progress(self, job: str, text: str) -> None:
 		"""Where a long run has got to, in words (the app's own column: it is not part of the engine's row). Says nothing for a job that never started."""
 		self.j.set_internal(job, progress=text)
+
+	def app_columns(self, job: str) -> dict | None:
+		"""How far the run got and how many requests it made (`progress`, `requests_made`), as the signed-in person may read them; None when the job never ran."""
+		return self.j.internal_values(job)
+
+	def requests_made(self, job: str, count: int) -> None:
+		"""How many requests the run made, once it has finished (the app's own column, like `progress`): the Settings page says it next to when the run was."""
+		self.j.set_internal(job, requests_made=count)
 
 
 # ---------------------------------------------------------------------------------------------------------------------- the ids of inbound messages

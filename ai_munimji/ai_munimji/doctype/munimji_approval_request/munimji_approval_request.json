@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "flow",
   "reasoning",
   "kind",
   "status",
@@ -32,6 +33,11 @@
   "sealed"
  ],
  "fields": [
+  {
+   "fieldname": "flow",
+   "fieldtype": "HTML",
+   "label": "Flow"
+  },
   {
    "fieldname": "reasoning",
    "fieldtype": "HTML",
@@ -205,7 +211,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-05 17:47:17.806914",
+ "modified": "2026-11-05 17:47:18.806914",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Approval Request",

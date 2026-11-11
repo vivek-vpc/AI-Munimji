@@ -10,7 +10,13 @@ from ai_munimji.settings_map import APP_ONLY, BY_FIELD, EVENT_FIELDS, EVENTS_FIE
 
 DOCTYPE = "AI Munimji Settings"
 ROOT = Path(__file__).resolve().parents[2]
-LAYOUT = ("Section Break", "Column Break", "Tab Break")
+LAYOUT = (
+	"Section Break",
+	"Column Break",
+	"Tab Break",
+	"HTML",
+	"Button",
+)  # fields that hold no value: the layout, the status of the last check, the Run the check now button, the text of how a request flows
 
 
 def new_page(**values):
