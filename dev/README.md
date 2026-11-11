@@ -49,6 +49,29 @@ python dev/scripts/make_doctypes.py     # write the DocType files and the table 
 
 After you change a DocType file, bring the sites up to date with `bench --site <site> migrate` (the test site is `test.localhost`).
 
+## Measuring at scale
+
+`docs/SCALE_MEASUREMENTS.md` has the numbers; these are the tools. They write millions of rows, so they run on a **separate site** that no person opens, never on `development.localhost` (each script
+stops if the site's name does not start with `scale`):
+
+```
+.\dev\exec.ps1 bash /workspace/ai_munimji/dev/make-site.sh scale.localhost app          # a site with ERPNext and the app (about 5 minutes)
+# the company, a supplier and the demo users, then the stock: 30,000 items, 5 million ledger rows (about 8 minutes)
+.\dev\exec.ps1 bash -c "cd /workspace/ai_munimji && SITE=scale.localhost bash dev/run-script.sh /workspace/ai_munimji/dev/scripts/seed.py"
+.\dev\exec.ps1 bash -c "cd /workspace/ai_munimji && SITE=scale.localhost bash dev/run-script.sh /workspace/ai_munimji/dev/scripts/seed_scale.py 30000 167"
+.\dev\exec.ps1 bash -c "cd /workspace/ai_munimji && SITE=scale.localhost bash dev/run-script.sh /workspace/ai_munimji/dev/scripts/seed_hot.py 3 100000"
+.\dev\exec.ps1 bench --site scale.localhost scheduler disable        # ERPNext's job that renames ledger entries would otherwise rewrite the seeded rows while you measure
+```
+
+* `scripts/measure_stock_check.py <items> [dismiss|approve|none]`: one stock check, its time, peak memory, the longest time it held row locks (the database's transaction list, read as its root user), and what
+  20 people who answer the requests it is replacing, as soon as it has begun to, are made to wait.
+* `scripts/measure_ledger_reads.py items|consumption <n>|hot|one`: what the ERP client reads from the stock ledger (time, peak memory, rows fetched into Python).
+* `scripts/seed_audit.py <n>`, `scripts/measure_audit_sweep.py`: the audit sweep over a sealed history of n requests, with nothing new to seal. `scripts/measure_retention.py <n> [runs]`: the daily clean-up over a backlog.
+* `scripts/seed_load.py` and `loadtest.py` (run in the container): 100 approvers with API keys and 100 requests waiting, then three crowds over HTTP: 100 different approvals at once, 20 presses on one request, and
+  100 people opening the list and a form while a stock check runs. It needs the app served by a real web server, not the development server: `bench` on the site's folder,
+  `env/bin/gunicorn -b 127.0.0.1:8001 -w 4 -t 300 frappe.app:application --preload`, from `sites/`.
+* To measure the code as it was committed against the code in the working tree, put the committed `ai_munimji` folder somewhere (`git archive HEAD ai_munimji`) and run a script with `PYTHONPATH=<that folder>`.
+
 ## What is in it
 
 | | |
@@ -68,8 +91,8 @@ After you change a DocType file, bring the sites up to date with `bench --site <
 
 These are the first experiment's, kept so that the app can be tried end to end. They are marked in the code with the words "replaced in Phase 5".
 
-* `ai_munimji/jobs.py` (`check_stock`): the scheduled entry. It runs the engine's stock check (`run_stock_check`) every 5 minutes at the soonest, and only while Watch stock is ticked. Phase 5 gives it
-  the schedule the settings page names.
+* `ai_munimji/jobs.py` (`check_stock`): the scheduled entry. At the time the Settings page names, and only while Watch stock is ticked, it queues the engine's stock check (`run_stock_check`) on the long queue
+  with a timeout of six hours and returns; the run works in batches of 200 items, committing and renewing its lease after each.
 * The list **Munimji Approval Request**: its form has one button, "Create Purchase Order", which calls `ai_munimji.api.answer`. Phase 5 builds the approval form with the reasoning, the inbox and
   the notifications.
 * `scripts/seed.py`, `scripts/reset_demo.py`, `roundtrip.ps1` and `browser/round-trip.cjs`, which exist for the two above (the demo's requests are made by `reset_demo.py`, which does what the job and
