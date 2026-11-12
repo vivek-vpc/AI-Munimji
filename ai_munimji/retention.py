@@ -100,7 +100,9 @@ def clean_up(keep_days: int | None = None, now=None, cap: int = CAP, batch: int 
 		for engine_table in list(waiting):
 			table, filters, column = waiting[engine_table]
 			asked = min(batch, cap - removed)
-			if not wait_for_room(asked):  # the workers have not taken the last batches' jobs yet: end here, and the next run goes on
+			if not wait_for_room(
+				asked
+			):  # the workers have not taken the last batches' jobs yet: end here, and the next run goes on
 				cap = removed
 				break
 			names = table.names(filters, order_by=f"{column} asc", limit=asked)

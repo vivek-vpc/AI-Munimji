@@ -16,7 +16,9 @@ from ai_munimji.stores.specs import TABLES
 from ai_munimji.tests.helpers import empty_store_tables
 
 NOW = datetime(2026, 11, 7, 9, 0, tzinfo=UTC)
-THE_REAL_LOOK_AT_THE_QUEUE = retention.room_in_the_queue  # the tests below replace it, and one of them is about it
+THE_REAL_LOOK_AT_THE_QUEUE = (
+	retention.room_in_the_queue
+)  # the tests below replace it, and one of them is about it
 
 
 def ago(days: float) -> str:
@@ -39,7 +41,9 @@ class TestTheCleanUp(IntegrationTestCase):
 		self.seed()
 		# the clean-up commits after every batch; this test's own transaction (its savepoint, below) must not be committed
 		self.commits = mock.patch.object(jobs, "commit").start()
-		self.room = mock.patch.object(retention, "room_in_the_queue", return_value=True).start()  # the queue of the site the tests run on is not what they are about
+		self.room = mock.patch.object(
+			retention, "room_in_the_queue", return_value=True
+		).start()  # the queue of the site the tests run on is not what they are about
 		self.addCleanup(mock.patch.stopall)
 
 	def tearDown(self):
@@ -241,7 +245,9 @@ class TestABacklogIsClearedInBatchesThatEachStay(IntegrationTestCase):
 		empty_store_tables()
 		self.core = jobs.system_stores()
 		self.commits = mock.patch.object(jobs, "commit").start()
-		self.room = mock.patch.object(retention, "room_in_the_queue", return_value=True).start()  # the queue of the site the tests run on is not what they are about
+		self.room = mock.patch.object(
+			retention, "room_in_the_queue", return_value=True
+		).start()  # the queue of the site the tests run on is not what they are about
 		self.addCleanup(mock.patch.stopall)
 		for n in range(25):  # tool calls 100 days old and more, one a minute apart: number 0 is the oldest
 			self.core.agents.add_tool_call(
@@ -318,14 +324,22 @@ class TestABacklogIsClearedInBatchesThatEachStay(IntegrationTestCase):
 			"the tables take turns: four of each, and again four of the tool calls",
 		)
 
-	def test_the_run_ends_when_the_workers_have_not_taken_the_jobs_the_deletions_queue_and_leaves_the_rest(self):
+	def test_the_run_ends_when_the_workers_have_not_taken_the_jobs_the_deletions_queue_and_leaves_the_rest(
+		self,
+	):
 		with (
 			mock.patch.object(retention, "room_in_the_queue", return_value=False),
 			mock.patch.object(retention.time, "sleep") as slept,
 		):
 			gone = retention.clean_up(keep_days=90, now=NOW, cap=10, batch=4)
-		self.assertEqual(gone["tool_calls"], 0, "nothing was deleted into a queue that could not take the jobs")
-		self.assertEqual(gone["left_for_the_next_run"], len(retention.RULES), "no table was looked at: every one is left for the next run")
+		self.assertEqual(
+			gone["tool_calls"], 0, "nothing was deleted into a queue that could not take the jobs"
+		)
+		self.assertEqual(
+			gone["left_for_the_next_run"],
+			len(retention.RULES),
+			"no table was looked at: every one is left for the next run",
+		)
 		self.assertEqual(slept.call_count, retention.QUEUE_WAIT_SECONDS, "it waited for the workers first")
 		self.assertEqual(len(self.tools_left()), 25)
 

@@ -23,7 +23,9 @@ db = frappe.db
 start = time.time()
 
 users = {}
-frappe.flags.in_import = True  # Frappe refuses more than 60 new users a minute (throttle_user_creation) unless it is an import
+frappe.flags.in_import = (
+	True  # Frappe refuses more than 60 new users a minute (throttle_user_creation) unless it is an import
+)
 for i in range(1, N + 1):
 	email = f"load.approver.{i:03d}@example.com"
 	if not db.exists("User", email):
