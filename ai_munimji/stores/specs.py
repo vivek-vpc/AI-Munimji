@@ -157,8 +157,8 @@ TABLES: tuple[Table, ...] = (
 			dt("sent_at", "l"),
 		),
 		numbered=True,
-		perms={VIEWER: "r", APPROVER: "r", MANAGER: "r", SYSTEM: "r"},
-		note="a separate DocType, not a child table: the engine addresses a delivery by its number and looks messages up across requests",
+		perms={VIEWER: "r", APPROVER: "rc", MANAGER: "rc", SYSTEM: "r"},
+		note="a separate DocType, not a child table: the engine addresses a delivery by its number and looks messages up across requests. The Approver and the Manager may create one: a person who answers a request in the Desk or in Telegram and changes it sends the revised request to the chats, and the engine records each message as a delivery, in that person's session",
 	),
 	Table(
 		"Munimji Audit Seal",

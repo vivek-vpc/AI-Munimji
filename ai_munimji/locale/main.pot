@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-11 15:16+0000\n"
-"PO-Revision-Date: 2026-11-11 15:16+0000\n"
+"POT-Creation-Date: 2026-11-12 09:46+0000\n"
+"PO-Revision-Date: 2026-11-12 09:46+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -23,11 +23,11 @@ msgstr ""
 msgid "+40 means 40% more use each day during the event, -20 means 20% less."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:46
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:56
 msgid "1 item could not be analysed in the last stock check and was skipped."
 msgstr ""
 
-#: ai_munimji/settings_map.py:251
+#: ai_munimji/settings_map.py:260
 msgid "1 minute"
 msgstr ""
 
@@ -41,56 +41,74 @@ msgstr ""
 msgid "<span class=\"h4\"><b>What needs you</b></span>"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.py:16
+msgid "A Telegram chat is a person's own chat number (digits only); group and channel chats are not supported."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:164
+#, python-brace-format
+msgid "A loop that asks Telegram for updates is {0}."
+msgstr ""
+
 #. Description of the 'Ask when stock is at or below this quantity (0 = not
 #. used)' (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:83
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:92
 msgid "A quantity, counted warehouse by warehouse. Leave 0 to not use this rule."
 msgstr ""
 
 #. Label of the approval_expiry_hours (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:179
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:188
 msgid "A request expires after (hours)"
 msgstr ""
 
 #. Description of the 'Supplier to use when an item has none' (Link) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:219
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:228
 msgid "A request for an item that has no supplier of its own goes to this one."
 msgstr ""
 
 #. Description of the 'A request expires after (hours)' (Int) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:176
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:185
 msgid "A request nobody answers is closed after this long. It is never approved on its own."
 msgstr ""
 
 #. Description of the 'Check stock at' (Data) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:124
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:133
 msgid "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest, and the check reads all your stock, so a schedule that can start it less than 15 minutes after the last start is refused."
 msgstr ""
 
 #. Description of the 'Send stock alerts' (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:201
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:210
 msgid "A short note inside this site when stock is low, before any purchase is asked for. Nothing is sent out of the site."
 msgstr ""
 
-#: ai_munimji/api.py:117
+#: ai_munimji/api.py:127
 msgid "A stock check is already waiting to start. Nothing more was queued: wait for it to finish."
 msgstr ""
 
-#: ai_munimji/api.py:120
+#: ai_munimji/api.py:130
 msgid "A stock check is running now. Nothing more was queued: wait for it to finish, then press the button again if you need another."
 msgstr ""
 
-#: ai_munimji/jobs.py:152
+#: ai_munimji/jobs.py:159
 msgid "A stock check is running."
 msgstr ""
 
-#: ai_munimji/jobs.py:140
+#: ai_munimji/jobs.py:147
 msgid "A stock check is waiting for a worker to start it."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:206
+msgid "A test message was sent to your chat."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:172
+#, python-brace-format
+msgid "A webhook needs this site's public HTTPS address, and this site is {0}. Choose Polling on the page, or put the site behind HTTPS."
 msgstr ""
 
 #. Label of the abc_class (Data) field in DocType 'Munimji Cycle Count'
@@ -100,7 +118,7 @@ msgstr ""
 
 #. Title of a Sidebar
 #. Name of a Workspace
-#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:210
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:227
 #: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:13
 #: ai_munimji/uninstall.py:82
 msgid "AI Munimji"
@@ -108,13 +126,17 @@ msgstr ""
 
 #. Name of a DocType
 #. Label of a shortcut in the AI Munimji Workspace
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:245
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:319
 #: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:91
 msgid "AI Munimji Settings"
 msgstr ""
 
 #: ai_munimji/uninstall.py:76
 msgid "AI Munimji is being removed from this site."
+msgstr ""
+
+#: ai_munimji/telegram/inbound.py:92
+msgid "AI Munimji is now connected to another Telegram chat of yours, so this chat no longer gets requests."
 msgstr ""
 
 #. Paragraph text in the AI Munimji Workspace
@@ -166,13 +188,13 @@ msgstr ""
 
 #. Label of the use_lead_time_rule (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:100
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:109
 msgid "Also ask in time for the delivery"
 msgstr ""
 
 #. Description of the 'Repeat an alert after (days)' (Int) field in DocType 'AI
 #. Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:208
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:217
 msgid "An item that is still low gets the same alert again after this many days. A worse level is always sent at once."
 msgstr ""
 
@@ -189,7 +211,7 @@ msgstr ""
 #. Label of the decided_at (Datetime) field in DocType 'Munimji Approval
 #. Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:142
-#: ai_munimji/flow.py:148
+#: ai_munimji/flow.py:157
 msgid "Answered"
 msgstr ""
 
@@ -198,7 +220,7 @@ msgstr ""
 msgid "Answered by"
 msgstr ""
 
-#: ai_munimji/flow.py:148
+#: ai_munimji/flow.py:157
 #, python-brace-format
 msgid "Answered by {0}, {1}."
 msgstr ""
@@ -219,12 +241,12 @@ msgstr ""
 msgid "Approve"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:251
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:258
 #, python-brace-format
 msgid "Approve this request? {0}"
 msgstr ""
 
-#: ai_munimji/flow.py:143
+#: ai_munimji/flow.py:148
 msgid "Approved"
 msgstr ""
 
@@ -237,7 +259,7 @@ msgstr ""
 msgid "Approved by (Munimji)"
 msgstr ""
 
-#: ai_munimji/flow.py:143
+#: ai_munimji/flow.py:148
 #, python-brace-format
 msgid "Approved by {0}, {1}."
 msgstr ""
@@ -268,17 +290,17 @@ msgstr ""
 
 #. Description of the 'Also ask in time for the delivery' (Check) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:97
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:106
 msgid "Ask early enough for the supplier to deliver: when the days of stock left are no more than the delivery time plus the safety days."
 msgstr ""
 
 #. Label of the min_qty (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:86
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:95
 msgid "Ask when stock is at or below this quantity (0 = not used)"
 msgstr ""
 
 #. Label of the min_days_cover (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:93
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:102
 msgid "Ask when stock will last this many days or fewer (0 = not used)"
 msgstr ""
 
@@ -298,6 +320,10 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:33
 #: ai_munimji/ai_munimji/doctype/munimji_chat_log/munimji_chat_log.json:29
 msgid "Asked by"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:245
+msgid "Asking Telegram..."
 msgstr ""
 
 #. Label of the asks (Int) field in DocType 'Munimji Delivery Chase'
@@ -320,8 +346,22 @@ msgstr ""
 msgid "Before"
 msgstr ""
 
-#: ai_munimji/flow.py:194
+#: ai_munimji/flow.py:203
 msgid "Being made"
+msgstr ""
+
+#. Label of the telegram_bot_username (Data) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:277
+#: ai_munimji/telegram/api.py:108
+msgid "Bot"
+msgstr ""
+
+#. Label of the telegram_bot_token (Password) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:254
+#: ai_munimji/settings_map.py:290
+msgid "Bot token"
 msgstr ""
 
 #. Label of the cache_key (Data) field in DocType 'Munimji Assistant Answer'
@@ -329,11 +369,11 @@ msgstr ""
 msgid "Cache key"
 msgstr ""
 
-#: ai_munimji/settings_map.py:188
+#: ai_munimji/settings_map.py:197
 msgid "Calendar events"
 msgstr ""
 
-#: ai_munimji/settings_map.py:186
+#: ai_munimji/settings_map.py:195
 #, python-brace-format
 msgid "Calendar events, row {0}"
 msgstr ""
@@ -344,12 +384,12 @@ msgid "Change in daily use (%)"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:135
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:219
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:226
 msgid "Change quantity"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:136
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:244
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:251
 msgid "Change vendor"
 msgstr ""
 
@@ -370,7 +410,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_notice/munimji_stock_notice.json:56
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:118
 #: ai_munimji/ai_munimji/doctype/munimji_work_order/munimji_work_order.json:64
-#: ai_munimji/flow.py:223
+#: ai_munimji/flow.py:242
 msgid "Changed"
 msgstr ""
 
@@ -384,11 +424,11 @@ msgid "Channel"
 msgstr ""
 
 #. Label of the check_cron (Data) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:127
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:136
 msgid "Check stock at"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:220
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:227
 msgid "Check the vendors again"
 msgstr ""
 
@@ -397,7 +437,7 @@ msgstr ""
 msgid "Checked at"
 msgstr ""
 
-#: ai_munimji/flow.py:151
+#: ai_munimji/flow.py:160
 msgid "Closed"
 msgstr ""
 
@@ -415,6 +455,37 @@ msgstr ""
 msgid "Comparison"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:18
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:43
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:58
+msgid "Connect Telegram"
+msgstr ""
+
+#. Label of the telegram_connect_bot (Button) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:285
+msgid "Connect the bot"
+msgstr ""
+
+#. Label of the linked_on (Datetime) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:49
+msgid "Connected on"
+msgstr ""
+
+#. Label of the since (Data) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:56
+msgid "Connected since (UTC)"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:179
+#, python-brace-format
+msgid "Connected to @{0}. {1} People connect their own chat with Connect Telegram."
+msgstr ""
+
+#: ai_munimji/telegram/links.py:128
+msgid "Connected. Requests that need your answer will arrive here, with buttons."
+msgstr ""
+
 #. Label of the cooldown_until (Datetime) field in DocType 'Munimji Stock
 #. Alert'
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:98
@@ -426,6 +497,12 @@ msgstr ""
 msgid "Counter"
 msgstr ""
 
+#. Description of the 'Bot token' (Password) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:251
+msgid "Create a bot with @BotFather in Telegram and paste the token it gives you. The token is a password: it is kept encrypted and is never shown again."
+msgstr ""
+
 #. Label of the created_at (Datetime) field in DocType 'Munimji Assistant
 #. Answer'
 #: ai_munimji/ai_munimji/doctype/munimji_assistant_answer/munimji_assistant_answer.json:40
@@ -434,13 +511,13 @@ msgstr ""
 
 #. Label of the default_lead_time_days (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:114
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:123
 msgid "Delivery time to assume (days)"
 msgstr ""
 
 #. Label of the calendar_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:154
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:163
 msgid "Demand calendar"
 msgstr ""
 
@@ -473,19 +550,23 @@ msgstr ""
 msgid "Digest"
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.js:10
+msgid "Disconnect"
+msgstr ""
+
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:137
 msgid "Dismiss"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:253
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:260
 msgid "Dismiss this request? Nothing will be ordered."
 msgstr ""
 
-#: ai_munimji/flow.py:145
+#: ai_munimji/flow.py:151
 msgid "Dismissed"
 msgstr ""
 
-#: ai_munimji/flow.py:145
+#: ai_munimji/flow.py:153
 #, python-brace-format
 msgid "Dismissed by {0}, {1}. Nothing was ordered."
 msgstr ""
@@ -497,7 +578,7 @@ msgstr ""
 
 #. Label of the po_name (Link) field in DocType 'Munimji Purchase Proposal'
 #: ai_munimji/ai_munimji/doctype/munimji_purchase_proposal/munimji_purchase_proposal.json:101
-#: ai_munimji/flow.py:256
+#: ai_munimji/flow.py:273
 msgid "Draft Purchase Order"
 msgstr ""
 
@@ -506,7 +587,7 @@ msgstr ""
 msgid "Draft Purchase Order {0} made. Review and submit it in ERPNext."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:82
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:92
 msgid "Draft Purchase Order."
 msgstr ""
 
@@ -522,7 +603,7 @@ msgstr ""
 msgid "Draft purchase orders"
 msgstr ""
 
-#: ai_munimji/flow.py:265
+#: ai_munimji/flow.py:282
 msgid "Draft purchase requisition"
 msgstr ""
 
@@ -546,11 +627,11 @@ msgid "Duties and taxes, by vendor"
 msgstr ""
 
 #. Description of the 'Events' (Table) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:163
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:172
 msgid "Each event applies to every item. Choosing items or item groups for an event comes later."
 msgstr ""
 
-#: ai_munimji/flow.py:249
+#: ai_munimji/flow.py:266
 #, python-brace-format
 msgid "Earlier version, {0}"
 msgstr ""
@@ -571,7 +652,7 @@ msgid "Event"
 msgstr ""
 
 #. Label of the calendar_events (Table) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:166
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:175
 msgid "Events"
 msgstr ""
 
@@ -587,7 +668,7 @@ msgstr ""
 msgid "Every vendor's figures, the duties and taxes, and how the score works"
 msgstr ""
 
-#: ai_munimji/flow.py:150
+#: ai_munimji/flow.py:159
 msgid "Expired"
 msgstr ""
 
@@ -611,13 +692,13 @@ msgstr ""
 
 #. Description of the 'Safety days' (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:104
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:113
 msgid "Extra days of stock to keep on top of the delivery time."
 msgstr ""
 
 #. Description of the 'Demand calendar' (Section Break) field in DocType 'AI
 #. Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:151
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:160
 msgid "Festivals and promotions, when you use more or less than usual."
 msgstr ""
 
@@ -626,7 +707,7 @@ msgstr ""
 msgid "Field"
 msgstr ""
 
-#: ai_munimji/jobs.py:162
+#: ai_munimji/jobs.py:169
 msgid "Finished"
 msgstr ""
 
@@ -649,7 +730,7 @@ msgstr ""
 
 #. Label of the flow (HTML) field in DocType 'Munimji Approval Request'
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.json:39
-#: ai_munimji/flow.py:335
+#: ai_munimji/flow.py:357
 msgid "Flow"
 msgstr ""
 
@@ -688,36 +769,41 @@ msgstr ""
 
 #. Label of the housekeeping_section (Section Break) field in DocType 'AI
 #. Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:228
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:302
 msgid "Housekeeping"
 msgstr ""
 
 #. Label of the flow_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
 #. Label of the flow_help (HTML) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:68
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:77
 msgid "How a request flows"
+msgstr ""
+
+#. Label of the telegram_mode (Select) field in DocType 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:262
+msgid "How answers reach this site"
 msgstr ""
 
 #. Label of the progress (Data) field in DocType 'Munimji Job Run'
 #: ai_munimji/ai_munimji/doctype/munimji_job_run/munimji_job_run.json:33
-#: ai_munimji/jobs.py:159 ai_munimji/jobs.py:162
+#: ai_munimji/jobs.py:166 ai_munimji/jobs.py:169
 msgid "How far it got"
 msgstr ""
 
-#: ai_munimji/jobs.py:153
+#: ai_munimji/jobs.py:160
 msgid "How far it has got"
 msgstr ""
 
 #. Description of the 'Read this many days of history' (Int) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:145
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:154
 msgid "How much past use is read from ERPNext. About 15 months or more lets last year's season count."
 msgstr ""
 
 #. Description of the 'When to check, and what history to look at' (Section
 #. Break) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:117
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:126
 msgid "How often stock is checked, and how much of your past use is looked at."
 msgstr ""
 
@@ -729,7 +815,7 @@ msgstr ""
 msgid "How the vendors were scored"
 msgstr ""
 
-#: ai_munimji/flow.py:201
+#: ai_munimji/flow.py:209
 #, python-brace-format
 msgid "If it does not, the next scheduled check ({0}) makes it."
 msgstr ""
@@ -761,7 +847,7 @@ msgstr ""
 msgid "It is no longer there."
 msgstr ""
 
-#: ai_munimji/flow.py:285
+#: ai_munimji/flow.py:304
 msgid "It is ordered in ERPNext by hand."
 msgstr ""
 
@@ -770,7 +856,7 @@ msgstr ""
 msgid "It is {0}; reopen it first."
 msgstr ""
 
-#: ai_munimji/jobs.py:159
+#: ai_munimji/jobs.py:166
 msgid "It stopped before it began"
 msgstr ""
 
@@ -804,8 +890,8 @@ msgid "Item code"
 msgstr ""
 
 #. Label of the keep_logs_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:235
-#: ai_munimji/settings_map.py:277
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:309
+#: ai_munimji/settings_map.py:302
 msgid "Keep logs for (days)"
 msgstr ""
 
@@ -819,8 +905,8 @@ msgid "Kind"
 msgstr ""
 
 #. Label of the check_status (HTML) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:56
-#: ai_munimji/jobs.py:142 ai_munimji/jobs.py:157
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:65
+#: ai_munimji/jobs.py:149 ai_munimji/jobs.py:164
 msgid "Last check"
 msgstr ""
 
@@ -869,33 +955,37 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:100
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:110
 #: ai_munimji/ai_munimji/doctype/munimji_work_order/munimji_work_order.json:56
-#: ai_munimji/flow.py:267
+#: ai_munimji/flow.py:284
 msgid "Made"
 msgstr ""
 
-#: ai_munimji/flow.py:211
+#: ai_munimji/flow.py:224
 msgid "Made after the reorder is approved."
 msgstr ""
 
-#: ai_munimji/flow.py:273
+#: ai_munimji/flow.py:291
 #, python-brace-format
 msgid "Made as a draft, {0}. Review and submit it in ERPNext. Nothing has been sent to the vendor."
 msgstr ""
 
-#: ai_munimji/flow.py:271
+#: ai_munimji/flow.py:288
 #, python-brace-format
 msgid "Made as a draft, {0}. Your buyer turns it into an order in ERPNext."
 msgstr ""
 
-#: ai_munimji/flow.py:298
+#: ai_munimji/flow.py:317
 msgid "Made when the new request is approved."
 msgstr ""
 
-#: ai_munimji/flow.py:296
+#: ai_munimji/flow.py:315
 msgid "Made when the purchase request is approved."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:252
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:37
+msgid "Making your link..."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:259
 #, python-brace-format
 msgid "Mark this request as handled? {0}"
 msgstr ""
@@ -920,7 +1010,7 @@ msgid "Model"
 msgstr ""
 
 #. Label of the max_reminders (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:192
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:201
 msgid "Most reminders for one request"
 msgstr ""
 
@@ -963,6 +1053,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:161
 #: ai_munimji/ai_munimji/doctype/munimji_stock_notice/munimji_stock_notice.json:104
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:152
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:78
 #: ai_munimji/ai_munimji/doctype/munimji_tool_call/munimji_tool_call.json:88
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_message/munimji_vendor_message.json:118
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_reply/munimji_vendor_reply.json:103
@@ -1021,7 +1112,7 @@ msgid "Munimji Lock"
 msgstr ""
 
 #. Name of a role
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:256
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:330
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:83
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:155
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:135
@@ -1043,6 +1134,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:173
 #: ai_munimji/ai_munimji/doctype/munimji_stock_notice/munimji_stock_notice.json:116
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:164
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:90
 #: ai_munimji/ai_munimji/doctype/munimji_tool_call/munimji_tool_call.json:100
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_message/munimji_vendor_message.json:130
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_reply/munimji_vendor_reply.json:115
@@ -1091,6 +1183,11 @@ msgid "Munimji Stock Transfer"
 msgstr ""
 
 #. Name of a DocType
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:66
+msgid "Munimji Telegram Link"
+msgstr ""
+
+#. Name of a DocType
 #: ai_munimji/ai_munimji/doctype/munimji_tool_call/munimji_tool_call.json:76
 msgid "Munimji Tool Call"
 msgstr ""
@@ -1127,7 +1224,7 @@ msgstr ""
 
 #. Description of the 'When to ask for a purchase' (Section Break) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:76
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:85
 msgid "Munimji asks for a purchase when either rule below says stock is running low."
 msgstr ""
 
@@ -1144,57 +1241,61 @@ msgstr ""
 msgid "Munimji request"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:212
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:219
 msgid "New quantity"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:186
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:190
 msgid "No answer"
 msgstr ""
 
-#: ai_munimji/flow.py:293
+#: ai_munimji/flow.py:312
 msgid "No order was made: creating orders is switched off in the procurement settings."
 msgstr ""
 
-#: ai_munimji/flow.py:209
+#: ai_munimji/flow.py:221
 msgid "No purchase request was found for this reorder."
 msgstr ""
 
-#: ai_munimji/flow.py:232
+#: ai_munimji/flow.py:250
 msgid "No vendor could be compared for this item, so no purchase request was made."
 msgstr ""
 
-#: ai_munimji/flow.py:150
+#: ai_munimji/flow.py:159
 msgid "Nobody answered in time. Nothing was ordered."
 msgstr ""
 
 #. Label of the base_window_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:141
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:150
 msgid "Normal use: look back this many days"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:192
+#: ai_munimji/telegram/webhook.py:26
+msgid "Not allowed"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:196
 msgid "Not done"
 msgstr ""
 
-#: ai_munimji/flow.py:209
+#: ai_munimji/flow.py:220
 msgid "Not found"
 msgstr ""
 
-#: ai_munimji/flow.py:213 ai_munimji/flow.py:292 ai_munimji/flow.py:299
+#: ai_munimji/flow.py:230 ai_munimji/flow.py:311 ai_munimji/flow.py:318
 msgid "Not made"
 msgstr ""
 
-#: ai_munimji/flow.py:284
+#: ai_munimji/flow.py:303
 msgid "Not made here"
 msgstr ""
 
-#: ai_munimji/flow.py:161
+#: ai_munimji/flow.py:170
 msgid "Not needed"
 msgstr ""
 
-#: ai_munimji/flow.py:211 ai_munimji/flow.py:214 ai_munimji/flow.py:278
-#: ai_munimji/flow.py:296 ai_munimji/flow.py:298
+#: ai_munimji/flow.py:224 ai_munimji/flow.py:233 ai_munimji/flow.py:297
+#: ai_munimji/flow.py:315 ai_munimji/flow.py:317
 msgid "Not yet"
 msgstr ""
 
@@ -1213,7 +1314,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_quote_round/munimji_quote_round.json:94
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:110
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:104
-#: ai_munimji/jobs.py:166
+#: ai_munimji/jobs.py:173
 msgid "Note"
 msgstr ""
 
@@ -1230,11 +1331,11 @@ msgstr ""
 msgid "Nothing was created: the supplier's currency could not be worked out ({0})."
 msgstr ""
 
-#: ai_munimji/flow.py:299
+#: ai_munimji/flow.py:318
 msgid "Nothing was ordered."
 msgstr ""
 
-#: ai_munimji/jobs.py:140 ai_munimji/jobs.py:152
+#: ai_munimji/jobs.py:147 ai_munimji/jobs.py:159
 msgid "Now"
 msgstr ""
 
@@ -1255,7 +1356,7 @@ msgstr ""
 
 #. Description of the 'Watch stock' (Check) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:42
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:51
 msgid "Off until you switch it on. Before you do, review: the thresholds below (minimum quantity and days of cover), the time in \"Check stock at\", and who holds the Munimji Approver role (they are told in their notification bell when a request is made). Once it is on, requests for purchases start to appear for your real stock at that time. Nothing is ordered until a person with that role approves a request, and then only a Draft Purchase Order is made. Switching it off stops the schedule; requests that are already waiting stay as they are."
 msgstr ""
 
@@ -1266,12 +1367,20 @@ msgstr ""
 
 #. Description of the 'Remind after (hours)' (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:183
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:192
 msgid "One reminder goes to the approvers if there is still no answer after this long."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:52
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:60
+msgid "Open Telegram"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:62
 msgid "Open the latest Munimji Agent Run to see which."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:53
+msgid "Open the link on the phone or computer where you use Telegram and press Start. It works once, for ten minutes."
 msgstr ""
 
 #. Label of the ref_id (Data) field in DocType 'Munimji Vendor Message'
@@ -1290,9 +1399,19 @@ msgstr ""
 msgid "Payment terms"
 msgstr ""
 
+#: ai_munimji/telegram/api.py:112
+msgid "People connected"
+msgstr ""
+
 #. Label of the planned_on (Date) field in DocType 'Munimji Cycle Count'
 #: ai_munimji/ai_munimji/doctype/munimji_cycle_count/munimji_cycle_count.json:41
 msgid "Planned on"
+msgstr ""
+
+#. Option for the 'How answers reach this site' (Select) field in DocType 'AI
+#. Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:263
+msgid "Polling"
 msgstr ""
 
 #. Label of the prev (Data) field in DocType 'Munimji Audit Seal'
@@ -1319,11 +1438,11 @@ msgstr ""
 msgid "Purchase proposals"
 msgstr ""
 
-#: ai_munimji/flow.py:184
+#: ai_munimji/flow.py:193
 msgid "Purchase request"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:76
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:86
 msgid "Purchase request."
 msgstr ""
 
@@ -1349,7 +1468,7 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:162
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:174
 msgid "Queueing the check..."
 msgstr ""
 
@@ -1364,7 +1483,7 @@ msgid "Rate"
 msgstr ""
 
 #. Label of the history_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:148
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:157
 msgid "Read this many days of history"
 msgstr ""
 
@@ -1408,7 +1527,7 @@ msgid "Received at"
 msgstr ""
 
 #. Label of the recent_window_days (Int) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:134
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:143
 msgid "Recent use: look back this many days"
 msgstr ""
 
@@ -1418,7 +1537,7 @@ msgstr ""
 msgid "Recipient"
 msgstr ""
 
-#: ai_munimji/flow.py:243
+#: ai_munimji/flow.py:260
 #, python-brace-format
 msgid "Recommended: {0}, {1} in total."
 msgstr ""
@@ -1445,7 +1564,7 @@ msgstr ""
 
 #. Label of the reminder_after_hours (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:186
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:195
 msgid "Remind after (hours)"
 msgstr ""
 
@@ -1460,17 +1579,17 @@ msgstr ""
 msgid "Remote"
 msgstr ""
 
-#: ai_munimji/flow.py:159 ai_munimji/flow.py:167
+#: ai_munimji/flow.py:168 ai_munimji/flow.py:176
 msgid "Reorder request"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:70
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:80
 msgid "Reorder request."
 msgstr ""
 
 #. Label of the stock_alert_repeat_days (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:211
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:220
 msgid "Repeat an alert after (days)"
 msgstr ""
 
@@ -1524,16 +1643,26 @@ msgstr ""
 msgid "Requests"
 msgstr ""
 
+#. Description of the 'Telegram' (Section Break) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:237
+msgid "Requests arrive in a Telegram chat with buttons, and the people who answer them can answer there. Off until you switch it on. When it is on, the text of each request (item names, quantities, vendor names and prices) goes to Telegram. docs/PRIVACY.md says what."
+msgstr ""
+
 #. Label of the requests_made (Int) field in DocType 'Munimji Job Run'
 #: ai_munimji/ai_munimji/doctype/munimji_job_run/munimji_job_run.json:40
-#: ai_munimji/jobs.py:164
+#: ai_munimji/jobs.py:171
 msgid "Requests it made"
 msgstr ""
 
 #. Label of the approvals_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:172
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:181
 msgid "Requests waiting for an answer"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.js:13
+msgid "Requests will no longer be sent to this Telegram chat. Connect again whenever you want."
 msgstr ""
 
 #. Label of the reviewed_at (Datetime) field in DocType 'Munimji Count Review'
@@ -1547,17 +1676,24 @@ msgid "Run"
 msgstr ""
 
 #. Label of the run_check_now (Button) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:62
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:71
 msgid "Run the check now"
 msgstr ""
 
 #. Label of the safety_stock_days (Float) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:107
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:116
 msgid "Safety days"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:150
+#. Description of the 'Connect the bot' (Button) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:282
+msgid "Save the page first. Asks Telegram who the token belongs to, then makes Telegram send answers here (webhook) or starts the loop that fetches them (polling)."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:160
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:231
 msgid "Save the settings first"
 msgstr ""
 
@@ -1592,8 +1728,24 @@ msgstr ""
 msgid "Seen at"
 msgstr ""
 
+#. Label of the telegram_send_test (Button) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:292
+msgid "Send me a test message"
+msgstr ""
+
+#. Label of the enabled (Check) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:43
+msgid "Send me requests on Telegram"
+msgstr ""
+
+#. Label of the telegram_enabled (Check) field in DocType 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:247
+msgid "Send requests on Telegram"
+msgstr ""
+
 #. Label of the stock_alerts (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:204
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:213
 msgid "Send stock alerts"
 msgstr ""
 
@@ -1601,13 +1753,29 @@ msgstr ""
 msgid "Sending e-mail"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:184
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:188
 msgid "Sending your answer..."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:262
+msgid "Sending..."
 msgstr ""
 
 #. Label of the sends (Int) field in DocType 'Munimji Delivery Chase'
 #: ai_munimji/ai_munimji/doctype/munimji_delivery_chase/munimji_delivery_chase.json:74
 msgid "Sends"
+msgstr ""
+
+#. Description of the 'Send me a test message' (Button) field in DocType 'AI
+#. Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:289
+msgid "Sends a message to your own chat. Connect your Telegram first (Munimji Telegram Link, Connect Telegram)."
+msgstr ""
+
+#. Description of the 'Send requests on Telegram' (Check) field in DocType 'AI
+#. Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:244
+msgid "Sends each request that needs an answer to the people who connected their Telegram, and takes their answers. Off by default: nothing leaves this site until you switch it on and give it a bot token."
 msgstr ""
 
 #. Label of the created_at (Datetime) field in DocType 'Munimji Stock Notice'
@@ -1641,6 +1809,11 @@ msgstr ""
 msgid "Set by AI Munimji when a request is turned into this stock transfer. Do not edit."
 msgstr ""
 
+#. Description of the 'Bot' (Data) field in DocType 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:274
+msgid "Set by Connect the bot."
+msgstr ""
+
 #. Label of a Sidebar Item
 #: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:196
 msgid "Settings"
@@ -1653,11 +1826,11 @@ msgstr ""
 msgid "Severity"
 msgstr ""
 
-#: ai_munimji/flow.py:147
+#: ai_munimji/flow.py:156
 msgid "Snoozed"
 msgstr ""
 
-#: ai_munimji/flow.py:147
+#: ai_munimji/flow.py:156
 #, python-brace-format
 msgid "Snoozed by {0}, {1}. Nothing was ordered."
 msgstr ""
@@ -1702,13 +1875,13 @@ msgstr ""
 msgid "Started at"
 msgstr ""
 
-#: ai_munimji/jobs.py:153
+#: ai_munimji/jobs.py:160
 msgid "Starting"
 msgstr ""
 
 #. Description of the 'Run the check now' (Button) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:59
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:68
 msgid "Starts the stock check at once, for the Munimji Managers and System Managers. It uses the settings as last saved. Not while a check is already waiting or running."
 msgstr ""
 
@@ -1741,7 +1914,7 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: ai_munimji/flow.py:320
+#: ai_munimji/flow.py:343
 #, python-brace-format
 msgid "Step {0} of 3"
 msgstr ""
@@ -1750,7 +1923,7 @@ msgstr ""
 #. Settings'
 #. Label of a Sidebar Item
 #. Label of a shortcut in the AI Munimji Workspace
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:197
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:206
 #: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:131
 #: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:75
 msgid "Stock alerts"
@@ -1761,7 +1934,7 @@ msgstr ""
 msgid "Stock and orders"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:36
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:46
 msgid "Stock monitoring is off. Review the thresholds below, then switch on Watch stock."
 msgstr ""
 
@@ -1800,13 +1973,13 @@ msgid "Supplier quotations"
 msgstr ""
 
 #. Label of the fallback_supplier (Link) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:222
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:231
 msgid "Supplier to use when an item has none"
 msgstr ""
 
 #. Label of the suppliers_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:216
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:225
 msgid "Suppliers"
 msgstr ""
 
@@ -1821,8 +1994,18 @@ msgstr ""
 msgid "Suppress until"
 msgstr ""
 
+#: ai_munimji/telegram/api.py:141
+msgid "Switch Telegram on and enter the bot token, then save the page, and press this again."
+msgstr ""
+
+#. Description of the 'Send me requests on Telegram' (Check) field in DocType
+#. 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:39
+msgid "Switch off to stop being sent requests on Telegram without disconnecting. Delete this record to disconnect."
+msgstr ""
+
 #. Name of a role
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:268
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:342
 #: ai_munimji/ai_munimji/doctype/munimji_agent_run/munimji_agent_run.json:95
 #: ai_munimji/ai_munimji/doctype/munimji_agent_task/munimji_agent_task.json:167
 #: ai_munimji/ai_munimji/doctype/munimji_approval_delivery/munimji_approval_delivery.json:147
@@ -1843,6 +2026,7 @@ msgstr ""
 #: ai_munimji/ai_munimji/doctype/munimji_stock_alert/munimji_stock_alert.json:185
 #: ai_munimji/ai_munimji/doctype/munimji_stock_notice/munimji_stock_notice.json:128
 #: ai_munimji/ai_munimji/doctype/munimji_stock_transfer/munimji_stock_transfer.json:176
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:102
 #: ai_munimji/ai_munimji/doctype/munimji_tool_call/munimji_tool_call.json:112
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_message/munimji_vendor_message.json:142
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_reply/munimji_vendor_reply.json:127
@@ -1861,9 +2045,82 @@ msgstr ""
 msgid "Taxes are not included in these totals."
 msgstr ""
 
+#. Label of the telegram_section (Section Break) field in DocType 'AI Munimji
+#. Settings'
+#. Label of the telegram_status (HTML) field in DocType 'AI Munimji Settings'
+#. Label of a Sidebar Item
+#. Label of a shortcut in the AI Munimji Workspace
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:240
+#: ai_munimji/ai_munimji/sidebar/ai_munimji/ai_munimji.json:213
+#: ai_munimji/ai_munimji/workspace/ai_munimji/ai_munimji.json:99
+#: ai_munimji/telegram/api.py:106 ai_munimji/telegram/api.py:121
+msgid "Telegram"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:94 ai_munimji/telegram/api.py:96
+msgid "Telegram calls"
+msgstr ""
+
+#. Label of the chat_id (Data) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:32
+msgid "Telegram chat"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:45
+msgid "Telegram could not be connected."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:148
+#, python-brace-format
+msgid "Telegram did not accept the bot token: {0}"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:91
+msgid "Telegram is connected. Requests will arrive in your chat."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:82
+#, python-brace-format
+msgid "Telegram is disconnected for {0}. Requests are no longer sent to their chat."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:77
+msgid "Telegram is disconnected. Requests are no longer sent to your chat."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:28
+msgid "Telegram is not switched on for this site. Ask a Munimji Manager to switch it on in AI Munimji Settings."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:200
+msgid "Telegram is switched off, or has no bot token."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:176
+#, python-brace-format
+msgid "Telegram refused: {0}"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:161
+#, python-brace-format
+msgid "Telegram will call {0}."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:99
+msgid "Telegram's last delivery error"
+msgstr ""
+
 #. Label of the text_hash (Data) field in DocType 'Munimji Vendor Reply'
 #: ai_munimji/ai_munimji/doctype/munimji_vendor_reply/munimji_vendor_reply.json:60
 msgid "Text hash"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:85
+msgid "That Telegram was not connected."
+msgstr ""
+
+#: ai_munimji/telegram/links.py:81
+msgid "That link has expired or was already used. Open AI Munimji in your browser and press Connect Telegram again."
 msgstr ""
 
 #. Label of the decision_json (JSON) field in DocType 'Munimji Approval
@@ -1876,12 +2133,20 @@ msgstr ""
 msgid "The audit seal is append only: a row is never changed or deleted."
 msgstr ""
 
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:233
+msgid "The bot is connected with the token as last saved. Save the page, then press the button."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:36
+msgid "The bot is not connected yet. A Munimji Manager has to press “Connect the bot” in AI Munimji Settings first."
+msgstr ""
+
 #: ai_munimji/erp_client.py:1175
 #, python-brace-format
 msgid "The change was refused: {0}"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:152
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:162
 msgid "The check uses the settings as last saved. Save the page, then press the button."
 msgstr ""
 
@@ -1912,7 +2177,7 @@ msgstr ""
 msgid "The figures, as the engine worked them out"
 msgstr ""
 
-#: ai_munimji/flow.py:333
+#: ai_munimji/flow.py:355
 msgid "The flow of this request: reorder request, purchase request, draft Purchase Order"
 msgstr ""
 
@@ -1922,14 +2187,20 @@ msgstr ""
 
 #. Description of the 'Recent use: look back this many days' (Int) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:131
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:140
 msgid "The latest days, to notice that use is speeding up or slowing down."
 msgstr ""
 
 #. Description of the 'Normal use: look back this many days' (Int) field in
 #. DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:138
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:147
 msgid "The longer stretch that tells what normal use is. It must be more than the recent days."
+msgstr ""
+
+#. Description of the 'Telegram chat' (Data) field in DocType 'Munimji Telegram
+#. Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:29
+msgid "The number Telegram gives the chat. It is set by the bot when the person presses Start on their Connect Telegram link, never typed."
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:13
@@ -1940,11 +2211,20 @@ msgstr ""
 msgid "The package ai-munimji-engine stays in the bench's Python environment. Remove it with: pip uninstall ai-munimji-engine"
 msgstr ""
 
-#: ai_munimji/jobs.py:160
+#. Description of the 'User' (Link) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:18
+msgid "The person whose Telegram this is. They answer requests as this user, with this user's rights."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:118
+msgid "The polling loop"
+msgstr ""
+
+#: ai_munimji/jobs.py:167
 msgid "The reason was not recorded."
 msgstr ""
 
-#: ai_munimji/flow.py:213
+#: ai_munimji/flow.py:231
 msgid "The reorder was not approved, so the vendors were not compared."
 msgstr ""
 
@@ -1980,7 +2260,7 @@ msgstr ""
 msgid "The row, as the engine kept it"
 msgstr ""
 
-#: ai_munimji/settings_map.py:86
+#: ai_munimji/settings_map.py:95
 msgid "The rules package ai-munimji-engine is not installed in this bench, so the settings cannot be checked. Install it (see the section The engine in the README) and try again."
 msgstr ""
 
@@ -1990,19 +2270,19 @@ msgstr ""
 
 #. Label of the check_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:51
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:60
 msgid "The stock check"
 msgstr ""
 
-#: ai_munimji/jobs.py:142
+#: ai_munimji/jobs.py:149
 msgid "The stock check has not run yet."
 msgstr ""
 
-#: ai_munimji/api.py:114
+#: ai_munimji/api.py:124
 msgid "The stock check is queued and starts in a moment. This page shows how far it has got; the requests it makes appear in Munimji Approval Request."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:71
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:81
 msgid "The stock check looks at every item. For each one that is running low it makes a Reorder request and tells the people who may approve."
 msgstr ""
 
@@ -2018,6 +2298,11 @@ msgstr ""
 msgid "The system mode of the ERP client is only for the scheduled job, which runs as Administrator."
 msgstr ""
 
+#: ai_munimji/telegram/api.py:207
+#, python-brace-format
+msgid "The test message could not be sent: {0}"
+msgstr ""
+
 #: ai_munimji/erp_client.py:1021
 msgid "The two warehouses are the same."
 msgstr ""
@@ -2027,12 +2312,16 @@ msgstr ""
 msgid "The values"
 msgstr ""
 
-#: ai_munimji/flow.py:198
+#: ai_munimji/flow.py:207
 msgid "The vendors are being compared. The purchase request appears here in about a minute."
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:18
 msgid "The vendors that were checked"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:155
+msgid "The webhook secret has not been made yet: save the page once more, then press this again."
 msgstr ""
 
 #: ai_munimji/erp_client.py:957
@@ -2049,8 +2338,12 @@ msgstr ""
 msgid "There are several companies and no default company is set, so nothing was created: it would land in whichever company the signed-in user has."
 msgstr ""
 
-#: ai_munimji/settings_map.py:286
+#: ai_munimji/settings_map.py:312
 msgid "These settings cannot be saved"
+msgstr ""
+
+#: ai_munimji/telegram/links.py:97
+msgid "This Telegram chat is already connected to another AI Munimji user. They have to disconnect it first."
 msgstr ""
 
 #: ai_munimji/api.py:62
@@ -2062,7 +2355,7 @@ msgstr ""
 msgid "This client makes documents as the person signed in, {0}; it cannot act for {1}."
 msgstr ""
 
-#: ai_munimji/flow.py:162
+#: ai_munimji/flow.py:171
 msgid "This purchase was asked for directly, so there was no reorder request."
 msgstr ""
 
@@ -2075,12 +2368,16 @@ msgstr ""
 msgid "This request is {0}."
 msgstr ""
 
-#: ai_munimji/flow.py:226
+#: ai_munimji/flow.py:245
 #, python-brace-format
 msgid "This request was changed. It was replaced by {0}."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:89
+#: ai_munimji/telegram/api.py:43
+msgid "This user cannot answer requests, so there is nothing to send to Telegram. Use your own user (the Munimji Approver role)."
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:99
 msgid "Timing: the stock check runs at the time set under “Check stock at”, or when a manager presses “Run the check now”. The vendor comparison starts right after a reorder is approved and takes about a minute; if a stock check is running at that moment, the next scheduled check makes it."
 msgstr ""
 
@@ -2133,19 +2430,32 @@ msgstr ""
 msgid "Updated by"
 msgstr ""
 
+#: ai_munimji/telegram/api.py:111
+msgid "Updates arrive by"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:97
+msgid "Updates waiting at Telegram"
+msgstr ""
+
 #. Label of the calendar_enabled (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:160
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:169
 msgid "Use the demand calendar"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:245
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:252
 msgid "Use this vendor"
 msgstr ""
 
 #. Description of the 'Delivery time to assume (days)' (Float) field in DocType
 #. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:111
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:120
 msgid "Used for an item when ERPNext has no delivery time for it."
+msgstr ""
+
+#. Label of the user (Link) field in DocType 'Munimji Telegram Link'
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:22
+msgid "User"
 msgstr ""
 
 #. Label of the variance (Float) field in DocType 'Munimji Count Review'
@@ -2154,12 +2464,16 @@ msgid "Variance"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:61
-#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:232
+#: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:239
 msgid "Vendor"
 msgstr ""
 
-#: ai_munimji/flow.py:138
+#: ai_munimji/flow.py:143
 msgid "Waiting for an answer"
+msgstr ""
+
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:70
+msgid "Waiting for you to press Start in Telegram..."
 msgstr ""
 
 #. Label of a Sidebar Item
@@ -2178,12 +2492,30 @@ msgid "Warehouse"
 msgstr ""
 
 #. Label of the enabled (Check) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:45
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:54
 msgid "Watch stock"
 msgstr ""
 
-#: ai_munimji/api.py:122
+#: ai_munimji/api.py:132
 msgid "Watch stock is switched off, so no check can run. Switch it on and save the page first."
+msgstr ""
+
+#. Option for the 'How answers reach this site' (Select) field in DocType 'AI
+#. Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:263
+msgid "Webhook"
+msgstr ""
+
+#. Label of the telegram_webhook_secret (Password) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:269
+msgid "Webhook secret"
+msgstr ""
+
+#. Description of the 'How answers reach this site' (Select) field in DocType
+#. 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:259
+msgid "Webhook: Telegram calls this site the moment someone presses a button; the site needs a public HTTPS address. Polling: a background job asks Telegram for the answers; it works on a site Telegram cannot reach, and needs a worker for the long queue."
 msgstr ""
 
 #. Label of the search_text (Long Text) field in DocType 'Munimji Approval
@@ -2211,11 +2543,11 @@ msgstr ""
 
 #. Description of the 'Keep logs for (days)' (Int) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:232
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:306
 msgid "What the agents did, the chat log and the ids of handled messages older than this are deleted by the clean-up. 0 keeps them all. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age."
 msgstr ""
 
-#: ai_munimji/flow.py:239
+#: ai_munimji/flow.py:256
 msgid "What to do: order it in ERPNext by hand, then press “Got it” on that request."
 msgstr ""
 
@@ -2229,7 +2561,7 @@ msgstr ""
 msgid "What was found"
 msgstr ""
 
-#: ai_munimji/jobs.py:160
+#: ai_munimji/jobs.py:167
 msgid "What went wrong"
 msgstr ""
 
@@ -2238,11 +2570,11 @@ msgstr ""
 msgid "When"
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:77
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:87
 msgid "When an approver approves a reorder, the vendors are compared in the background (price, delivery time, how often each delivered on time). About a minute later a Purchase request appears in Munimji Approval Request, with the vendor it recommends and why it did not choose the others. For an item with no purchase history no comparison is possible: the request says so, and you order it in ERPNext by hand and press “Got it”."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:83
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:93
 msgid "When an approver approves the purchase request, ERPNext gets a Draft Purchase Order in the approver’s name. It is only a draft: open it in ERPNext, check it and submit it. Nothing is sent to the vendor."
 msgstr ""
 
@@ -2262,13 +2594,13 @@ msgstr ""
 
 #. Label of the rules_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:79
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:88
 msgid "When to ask for a purchase"
 msgstr ""
 
 #. Label of the schedule_section (Section Break) field in DocType 'AI Munimji
 #. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:120
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:129
 msgid "When to check, and what history to look at"
 msgstr ""
 
@@ -2286,7 +2618,7 @@ msgstr ""
 msgid "Who approved the request, and where from. Do not edit."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:94
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:104
 msgid "Who sees what: Viewers see the requests. Approvers also answer them and make the draft order. Managers also change the settings and run the check."
 msgstr ""
 
@@ -2313,12 +2645,29 @@ msgstr ""
 
 #. Description of the 'Ask when stock will last this many days or fewer (0 =
 #. not used)' (Float) field in DocType 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:90
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:99
 msgid "Worked out from how much of the item you have been using. Leave 0 to not use this rule."
 msgstr ""
 
-#: ai_munimji/flow.py:317
+#: ai_munimji/flow.py:336
 msgid "You are here"
+msgstr ""
+
+#. Description of a DocType
+#: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link.json:6
+msgid "Your Telegram chat, once you have connected it. Press Connect Telegram, at the top right, to get the requests that need your answer in Telegram, with buttons to answer them."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:195
+msgid "Your own Telegram is not connected yet: press Connect Telegram in AI Munimji, then try again."
+msgstr ""
+
+#: ai_munimji/telegram/links.py:89
+msgid "Your user cannot answer requests (it needs the Munimji Approver role), so Telegram was not connected."
+msgstr ""
+
+#: ai_munimji/telegram/api.py:165
+msgid "already running"
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:75
@@ -2352,9 +2701,37 @@ msgstr ""
 msgid "no reason was given"
 msgstr ""
 
+#: ai_munimji/telegram/api.py:121
+msgid "not answering a moment ago; not tried again for a minute"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:109
+msgid "not connected yet"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:118
+msgid "not running"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:96
+msgid "nothing: no webhook is registered (right for polling)"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:106
+msgid "off"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:106
+msgid "on"
+msgstr ""
+
 #. Option for the 'Kind' (Select) field in DocType 'Munimji Calendar Event'
 #: ai_munimji/ai_munimji/doctype/munimji_calendar_event/munimji_calendar_event.json:30
 msgid "other"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:111
+msgid "polling"
 msgstr ""
 
 #. Option for the 'Kind' (Select) field in DocType 'Munimji Calendar Event'
@@ -2370,19 +2747,31 @@ msgstr ""
 msgid "purchase requisition"
 msgstr ""
 
+#: ai_munimji/telegram/api.py:118
+msgid "running"
+msgstr ""
+
+#: ai_munimji/telegram/api.py:165
+msgid "started"
+msgstr ""
+
 #: ai_munimji/erp_client.py:1027
 msgid "stock transfer"
 msgstr ""
 
-#: ai_munimji/flow.py:227
+#: ai_munimji/flow.py:246
 msgid "the new request"
 msgstr ""
 
-#: ai_munimji/flow.py:205 ai_munimji/next_step.py:42
+#: ai_munimji/flow.py:212 ai_munimji/next_step.py:42
 msgid "the time set in AI Munimji Settings"
 msgstr ""
 
-#: ai_munimji/jobs.py:156
+#: ai_munimji/telegram/api.py:111
+msgid "webhook"
+msgstr ""
+
+#: ai_munimji/jobs.py:163
 #, python-brace-format
 msgid "{0} (finished {1})"
 msgstr ""
@@ -2412,7 +2801,7 @@ msgstr ""
 msgid "{0} is not supported in this version of AI Munimji."
 msgstr ""
 
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:47
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.js:57
 #, python-brace-format
 msgid "{0} items could not be analysed in the last stock check and were skipped."
 msgstr ""
@@ -2447,7 +2836,7 @@ msgstr ""
 msgid "{0} may not {1} {2} records (the DocType's permission rows decide)."
 msgstr ""
 
-#: ai_munimji/settings_map.py:251
+#: ai_munimji/settings_map.py:260
 #, python-brace-format
 msgid "{0} minutes"
 msgstr ""
@@ -2457,12 +2846,12 @@ msgstr ""
 msgid "{0}% of it has been received and {1}% billed, so it has to be dealt with in ERPNext (cancel the receipt or invoice first)."
 msgstr ""
 
-#: ai_munimji/settings_map.py:253
+#: ai_munimji/settings_map.py:262
 #, python-brace-format
 msgid "{0}: “{1}” can start the stock check again only {2} after the last start. Every check reads all your stock, so there must be at least {3} minutes between starts. 0 * * * * is every hour and 0 6 * * * is every day at 6 in the morning"
 msgstr ""
 
-#: ai_munimji/settings_map.py:245
+#: ai_munimji/settings_map.py:254
 #, python-brace-format
 msgid "{0}: “{1}” is not a schedule the scheduler can read (for example 0 6 * * * is every day at 6 in the morning)"
 msgstr ""
@@ -2485,8 +2874,13 @@ msgstr ""
 msgid "{} waiting"
 msgstr ""
 
-#: ai_munimji/settings_map.py:277
+#: ai_munimji/settings_map.py:302
 #, python-brace-format
 msgid "“{0}” cannot be negative (0 keeps the logs for ever)"
+msgstr ""
+
+#: ai_munimji/settings_map.py:289
+#, python-brace-format
+msgid "“{0}” is needed to switch Telegram on: create a bot with @BotFather in Telegram and paste its token"
 msgstr ""
 

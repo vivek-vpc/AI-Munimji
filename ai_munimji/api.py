@@ -62,7 +62,9 @@ def answer(approval_id: str, action: str, params: str | None = None) -> dict:
 				"This answer could not be read, so nothing was done. Reload the page and press the button again."
 			),
 		}
-	services = wiring.person_services()
+	services = wiring.person_services(
+		telegram=True
+	)  # with Telegram on, the chats the request was sent to are tidied up (the buttons go, the outcome appears under it)
 	try:
 		result = services.approvals.decide(approval_id, action, wiring.actor_for(), "desk", given)
 	except (frappe.QueryDeadlockError, frappe.QueryTimeoutError) as exc:

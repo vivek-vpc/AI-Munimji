@@ -21,3 +21,25 @@ def has_permission(doc, ptype=None, user=None, debug=False):
 	if ptype == "approve" and not frappe.has_permission("Purchase Order", "create", user=user):
 		return False
 	return True
+
+
+MANAGERS = frozenset(("Munimji Manager", "System Manager"))
+
+
+def _is_manager(user: str) -> bool:
+	return user == "Administrator" or bool(MANAGERS.intersection(frappe.get_roles(user)))
+
+
+def link_has_permission(doc, ptype=None, user=None, debug=False):
+	"""Hook for Munimji Telegram Link. A person sees, switches off and deletes their own Telegram link; a Munimji Manager or a System Manager, everyone's. A hook can only deny: the
+	DocType's permission rows give the Munimji Approver the right to read, write and delete links, and this narrows it to the person's own."""
+	user = user or frappe.session.user
+	return _is_manager(user) or doc.user == user
+
+
+def link_query_conditions(user=None):
+	"""The same rule for a list: a person's list holds their own link only."""
+	user = user or frappe.session.user
+	if _is_manager(user):
+		return ""
+	return f"`tabMunimji Telegram Link`.`user` = {frappe.db.escape(user)}"

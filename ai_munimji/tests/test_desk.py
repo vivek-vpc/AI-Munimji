@@ -189,8 +189,8 @@ class TestWhatPeopleSeeOnTheDesk(ERPNextTestSuite):
 		for user, hidden in (
 			(
 				self.viewer,
-				{"Draft purchase orders", "Settings"},
-			),  # no right on Purchase Order, none on the Settings
+				{"Draft purchase orders", "Settings", "Telegram"},
+			),  # no right on Purchase Order, none on the Settings, none on the Telegram links (a Viewer is sent nothing and answers nothing)
 			(self.approver, {"Settings"}),
 			(self.manager, {"Draft purchase orders"}),  # the Munimji roles alone give no Purchase Order
 		):

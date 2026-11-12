@@ -93,7 +93,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-07 12:00:00.000000",
+ "modified": "2026-11-07 12:00:01.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Approval Delivery",
@@ -113,7 +113,7 @@
    "write": 0
   },
   {
-   "create": 0,
+   "create": 1,
    "delete": 0,
    "email": 0,
    "export": 0,
@@ -125,7 +125,7 @@
    "write": 0
   },
   {
-   "create": 0,
+   "create": 1,
    "delete": 0,
    "email": 0,
    "export": 0,

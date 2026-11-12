@@ -2,7 +2,9 @@ import frappe
 
 METHOD = "ai_munimji.jobs.check_stock"
 CLEAN_UP = "ai_munimji.retention.clean_up"  # the daily clean-up of the logs (retention.py)
-METHODS = (METHOD, CLEAN_UP)
+TELEGRAM = "ai_munimji.telegram.jobs.housekeeping"  # retries, reminders and the polling loop kept alive (telegram/jobs.py); runs only while Telegram is on
+TELEGRAM_CRON = "*/10 * * * *"
+METHODS = (METHOD, CLEAN_UP, TELEGRAM)
 AGAINST = "AI Munimji Settings"
 DEFAULT_CRON = "0 6 * * *"  # the Settings page's own default
 
@@ -88,6 +90,14 @@ def sync_clean_up(keep_logs_days: int | None) -> str:
 
 	days = KEEP_LOGS_DEFAULT if keep_logs_days is None else int(keep_logs_days)
 	return _ensure(CLEAN_UP, {"frequency": "Daily Long", "stopped": 0 if days > 0 else 1})
+
+
+def sync_telegram(enabled: bool) -> str:
+	"""Make the housekeeping job of Telegram exist, running while Telegram is switched on and stopped while it is off. Every ten minutes: the retries and the reminders are counted in minutes
+	and hours, and the scheduler's own tick is a few minutes. Returns the job's name."""
+	return _ensure(
+		TELEGRAM, {"frequency": "Cron", "cron_format": TELEGRAM_CRON, "stopped": 0 if enabled else 1}
+	)
 
 
 def remove() -> None:

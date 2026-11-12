@@ -1,6 +1,7 @@
 # Copyright (c) 2026, AI Munimji project and contributors
 # For license information, please see license.txt
 
+import frappe
 from frappe.model.document import Document
 
 
@@ -10,6 +11,18 @@ class AIMunimjiSettings(Document):
 		from ai_munimji import settings_map
 
 		settings_map.validate(self)
+		self.make_the_webhook_secret()
+
+	def make_the_webhook_secret(self):
+		"""Telegram sends this secret in a header with every call to the webhook, and the webhook refuses a call without it. Nobody types or reads it: it is made when Telegram is first switched on."""
+		from ai_munimji.telegram import config
+
+		if (
+			self.telegram_enabled
+			and not str(self.telegram_webhook_secret or "").strip("*")
+			and not config.webhook_secret()
+		):
+			self.telegram_webhook_secret = frappe.generate_hash(length=32)
 
 	def onload(self):
 		"""The page warns at the top while the database has innodb_snapshot_isolation ON (dbcheck.py); nothing is sent when it is OFF or cannot be read. It also says how many items the last
@@ -29,3 +42,4 @@ class AIMunimjiSettings(Document):
 
 		schedule.sync(bool(self.enabled), self.check_cron)
 		schedule.sync_clean_up(self.keep_logs_days)
+		schedule.sync_telegram(bool(self.telegram_enabled))

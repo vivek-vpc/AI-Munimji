@@ -9,12 +9,22 @@ frappe.ui.form.on("AI Munimji Settings", {
 		show_the_notes(frm);
 		show_the_flow_help(frm);
 		show_the_check(frm);
+		show_telegram(frm);
 	},
 	enabled(frm) {
 		show_the_notes(frm);
 	},
 	run_check_now(frm) {
 		run_the_check(frm);
+	},
+	telegram_enabled(frm) {
+		show_telegram(frm);
+	},
+	telegram_connect_bot(frm) {
+		connect_the_bot(frm);
+	},
+	telegram_send_test(frm) {
+		send_the_test(frm);
 	},
 });
 
@@ -175,4 +185,81 @@ function run_the_check(frm) {
 			paint_the_check(frm, result);
 			watch_the_check(frm, result);
 		});
+}
+
+// Telegram: what the site knows about it (no call to Telegram), and the two buttons that do call it. Everything that came from the server is escaped; the bot token is never on the page.
+function rows_html(rows) {
+	const body = (rows || [])
+		.map(
+			([label, value]) =>
+				`<tr><td class="text-muted" style="padding-right: var(--padding-lg)">${frappe.utils.escape_html(
+					label
+				)}</td><td><b>${frappe.utils.escape_html(value)}</b></td></tr>`
+		)
+		.join("");
+	return body ? `<table>${body}</table>` : "";
+}
+
+function show_telegram(frm) {
+	const field = frm.fields_dict && frm.fields_dict.telegram_status;
+	if (!field) {
+		return;
+	}
+	if (!frm.doc.telegram_enabled) {
+		field.$wrapper.html("");
+		return;
+	}
+	return frappe
+		.call({ method: "ai_munimji.telegram.api.status", type: "GET" })
+		.then((r) => field.$wrapper.html(rows_html((r.message || {}).rows)))
+		.catch(() => field.$wrapper.html(""));
+}
+
+function say_what_telegram_answered(result) {
+	frappe.show_alert(
+		{
+			message: frappe.utils.escape_html(result.message || ""),
+			indicator: result.ok ? "green" : "orange",
+		},
+		10
+	);
+}
+
+function connect_the_bot(frm) {
+	if (frm.is_dirty()) {
+		frappe.msgprint({
+			title: __("Save the settings first"),
+			message: frappe.utils.escape_html(
+				__(
+					"The bot is connected with the token as last saved. Save the page, then press the button."
+				)
+			),
+			indicator: "orange",
+		});
+		return;
+	}
+	return frappe
+		.call({
+			method: "ai_munimji.telegram.api.connect_bot",
+			freeze: true,
+			freeze_message: __("Asking Telegram..."),
+		})
+		.then((r) => {
+			const result = r.message || {};
+			say_what_telegram_answered(result);
+			if (result.rows) {
+				frm.fields_dict.telegram_status.$wrapper.html(rows_html(result.rows));
+			}
+			frm.reload_doc();
+		});
+}
+
+function send_the_test(frm) {
+	return frappe
+		.call({
+			method: "ai_munimji.telegram.api.send_test",
+			freeze: true,
+			freeze_message: __("Sending..."),
+		})
+		.then((r) => say_what_telegram_answered(r.message || {}));
 }

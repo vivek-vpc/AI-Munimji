@@ -33,6 +33,15 @@
   "stock_alert_repeat_days",
   "suppliers_section",
   "fallback_supplier",
+  "telegram_section",
+  "telegram_enabled",
+  "telegram_bot_token",
+  "telegram_mode",
+  "telegram_webhook_secret",
+  "telegram_bot_username",
+  "telegram_connect_bot",
+  "telegram_send_test",
+  "telegram_status",
   "housekeeping_section",
   "keep_logs_days"
  ],
@@ -223,6 +232,71 @@
    "options": "Supplier"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.telegram_enabled",
+   "description": "Requests arrive in a Telegram chat with buttons, and the people who answer them can answer there. Off until you switch it on. When it is on, the text of each request (item names, quantities, vendor names and prices) goes to Telegram. docs/PRIVACY.md says what.",
+   "fieldname": "telegram_section",
+   "fieldtype": "Section Break",
+   "label": "Telegram"
+  },
+  {
+   "default": "0",
+   "description": "Sends each request that needs an answer to the people who connected their Telegram, and takes their answers. Off by default: nothing leaves this site until you switch it on and give it a bot token.",
+   "fieldname": "telegram_enabled",
+   "fieldtype": "Check",
+   "label": "Send requests on Telegram"
+  },
+  {
+   "depends_on": "eval:doc.telegram_enabled",
+   "description": "Create a bot with @BotFather in Telegram and paste the token it gives you. The token is a password: it is kept encrypted and is never shown again.",
+   "fieldname": "telegram_bot_token",
+   "fieldtype": "Password",
+   "label": "Bot token"
+  },
+  {
+   "default": "Webhook",
+   "depends_on": "eval:doc.telegram_enabled",
+   "description": "Webhook: Telegram calls this site the moment someone presses a button; the site needs a public HTTPS address. Polling: a background job asks Telegram for the answers; it works on a site Telegram cannot reach, and needs a worker for the long queue.",
+   "fieldname": "telegram_mode",
+   "fieldtype": "Select",
+   "label": "How answers reach this site",
+   "options": "Webhook\nPolling"
+  },
+  {
+   "fieldname": "telegram_webhook_secret",
+   "fieldtype": "Password",
+   "hidden": 1,
+   "label": "Webhook secret",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.telegram_enabled",
+   "description": "Set by Connect the bot.",
+   "fieldname": "telegram_bot_username",
+   "fieldtype": "Data",
+   "label": "Bot",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.telegram_enabled",
+   "description": "Save the page first. Asks Telegram who the token belongs to, then makes Telegram send answers here (webhook) or starts the loop that fetches them (polling).",
+   "fieldname": "telegram_connect_bot",
+   "fieldtype": "Button",
+   "label": "Connect the bot"
+  },
+  {
+   "depends_on": "eval:doc.telegram_enabled",
+   "description": "Sends a message to your own chat. Connect your Telegram first (Munimji Telegram Link, Connect Telegram).",
+   "fieldname": "telegram_send_test",
+   "fieldtype": "Button",
+   "label": "Send me a test message"
+  },
+  {
+   "fieldname": "telegram_status",
+   "fieldtype": "HTML",
+   "label": "Telegram"
+  },
+  {
    "fieldname": "housekeeping_section",
    "fieldtype": "Section Break",
    "label": "Housekeeping"
@@ -239,7 +313,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-11 16:00:01.000000",
+ "modified": "2026-11-12 18:30:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",

@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:user",
+ "creation": "2026-11-12 18:00:00.000000",
+ "description": "Your Telegram chat, once you have connected it. Press Connect Telegram, at the top right, to get the requests that need your answer in Telegram, with buttons to answer them.",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "user",
+  "chat_id",
+  "enabled",
+  "linked_on",
+  "since"
+ ],
+ "fields": [
+  {
+   "description": "The person whose Telegram this is. They answer requests as this user, with this user's rights.",
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "description": "The number Telegram gives the chat. It is set by the bot when the person presses Start on their Connect Telegram link, never typed.",
+   "fieldname": "chat_id",
+   "fieldtype": "Data",
+   "label": "Telegram chat",
+   "read_only": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "description": "Switch off to stop being sent requests on Telegram without disconnecting. Delete this record to disconnect.",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Send me requests on Telegram"
+  },
+  {
+   "fieldname": "linked_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Connected on",
+   "read_only": 1
+  },
+  {
+   "fieldname": "since",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Connected since (UTC)",
+   "read_only": 1
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-12 21:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "AI Munimji",
+ "name": "Munimji Telegram Link",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 0,
+   "delete": 1,
+   "email": 0,
+   "export": 0,
+   "print": 0,
+   "read": 1,
+   "report": 0,
+   "role": "Munimji Approver",
+   "share": 0,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 1,
+   "email": 0,
+   "export": 0,
+   "print": 0,
+   "read": 1,
+   "report": 0,
+   "role": "Munimji Manager",
+   "share": 0,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 1,
+   "email": 0,
+   "export": 0,
+   "print": 0,
+   "read": 1,
+   "report": 0,
+   "role": "System Manager",
+   "share": 0,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "user",
+ "track_changes": 0
+}

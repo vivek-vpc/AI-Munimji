@@ -32,7 +32,17 @@ SCREEN = {V: "rx", A: "rwcx", M: "rwcx", S: "rwcx"}
 EXPECTED_LETTERS: dict[str, dict[str, str]] = {
 	SETTINGS: {M: "rw", S: "rw"},
 	REQUEST: {V: "rx", A: "rwcxa", M: "rwcxa", S: "rwcxa"},
-	"Munimji Approval Delivery": {V: "r", A: "r", M: "r", S: "r"},
+	"Munimji Approval Delivery": {
+		V: "r",
+		A: "rc",
+		M: "rc",
+		S: "r",
+	},  # an Approver or a Manager who answers and changes a request sends the revised one to the chats, and the engine records each message as a delivery, in their session (Telegram)
+	"Munimji Telegram Link": {
+		A: "rwd",
+		M: "rwd",
+		S: "rwd",
+	},  # nobody creates one by hand: the bot makes it when the person presses Start on their Connect Telegram link; the hooks narrow an Approver to their own
 	SEAL: {
 		M: "r",
 		S: "r",
