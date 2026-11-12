@@ -335,10 +335,13 @@ def render(steps: list[Step]) -> str:
 		marker = (
 			f' <span class="indicator-pill blue">{markup.esc(_("You are here"))}</span>' if step.here else ""
 		)
+		heading = (
+			f"<div><b>{markup.esc(step.title)}</b> "
+			f'<span class="indicator-pill {PILL[step.state]}">{markup.esc(step.status)}</span>{marker}</div>'
+		)
 		body = [
 			f'<div class="text-muted small">{markup.esc(_("Step {0} of 3").format(step.number))}</div>',
-			f"<div><b>{markup.esc(step.title)}</b> "
-			f'<span class="indicator-pill {PILL[step.state]}">{markup.esc(step.status)}</span>{marker}</div>',
+			heading,
 		]
 		body += [f"<div>{markup.link(path, label)}</div>" for label, path in step.links]
 		body += [f'<div class="text-muted small">{markup.esc(line)}</div>' for line in step.lines]

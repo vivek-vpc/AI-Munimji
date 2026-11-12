@@ -172,6 +172,7 @@ def check_status() -> dict:
 def run_stock_check_now() -> dict:
 	"""The queued job of the "Run the check now" button. Frappe runs a queued job as the person who queued it, and the check reads and writes in the system mode, which is Administrator's alone
 	(the scheduler's own jobs are Administrator's already), so it becomes Administrator here, in the worker, before anything is read."""
+	# nosemgrep: frappe-setuser - the worker of this queued job switches itself; tests/test_rules.py allows set_user only in the two queued entry points
 	frappe.set_user("Administrator")
 	return run_stock_check()
 
@@ -183,6 +184,7 @@ def run_vendor_comparison(work_order_id: str, clock=None, company: str | None = 
 	person's own session. It takes the stock check's lease, so it never runs beside a check (two runs would compare the same reorder twice); when it cannot get it, it does nothing and the next
 	scheduled check compares the vendors, which is what the person was told (next_step.py). The work order is claimed in the same transaction as the request it leads to, so the scheduled check
 	that follows finds nothing waiting for this reorder and makes no second request. Does nothing while Watch stock is off."""
+	# nosemgrep: frappe-setuser - as in run_stock_check_now: a queued job runs as whoever queued it, and this one needs the system mode
 	frappe.set_user("Administrator")
 	if not frappe.get_cached_doc("AI Munimji Settings").enabled:
 		return {"ran": False, "why": "Watch stock is off", "requests": 0}
