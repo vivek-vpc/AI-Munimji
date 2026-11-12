@@ -7,7 +7,7 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 ### Fixed after the production-readiness review: scale and concurrency
 
 Measured on a site of 30,000 items and 5.3 million stock ledger entries; the numbers, the method and the tools to repeat it are in `docs/SCALE_MEASUREMENTS.md`. The stock check needs `ai-munimji-engine` 0.1.2
-(batches and `get_items`); `pyproject.toml` still pins 0.1.1 and is not changed here.
+(batches and `get_items`); `pyproject.toml` pins 0.1.2.
 
 * **The stock check no longer is one transaction for the whole site.** It works through the items in batches of 200 and, after each batch, commits, renews its lease and writes how far it has got in its Job Run
   (new column "How far it got"). Before, every record it changed stayed row-locked for the whole run, so a person answering a request the run had touched waited until the run ended or was told "busy" (at 30,000 items
@@ -26,7 +26,7 @@ Measured on a site of 30,000 items and 5.3 million stock ledger entries; the num
 
 ### Added after the production-readiness review: the flow a person can follow
 
-From the use of the app: after approving a "Reorder suggested" request nothing visible happened until the next scheduled check, the person was not told what to do next, and the draft Purchase Order's number was not shown anywhere. The stock check needs `ai-munimji-engine` 0.1.2 (`ProcurementAgent.run(work_orders=)`, with the batch parameters above); `pyproject.toml` still pins 0.1.1 and is not changed here.
+From the use of the app: after approving a "Reorder suggested" request nothing visible happened until the next scheduled check, the person was not told what to do next, and the draft Purchase Order's number was not shown anywhere. The stock check needs `ai-munimji-engine` 0.1.2 (`ProcurementAgent.run(work_orders=)`, with the batch parameters above); `pyproject.toml` pins 0.1.2.
 
 * **The vendors are compared within about a minute of approving a reorder.** The answer queues a job (long queue, after the commit) that compares the vendors for that one reorder, as Administrator, under the stock check's lease; the purchase request appears in Munimji Approval Request. If the job cannot take the lease, the next scheduled check does it, and no reorder gets two purchase requests. (`hand_off.py`, `jobs.run_vendor_comparison`)
 * **Every answer is followed by one plain sentence** saying what happens next and where to look: "Approved. The vendors are being compared; the purchase request will appear in Munimji Approval Request in about a minute.", "Draft Purchase Order PO-... made. Review and submit it in ERPNext." (the number is a link), "Closed. Nothing was ordered." (`next_step.py`)
