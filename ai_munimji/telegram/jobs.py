@@ -78,24 +78,31 @@ def sending():
 
 
 def ensure_poller() -> str:
-	"""Start the polling loop if the site is set to poll and none is running. Returns what it did: 'not wanted', 'running' or 'queued'."""
+	"""Start the polling loop if the site is set to poll and none is running. Returns what it did: 'not wanted', 'running', 'queued' or 'waiting'.
+
+	A worker killed in the middle of a loop (a deploy, a restart) leaves its job registered as running until the queue notices, and Frappe refuses to queue a job under that id; the lease
+	is free by then, since it runs out on its own. So the other id is tried too, and polling is back at the next run and not when the dead job has been cleaned up. 'waiting' is both ids
+	taken: a loop is queued already, or two dead ones have not been cleaned up yet."""
 	if not (config.enabled() and config.mode() == "polling"):
 		return "not wanted"
 	if locks.held(POLL_LEASE):
 		return "running"
-	queue_the_loop("a")
-	return "queued"
+	for slot in ("a", "b"):
+		if queue_the_loop(slot):
+			return "queued"
+	return "waiting"
 
 
 def poll_job_id(slot: str) -> str:
 	return f"{POLL_JOB}:{slot}"
 
 
-def queue_the_loop(slot: str) -> None:
+def queue_the_loop(slot: str) -> bool:
 	"""Queue a polling loop that holds the job id of `slot`. Frappe does not queue a job whose id is already queued or running (`deduplicate`), and the loop that queues its successor is itself
 	still running: a successor with the same id was silently dropped, the polling stopped at the end of every loop, and the housekeeping started it again minutes later (a button pressed
-	in between waited that long). So two loops take turns at two ids, "a" and "b", and each is told which it holds (`slot`) so that it can queue the other."""
-	frappe.enqueue(
+	in between waited that long). So two loops take turns at two ids, "a" and "b", and each is told which it holds (`slot`) so that it can queue the other. Returns whether Frappe queued it
+	(it answers nothing when the id is taken)."""
+	queued = frappe.enqueue(
 		POLL,
 		queue=POLL_QUEUE,
 		timeout=POLL_TIMEOUT,
@@ -103,6 +110,7 @@ def queue_the_loop(slot: str) -> None:
 		deduplicate=True,
 		slot=slot,
 	)
+	return queued is not None
 
 
 def wanted() -> bool:

@@ -277,6 +277,28 @@ class TestPolling(TelegramCase):
 		self.assertEqual(out, {"ran": False, "why": "another poller is running"})
 		self.assertEqual(self.telegram.calls, [])
 
+	def test_the_housekeeping_uses_the_other_id_when_a_loop_that_died_still_holds_the_first(self):
+		"""A worker killed in the middle of a loop (a deploy, a restart) leaves its job registered as running until the queue notices, and Frappe, which answers nothing, refuses to queue a
+		job under that id. The housekeeping then tries the other id, so that polling is back at its next run and not when the dead job has been cleaned up."""
+		frappe.set_user("Administrator")
+		ids = lambda: [  # noqa: E731
+			c.kwargs["job_id"]
+			for c in self.enqueued.call_args_list
+			if c.args and c.args[0] == telegram_jobs.POLL
+		]
+		with mock.patch.object(locks, "held", return_value=False):
+			self.enqueued.reset_mock()
+			self.enqueued.side_effect = [None, mock.Mock()]
+			self.assertEqual(telegram_jobs.ensure_poller(), "queued")
+			self.assertEqual(ids(), [telegram_jobs.poll_job_id("a"), telegram_jobs.poll_job_id("b")])
+			self.enqueued.reset_mock()
+			self.enqueued.side_effect = [None, None]
+			self.assertEqual(
+				telegram_jobs.ensure_poller(),
+				"waiting",
+				"both ids are taken: it says so and does nothing more",
+			)
+
 	def test_the_housekeeping_starts_a_loop_only_when_one_is_wanted_and_none_runs(self):
 		frappe.set_user("Administrator")
 		with mock.patch.object(locks, "held", return_value=True):
