@@ -76,6 +76,14 @@ Reading **Tax Rules needs the Accounts Manager role**, which a Purchase User doe
 
 Open AI Munimji Settings as a Munimji Manager or System Manager. The values are checked by the same rules as the standalone service uses for its `settings.yaml`, so a value is accepted here exactly when the service accepts it there. The time zone is the one in System Settings. **Keep logs for (days)** says how long what the agents did and the chat log are kept: 90 by default. A clean-up (`ai_munimji.retention.clean_up`) runs once a day while this is a positive number and removes what is older; with 0 it does not run and every log is kept. It never deletes a request, a proposal, an alert or the audit seal. There are no secrets in version 0.1.
 
+## Telegram (optional)
+
+Telegram is off after install. To use it a Munimji Manager makes a bot with @BotFather and switches it on in AI Munimji Settings; **[TELEGRAM.md](TELEGRAM.md)** has the steps, what each person sees and what is sent. What the site needs:
+
+* **A worker.** Requests are sent to Telegram by a background job (the `short` queue) once the stock check has committed them, so a worker must be running. The stock check and the vendor comparison need one as well.
+* **Either a public HTTPS address (webhook mode) or a worker for the `long` queue (polling mode).** The webhook is `/api/method/ai_munimji.telegram.webhook.receive` on your site. It is the only address of the app that works without signing in, and it refuses every call that does not carry the secret Telegram was given. Polling asks Telegram for answers from a job that runs for a few minutes at a time; it works for a site Telegram cannot reach.
+* **Outgoing HTTPS to `api.telegram.org`.** Nothing else leaves the site (`docs/PRIVACY.md`).
+
 ## Taking it out
 
 See [UNINSTALL.md](UNINSTALL.md).

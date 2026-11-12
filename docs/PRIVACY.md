@@ -1,10 +1,10 @@
 # AI Munimji: Privacy Policy
 
-Version 0.1 · Draft of 9 Nov 2026 · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
+Version 0.1 · Draft of 12 Nov 2026 (Telegram added) · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
 
 ## In short
 
-AI Munimji runs inside your own ERPNext site. In version 0.1 it **sends no data out of your site**, makes **no calls to any outside service**, and uses **no AI model**. It does not collect usage statistics, and it sets no cookies of its own.
+AI Munimji runs inside your own ERPNext site. By default it **sends no data out of your site**, makes **no calls to any outside service**, and uses **no AI model**. It does not collect usage statistics, and it sets no cookies of its own. There is one optional exception, **Telegram**: a Munimji Manager can switch it on, it is off until then, and what it sends is listed under “What leaves your site”.
 
 ## Who is who
 
@@ -30,7 +30,8 @@ In your site's own database, as DocTypes (the full table is in `docs/STORES.md`)
 - the decisions: who answered, when, and what they decided;
 - a tamper-evident seal over that history (added by the next run of the scheduled job);
 - a log of what the app did (kept for 90 days by default; the setting is "Keep logs for (days)");
-- its own settings.
+- its own settings;
+- if Telegram is switched on: the bot token and a secret for Telegram’s calls (both in Password fields, encrypted), and for each person who connected a chat a Munimji Telegram Link (the user, the chat number and the date). The ids of the Telegram messages already handled are kept for seven days so that none is handled twice.
 
 Seven read-only custom fields are added to Purchase Order, Material Request and Stock Entry. They hold the request's reference and who approved it; Material Request also has a note field.
 
@@ -40,21 +41,32 @@ Draft documents, created under the approver's own login. The app **never submits
 
 ## What leaves your site
 
-**Nothing.** Specifically in version 0.1:
+**By default, nothing.** Specifically, with Telegram switched off (it is off after install):
 - no data is sent to the publisher, to any AI provider or to any other third party;
 - no e-mail or message is sent. The only notification is shown inside your site, in the Desk bell, to people with the role Munimji Approver;
 - there is no analytics, tracking or telemetry.
 
-If a later version adds anything that sends data out (for example e-mail, chat messages or a hosted AI model), it will be off by default, and this policy will be updated before such a change is made available.
+**With Telegram switched on** (AI Munimji Settings, “Send requests on Telegram”, by a Munimji Manager, with a bot token the manager made with @BotFather), the site talks to Telegram (`api.telegram.org`) and nobody else:
+- each request that needs an answer is sent as a message to the Telegram chat of every person who connected one and may answer requests. The message carries the request’s text: the item, the quantity, the warehouse, the vendors that were compared with their prices, delivery times and totals, the reasons, and the tax figures where the request shows them, with its buttons;
+- reminders, the outcome of an answer (who answered, for example “by anna@example.com via telegram”, and the number of the draft Purchase Order made) and what a person types in the chat (a quantity, a vendor, yes or no) pass through Telegram too;
+- Telegram keeps those messages under its own policy, and an ordinary bot chat is not end-to-end encrypted. Anyone who can read that chat on a person’s devices, or who holds the bot token, can read them;
+- Telegram tells the site each button press and message, with the sender’s chat number. The site keeps the chat number of people who connected one. A stranger who writes to the bot is answered, at most once every half minute, with their own number and nothing else;
+- the bot token is sent to Telegram in the address of each call, as Telegram requires. It is never shown on a page, written in a log, put in a message or put in an error;
+- a person can disconnect at any time (the Disconnect button, or deleting their Munimji Telegram Link), and switching Telegram off stops every message. Messages already in Telegram stay there; only the person can delete them.
+
+In both cases **no data is sent to the publisher**.
+
+If a later version adds anything else that sends data out (for example e-mail or a hosted AI model), it will be off by default, and this policy will be updated before such a change is made available.
 
 ## Who can see the data
 
-Only people on your site with the app's roles (Munimji Viewer, Approver, Manager) or System Manager, and, for stock and order details, only if ERPNext also lets them see that data. The app adds no permissions to any ERPNext DocType.
+Only people on your site with the app's roles (Munimji Viewer, Approver, Manager) or System Manager, and, for stock and order details, only if ERPNext also lets them see that data. The app adds no permissions to any ERPNext DocType. With Telegram on, anyone in a connected chat also sees the requests sent there.
 
 ## Keeping and deleting data
 
 - Logs older than the setting "Keep logs for (days)" (90 by default) are removed by a clean-up that runs once a day on your site's scheduler. It runs while that setting is a positive number; with 0 it does not run and every log is kept. You can also run it by hand: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it.
 - If you uninstall the app, its DocTypes and the data in them are removed with it. Database columns that Frappe cannot drop stay in the database, and any Purchase Orders already made stay. See the uninstall notes.
+- Deleting a user deletes their Telegram link. Disconnecting stops the messages; it cannot remove messages already in Telegram.
 - Export anything you need to keep before you uninstall.
 
 ## Your rights

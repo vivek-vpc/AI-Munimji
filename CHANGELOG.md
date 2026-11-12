@@ -4,6 +4,19 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 
 ## Unreleased
 
+### Added: Telegram (optional, off by default)
+
+Requests can also arrive in a Telegram chat, with buttons, and be answered there. The behaviour is the engine’s (`ai-munimji-engine` 0.1.3: the Telegram channel, the inbound handling and the typed answers, the same code the standalone service runs); this is the edge a Frappe site adds. `pyproject.toml` pins 0.1.3, so the app installs only once the engine 0.1.3 is on PyPI. Steps, what is sent and the limits: `docs/TELEGRAM.md`, `docs/PRIVACY.md`, `docs/KNOWN_LIMITATIONS.md`.
+
+* **AI Munimji Settings → Telegram:** a switch, the bot token (a Password field), webhook or polling, “Connect the bot” (asks Telegram who the token belongs to and registers the webhook or starts the loop), “Send me a test message”, and a status block. Off by default; nothing leaves the site while it is off.
+* **Munimji Telegram Link** (new DocType) and **Connect Telegram**: a person presses the button, opens a link to the bot with a one-time code (ten minutes, used once, kept as a hash) and presses Start; the bot connects that chat to that Frappe user. Nobody types a chat number. A person sees only their own link; a Munimji Manager sees and removes all.
+* **A press is the person’s own answer.** The app acts as the connected user with that user’s rights (a disabled user, or one without the Munimji Approver role, is a stranger), through the same services as the Desk. The decision, the audit seal and the Purchase Order record `telegram` as the channel.
+* **Requests are sent by a job, never by the stock check:** the check and the vendor comparison only ask for a delivery (`outbox.nudge`); a job queued once the work is committed sends each waiting request once to each connected approver who was connected when it was made, records each message as a delivery, and the housekeeping (every ten minutes) retries failed sends (up to five) and sends the reminders to the people who were sent the request.
+* **The webhook** (`/api/method/ai_munimji.telegram.webhook.receive`) is the one method open to guests: its first statement refuses any call without Telegram’s secret header (compared in constant time), then it acts as the system only to hand the update over. **Polling** is a lease-protected loop on the long queue for a site Telegram cannot reach.
+* **A Desk answer tidies the Telegram messages** (buttons removed, the outcome under the request) with short timeouts and a breaker, and a Telegram that is down never stops the answer.
+* **Rights:** Munimji Approval Delivery is now created by the Approver and the Manager (the engine records each message sent to a chat in the session of the person who answered); Munimji Telegram Link is new (`tests/test_permissions.py`). `tests/test_rules.py` names the four places that act as someone else, and the webhook as the only method open to guests; `tests/test_nothing_leaves.py` names `telegram/transport.py` as the only module that reaches the network, and the only addresses written in the app.
+* Tests: `tests/test_telegram_links.py`, `test_telegram_flow.py`, `test_telegram_webhook.py` on a pretend Telegram (`tests/telegram_kit.py`). Beyond them, `dev/telegram-e2e.ps1` walks a request from the stock check to a Draft Purchase Order over HTTP on real ERPNext data, and `-Browser` drives the Settings page and the Connect Telegram dialog in a real browser; neither needs a bot or the internet (a pretend Telegram, `dev/scripts/fake_telegram.py`).
+
 ### Fixed after the production-readiness review: scale and concurrency
 
 Measured on a site of 30,000 items and 5.3 million stock ledger entries; the numbers, the method and the tools to repeat it are in `docs/SCALE_MEASUREMENTS.md`. The stock check needs `ai-munimji-engine` 0.1.2
