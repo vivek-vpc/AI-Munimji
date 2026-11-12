@@ -25,7 +25,13 @@ from ai_munimji.erp_client import FrappeERPClient
 from ai_munimji.stores import frappe_core_stores, locks
 from ai_munimji.stores.core import FrappeJobRunStore
 from ai_munimji.tests.helpers import empty_store_tables
-from ai_munimji.tests.world import as_administrator, as_user
+from ai_munimji.tests.world import (
+	STOCK_CHECK_JOB,
+	as_administrator,
+	as_user,
+	queue_captured,
+	scheduled_tick,
+)
 from ai_munimji.tests.world.parallel import ParallelCase, on_own_connections
 
 SETTINGS = "AI Munimji Settings"
@@ -347,9 +353,11 @@ class TestTwoTicksAtOnce(EndToEnd):
 
 	def test_the_negative_control_without_the_lease_two_ticks_make_two_proposals(self):
 		self.waiting_reorder()
-		# the lease is taken away; so is the record of the run, because a second insert of "the stock check ran" waits for the first tick to commit and would serialise them by accident
+		# the lease is taken away (and with it its renewal at the end of each batch, which would find that nobody holds it); so is the record of the run, because a second insert of "the
+		# stock check ran" waits for the first tick to commit and would serialise them by accident
 		with (
 			mock.patch.object(locks, "lease", return_value=True),
+			mock.patch.object(locks, "renew", return_value=None),
 			mock.patch.object(locks, "release", return_value=None),
 			mock.patch.object(FrappeJobRunStore, "started", return_value=None),
 			mock.patch.object(FrappeJobRunStore, "finished", return_value=None),
@@ -467,11 +475,12 @@ class TestTheScheduledJob(EndToEnd):
 		page.save()
 		frappe.db.commit()
 
-	def tick(self):
-		"""What the scheduler does with a job that is due: the job record runs its method, as the system."""
-		with as_administrator():
-			self.job().execute()
-		frappe.db.commit()
+	def tick(self) -> list[tuple[str, dict]]:
+		"""What the scheduler does with a job that is due (the job record runs its method, as the system, which puts the stock check on the long queue) and what a worker then does with what was
+		queued. Returns what the tick put on the queue."""
+		with queue_captured() as queued:
+			scheduled_tick(self.job(), queued)
+		return queued
 
 	def told(self, request_id: str) -> list[str]:
 		return [
@@ -491,7 +500,10 @@ class TestTheScheduledJob(EndToEnd):
 			frappe.get_all("Scheduled Job Type", {"method": schedule.METHOD, "stopped": 0}),
 			"the scheduler takes the jobs that are not stopped, and this one is",
 		)
-		self.tick()  # even a tick that someone runs by hand finds Watch stock off
+		queued = self.tick()  # even a tick that someone runs by hand finds Watch stock off
+		self.assertEqual(
+			[m for m, _options in queued if m == STOCK_CHECK_JOB], [], "so no check is put on the queue"
+		)
 		self.assertEqual(self.proposals(), [])
 		self.assertEqual(self.pending(KIND_PO), [])
 		self.assertEqual(frappe.db.count("Munimji Job Run"), 0, "not even a record that the check ran")
@@ -501,7 +513,10 @@ class TestTheScheduledJob(EndToEnd):
 		self.waiting_reorder()
 		self.watch_stock(1)
 		self.assertEqual(self.job().stopped, 0)
-		self.tick()
+		queued = self.tick()
+		# the scheduled entry does not run the check itself: it queues it on the long queue and returns
+		[options] = [options for method, options in queued if method == STOCK_CHECK_JOB]
+		self.assertEqual(options["queue"], jobs.QUEUE)
 		self.assertEqual(len(self.proposals()), 1)
 		self.assertEqual(len(self.pending(KIND_PO)), 1)
 		log = frappe.get_all(
@@ -519,7 +534,15 @@ class TestTheScheduledJob(EndToEnd):
 		self.waiting_reorder()
 		self.watch_stock(1)
 		name = self.job().name
-		results = self.two_ticks(lambda: frappe.get_doc("Scheduled Job Type", name).execute())
+
+		def scheduled_entry_then_the_run():
+			frappe.get_doc(
+				"Scheduled Job Type", name
+			).execute()  # the scheduled entry queues the check (captured below) ...
+			return jobs.run_stock_check()  # ... and this is what the worker does with it
+
+		with queue_captured():
+			results = self.two_ticks(scheduled_entry_then_the_run)
 		self.assertFalse([r for r in results if isinstance(r, BaseException)], results)
 		self.assertEqual(len(self.proposals()), 1, "one proposal, not two")
 		self.assertEqual(len(self.pending(KIND_PO)), 1)

@@ -13,6 +13,7 @@ import unittest
 from contextlib import contextmanager
 from datetime import date, timedelta
 from pathlib import Path
+from unittest import mock
 
 import frappe
 
@@ -53,6 +54,43 @@ def as_user(user: str):
 def as_administrator():
 	with as_user("Administrator"):
 		yield
+
+
+STOCK_CHECK_JOB = "ai_munimji.jobs.run_stock_check"
+
+
+@contextmanager
+def queue_captured():
+	"""What the code under test puts on the queue is noted, as (method, options), and not queued: CI has no worker, and on a developer's bench a worker would run the job beside the test.
+	A call with now=True is a call that Frappe makes at once (the notification logs, when frappe.in_test is set); it goes through. Threads share it, so a test that runs ticks on several
+	connections patches once, around all of them."""
+	queued: list[tuple[str, dict]] = []
+	real_enqueue = frappe.enqueue
+
+	def capture(method, **options):
+		if options.get("now"):
+			return real_enqueue(method, **options)
+		queued.append((method, options))
+
+	with mock.patch.object(frappe, "enqueue", capture):
+		yield queued
+
+
+def scheduled_tick(job_type, queued: list) -> list[str]:
+	"""What the scheduler does with the stock check when it is due, and what a worker then does with what that queued. The job record runs `jobs.check_stock`, which only puts the run on the long
+	queue and returns (so that the scheduler is not held up for the length of a run); the run itself is a queued job, so it is run here the way a worker runs it, as Administrator (the jobs of this
+	app switch to the system mode themselves). `queued` is the list `queue_captured` gave; only what this tick queued is run. Returns the methods that were run."""
+	first = len(queued)
+	with as_administrator():
+		job_type.execute()
+	ran = []
+	for method, _options in queued[first:]:
+		if method == STOCK_CHECK_JOB:
+			with as_administrator():
+				frappe.get_attr(method)()
+			ran.append(method)
+	frappe.db.commit()  # a worker commits a job that returns
+	return ran
 
 
 class WorldCase(unittest.TestCase):
