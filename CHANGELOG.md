@@ -4,6 +4,10 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 
 ## Unreleased
 
+### Fixed: Telegram sent an alert and the reorder it suggests in the wrong order
+
+Found on the first real use. One stock check makes an alert and the reorder it suggests within the same second, and the store lists such requests older first while the delivery job reversed that list to get "oldest first", so the reorder reached the chat before the alert. The waiting requests are now sorted on the time they were made (`telegram/outbox.py: waiting_in_order`), which keeps requests of the same second in the order they were made. Reminders go out in the same order. `tests/test_telegram_flow.py` pins both with three requests made in one second.
+
 ### Added: Telegram (optional, off by default)
 
 Requests can also arrive in a Telegram chat, with buttons, and be answered there. The behaviour is the engine’s (`ai-munimji-engine` 0.1.3: the Telegram channel, the inbound handling and the typed answers, the same code the standalone service runs); this is the edge a Frappe site adds. `pyproject.toml` pins 0.1.3, so the app installs only once the engine 0.1.3 is on PyPI. Steps, what is sent and the limits: `docs/TELEGRAM.md`, `docs/PRIVACY.md`, `docs/KNOWN_LIMITATIONS.md`.

@@ -81,6 +81,24 @@ class TestSendingRequests(TelegramCase):
 			all(c.kwargs["enqueue_after_commit"] and c.kwargs["deduplicate"] for c in asked), asked
 		)
 
+	def test_requests_made_in_the_same_second_are_sent_in_the_order_they_were_made(self):
+		"""An alert and the reorder it suggests come from one check, within a second of each other. The store lists such ties older first (newest first otherwise), so reversing its list to get
+		oldest first would send the later one before the earlier."""
+		from ai_munimji_engine.core.approvals.models import ApprovalRequest
+
+		self.connect("alice")
+		frappe.set_user("Administrator")
+		one_second = utcnow() + timedelta(minutes=1)  # after alice connected, and the same for all three
+		services = jobs.system_services(clock=lambda: one_second)
+		titles = ("First request", "Second request", "Third request")
+		for title in titles:
+			services.approvals.submit(
+				ApprovalRequest(kind="inventory.alert", title=title, headline=title), deliver=False
+			)
+		self.assertEqual(self.deliver()["sent"], 3)
+		arrived = [t for text in self.telegram.texts(self.CHAT["alice"]) for t in titles if t in text]
+		self.assertEqual(arrived, list(titles))
+
 	def test_the_delivery_job_sends_each_waiting_request_once_to_each_connected_approver(self):
 		self.connect("alice")
 		self.connect("bob")
@@ -187,6 +205,35 @@ class TestReminders(FlowOnTelegram):
 			self.telegram.sent(self.CHAT["manager"])[-1]["text"],
 			"Connected. Requests that need your answer will arrive here, with buttons.",
 		)
+
+	def test_reminders_go_out_in_the_order_the_requests_were_made(self):
+		from ai_munimji_engine.core.approvals.models import ApprovalRequest
+
+		frappe.set_user("Administrator")
+		made = utcnow() + timedelta(
+			minutes=1
+		)  # later than the reorder of setUp, and the same second for both
+		services = jobs.system_services(clock=lambda: made)
+		for title in ("Earlier request", "Later request"):
+			services.approvals.submit(
+				ApprovalRequest(kind="inventory.reorder", title=title, headline=title), deliver=False
+			)
+		self.deliver()
+		self.telegram.calls.clear()
+		self.assertEqual(len(self.reminders_at(3)), 3)
+		marks = (
+			self.reorder,
+			"Earlier request",
+			"Later request",
+		)  # a reminder names the request's headline and its id
+		reminded = [
+			mark
+			for text in self.telegram.texts(self.CHAT["alice"])
+			if text.startswith("Reminder: ")
+			for mark in marks
+			if mark in text
+		]
+		self.assertEqual(reminded, list(marks))
 
 	def test_a_person_whose_send_failed_has_no_message_to_scroll_up_to_either(self):
 		[bobs] = [d for d in self.deliveries(self.reorder) if d["address"] == self.CHAT["bob"]]
