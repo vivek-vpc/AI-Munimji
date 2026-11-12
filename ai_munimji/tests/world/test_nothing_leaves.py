@@ -15,8 +15,8 @@ import requests
 from ai_munimji_engine.packs.stock_procurement.inventory.messages import KIND as KIND_REORDER
 from ai_munimji_engine.packs.stock_procurement.procurement.messages import KIND_PO
 
-from ai_munimji import api, jobs, schedule
-from ai_munimji.tests.world import as_administrator, as_user
+from ai_munimji import api, hand_off, jobs, schedule
+from ai_munimji.tests.world import as_administrator, as_user, queue_captured, scheduled_tick
 from ai_munimji.tests.world.test_end_to_end import REQUEST, SETTINGS, EndToEnd
 
 
@@ -128,11 +128,11 @@ class TestNothingLeavesTheSite(EndToEnd):
 		self.addCleanup(patch.stop)
 
 		def job_tick():
-			with as_administrator():
-				frappe.get_doc("Scheduled Job Type", {"method": schedule.METHOD}).execute()
-			frappe.db.commit()
+			scheduled_tick(frappe.get_doc("Scheduled Job Type", {"method": schedule.METHOD}), queued)
 
-		with cut_off() as seen:
+		# what is queued is noted and not queued (the queue is Redis, on the site's own network, but there is no worker in CI): the scheduled entry's stock check is run the way a worker runs it,
+		# and the vendor comparison that approving a reorder queues is left for the second tick, which is the fallback the person is told about
+		with queue_captured() as queued, cut_off() as seen:
 
 			def nothing_attempted(step: str):
 				# Frappe's job runner logs an exception of the job and carries on, so the attempt is read from what the cut-off wrote down, at once, not from what fails later
@@ -153,6 +153,9 @@ class TestNothingLeavesTheSite(EndToEnd):
 				started = api.answer(reorder["id"], "approve")
 			frappe.db.commit()
 			nothing_attempted("approving the reorder")
+			self.assertIn(
+				hand_off.JOB, [method for method, _options in queued], "the approval queued the comparison"
+			)
 			job_tick()
 			nothing_attempted("the scheduled job, the second time")
 			[order] = self.pending(KIND_PO)
