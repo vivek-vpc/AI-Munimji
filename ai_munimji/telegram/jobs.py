@@ -24,6 +24,7 @@ OUTBOX_LEASE_MINUTES = (
 	5  # a delivery of a few hundred messages takes seconds; a holder that died is taken for dead after this
 )
 POLL_QUEUE = "long"
+POLL_JOB = "ai_munimji:telegram_poll"  # the job id of a loop is this and its slot, "a" or "b"
 LOOP_SECONDS = 9 * 60  # how long one poll job keeps asking before it queues its successor
 LONG_POLL_SECONDS = 25  # Telegram holds a request this long when it has nothing to say
 LEASE_MINUTES = 2  # renewed after every request to Telegram: a loop that stops renewing is taken for dead
@@ -82,10 +83,26 @@ def ensure_poller() -> str:
 		return "not wanted"
 	if locks.held(POLL_LEASE):
 		return "running"
-	frappe.enqueue(
-		POLL, queue=POLL_QUEUE, timeout=POLL_TIMEOUT, job_id="ai_munimji:telegram_poll", deduplicate=True
-	)
+	queue_the_loop("a")
 	return "queued"
+
+
+def poll_job_id(slot: str) -> str:
+	return f"{POLL_JOB}:{slot}"
+
+
+def queue_the_loop(slot: str) -> None:
+	"""Queue a polling loop that holds the job id of `slot`. Frappe does not queue a job whose id is already queued or running (`deduplicate`), and the loop that queues its successor is itself
+	still running: a successor with the same id was silently dropped, the polling stopped at the end of every loop, and the housekeeping started it again minutes later (a button pressed
+	in between waited that long). So two loops take turns at two ids, "a" and "b", and each is told which it holds (`slot`) so that it can queue the other."""
+	frappe.enqueue(
+		POLL,
+		queue=POLL_QUEUE,
+		timeout=POLL_TIMEOUT,
+		job_id=poll_job_id(slot),
+		deduplicate=True,
+		slot=slot,
+	)
 
 
 def wanted() -> bool:
@@ -94,7 +111,7 @@ def wanted() -> bool:
 	return config.enabled() and config.mode() == "polling"
 
 
-def poll() -> dict:
+def poll(slot: str = "a") -> dict:
 	# nosemgrep: frappe-setuser - a queued job runs as whoever queued it, and these read and write in the system mode, which is Administrator's alone (tests/test_rules.py names the three jobs)
 	frappe.set_user("Administrator")
 	if not wanted():
@@ -121,9 +138,7 @@ def poll() -> dict:
 	finally:
 		locks.release(POLL_LEASE, holder)
 	if wanted():
-		frappe.enqueue(
-			POLL, queue=POLL_QUEUE, timeout=POLL_TIMEOUT, job_id="ai_munimji:telegram_poll", deduplicate=True
-		)
+		queue_the_loop("b" if slot == "a" else "a")
 	return {"ran": True, "handled": handled}
 
 

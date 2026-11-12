@@ -4,6 +4,10 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 
 ## Unreleased
 
+### Fixed: in polling mode a button pressed between two polling loops waited for minutes
+
+Found on the first real use. The polling loop runs for about nine minutes and queues its successor as it ends, but it queued it under the job id it was itself still running under, and Frappe does not queue a job whose id is queued or running (`deduplicate`). The successor was silently dropped, so after every loop there was a gap of 7 to 11 minutes until the housekeeping (every 10 minutes) started a new one; a press made in the gap waited for it. The loops now take turns at two job ids (`telegram/jobs.py: queue_the_loop`), each told which it holds, so a successor is always accepted. `tests/test_telegram_webhook.py` pins that the successor never has the id of the loop that queues it.
+
 ### Fixed: Telegram sent an alert and the reorder it suggests in the wrong order
 
 Found on the first real use. One stock check makes an alert and the reorder it suggests within the same second, and the store lists such requests older first while the delivery job reversed that list to get "oldest first", so the reorder reached the chat before the alert. The waiting requests are now sorted on the time they were made (`telegram/outbox.py: waiting_in_order`), which keeps requests of the same second in the order they were made. Reminders go out in the same order. `tests/test_telegram_flow.py` pins both with three requests made in one second.
