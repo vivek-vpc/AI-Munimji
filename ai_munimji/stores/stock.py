@@ -209,6 +209,14 @@ class FrappeProposalStore(_Store):
 		rows = self.t.find([["approval_id", "=", approval_id]], limit=1)
 		return rows[0] if rows else None
 
+	def for_work_order(self, work_order_id: str) -> Row | None:
+		"""The newest proposal made for this work order (a snoozed one that is looked at again gets a new proposal). Not part of the engine's contract: the flow block of a request follows a
+		reorder to its purchase request with it."""
+		rows = self.t.find(
+			[["work_order_id", "=", work_order_id]], order_by="created_at desc, creation desc", limit=1
+		)
+		return rows[0] if rows else None
+
 	def open_for_item(self, item_code: str, statuses: Sequence[str]) -> list[Row]:
 		return self.t.find([["item_code", "=", item_code], ["status", "in", list(statuses)]])
 

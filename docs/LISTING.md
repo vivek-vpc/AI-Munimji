@@ -59,7 +59,7 @@ AI Munimji watches the stock in your ERPNext site and, when an item is running l
 
 **What it does**
 - Checks stock on a schedule you set, using the usage history and the demand calendar on your site.
-- Starts with a **reorder request**. When an approver agrees, the next run compares your suppliers on price, delivery time and terms, and picks one by fixed rules.
+- Starts with a **reorder request**. When an approver agrees, the app compares your suppliers on price, delivery time and terms within about a minute, and picks one by fixed rules.
 - Shows the purchase request in plain words: the stock you have, how long it will last, how long a new order takes to arrive, and the cost, with taxes where they can be read.
 - Explains **why this supplier was chosen and why each of the others was not**.
 - Lets an approver approve, change the quantity or the vendor, or dismiss it. The first answer wins; a later one is told who answered first.
@@ -71,7 +71,16 @@ AI Munimji watches the stock in your ERPNext site and, when an item is running l
 - It never submits a document. It creates drafts. An approver can later change the quantity of, or cancel, an order made from a request.
 - It sends nothing out of your site and calls no AI model in this version.
 
-**Who sees what**
+**How a request flows**
+1. **Reorder request.** The stock check looks at every item. For each one that is running low it makes a Reorder request and tells the people who may approve.
+2. **Purchase request.** When an approver approves a reorder, the vendors are compared in the background (price, delivery time, how often each delivered on time). About a minute later a Purchase request appears in Munimji Approval Request, with the vendor it recommends and why it did not choose the others. For an item with no purchase history no comparison is possible: the request says so, and you order it in ERPNext by hand and press Got it.
+3. **Draft Purchase Order.** When an approver approves the purchase request, ERPNext gets a Draft Purchase Order in the approver's name. It is only a draft: open it in ERPNext, check it and submit it. Nothing is sent to the vendor.
+
+Timing: the stock check runs at the time set under Check stock at, or when a manager presses Run the check now on the Settings page. The vendor comparison starts right after a reorder is approved and takes about a minute; if a stock check is running at that moment, the next scheduled check makes it.
+
+Who sees what: Viewers see the requests. Approvers also answer them and make the draft order. Managers also change the settings and run the check.
+
+**Which roles**
 Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Munimji Manager. What a person can see of your stock and orders is still decided by ERPNext's own roles.
 
 **Good to know**
@@ -85,7 +94,7 @@ Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Mu
 | Claim | Where to check |
 |---|---|
 | Creates drafts, never submits; an approver can change or cancel an order made from a request | `ai_munimji/erp_client.py`, the order tests |
-| Two answers from low stock to an order (reorder request, then purchase request at the next job run) | the browser round trip |
+| Two answers from low stock to an order (reorder request, then purchase request about a minute after the reorder is approved) | the browser round trip |
 | Nothing leaves the site, no model in 0.1 | `docs/PRIVACY.md`, the outbound-block tests |
 | Stock monitor off after install | `docs/INSTALL.md`, the settings tests |
 | First answer wins | the approval tests |
@@ -118,7 +127,7 @@ Each image: at least 1280 px wide, light theme, no browser toolbars, a short cap
 | 0:00 | Stock list, one item low | "Stock for bolts is running low." |
 | 0:10 | AI Munimji Settings, monitor on | "I switch on the stock monitor and set the time of the check." |
 | 0:20 | The reorder request (bell shows it) | "AI Munimji raises a reorder request and tells the approver." |
-| 0:30 | Approve it | "The approver agrees. At its next run, the app compares the suppliers." |
+| 0:30 | Approve it | "The approver agrees. About a minute later the app has compared the suppliers." |
 | 0:45 | The purchase request | "It shows the stock, how long it lasts, and how long a new order takes." |
 | 1:00 | Supplier comparison | "It picked this supplier, and explains why each other supplier was not chosen." |
 | 1:15 | Change quantity, Approve | "The approver can change the quantity. Approving creates a draft order." |
@@ -135,6 +144,6 @@ Each image: at least 1280 px wide, light theme, no browser toolbars, a short cap
 6. If it passes, a new app merges on its own. If it is labelled `held-for-review`, read the reason in the Auto-merge Registry run.
 7. In parallel, check whether the Frappe Cloud dashboard still offers "Become a Publisher", and follow it if it does.
 
-## Note: settle before submitting
+## Note: the MariaDB setting
 
-`docs/INSTALL.md` says the parallel-press protection needs MariaDB with `innodb_snapshot_isolation` OFF. Frappe's own Docker files set it that way; I do not know how Frappe Cloud configures it, and an app cannot change it. The app now warns when it is ON. Ask Frappe or check on a real Frappe Cloud site before you claim anything about it.
+`docs/INSTALL.md` says the parallel-press protection needs MariaDB with `innodb_snapshot_isolation` OFF. Frappe's own Docker files set it that way. On Frappe Cloud it was checked on 11 Nov 2026 on one site (`SHOW VARIABLES LIKE 'innodb_snapshot_isolation'` returned OFF). An app cannot change this setting, and Frappe Cloud may change its configuration later, so the app warns after install and on its Settings page when the setting is ON. Do not claim more than this: say OFF on Frappe Cloud as checked on that date, not "always".

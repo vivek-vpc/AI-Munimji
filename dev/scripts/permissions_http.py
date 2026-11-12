@@ -160,9 +160,8 @@ def seed():
 	)
 	stock.alerts.insert("perm-a1", "BOLT", "BREACH", 2, T0, "{}", "Low on bolts.", None)
 	stock.proposals.insert("perm-p1", "w1", "BOLT", "awaiting", "S1", "Acme", 10.0, 2.5, 25.0, "{}", "", T0)
-	from ai_munimji_engine.core.audit import AuditChain
-
-	AuditChain(core.audit).sweep()  # perm-r2 is closed, so it and the settings change are sealed
+	# nothing is sealed here: the sweep would seal every closed request of the site, and removing the entries again afterwards would leave a hole in its chain (the seal check of the site would go
+	# red). The checks of the seal below use a row the site already has.
 	frappe.db.commit()
 	return warehouses
 
@@ -176,14 +175,18 @@ def cleanup():
 		for name in names:
 			frappe.db.delete(doctype, {"name": name})
 	frappe.db.delete(OVERRIDE, {"scope_key": "BOLT"})
-	frappe.db.delete("Munimji Settings Change", {"actor": PEOPLE["manager"][0]})
-	frappe.db.delete(SEAL, {"ref_id": ["in", ["perm-r2"]]})
+	frappe.db.delete(
+		"Munimji Settings Change", {"actor": PEOPLE["manager"][0], "sealed": 0}
+	)  # never one that a sweep sealed in the meantime: that would be a record deleted after it was sealed
 	frappe.db.commit()
 
 
 make_people()
 frappe.db.commit()
 warehouses = seed()
+SEAL_ROW = frappe.db.get_value(
+	SEAL, {}, "name", order_by="creation asc"
+)  # a seal row the site already has (the check of the stock seals what was answered); None on a site that has none: the checks that need one are skipped, and say so
 try:
 	who = {key: Person(key) for key in PEOPLE}
 	readers, everyone = {"viewer", "approver", "manager"}, set(PEOPLE)
@@ -227,7 +230,7 @@ try:
 		(REQUEST, "perm-r1"),
 		(ALERT, "perm-a1"),
 		(PROPOSAL, "perm-p1"),
-		(SEAL, "1"),
+		*(((SEAL, SEAL_ROW),) if SEAL_ROW else ()),
 		(OVERRIDE, "anything"),
 	):
 		r = nobody.resource(doctype, name)
@@ -235,8 +238,13 @@ try:
 			r.status_code == 403 and "data" not in r.text[:20],
 			f"nobody asks for {doctype} {name}: {r.status_code} and no data",
 		)
-	r = who["viewer"].resource(SEAL, "1")
-	say(r.status_code == 403, f"a viewer asks for the audit seal row 1: {r.status_code}")
+	if SEAL_ROW:
+		r = who["viewer"].resource(SEAL, SEAL_ROW)
+		say(r.status_code == 403, f"a viewer asks for the audit seal row {SEAL_ROW}: {r.status_code}")
+	else:
+		print(
+			"  SKIP  a viewer asks for a seal row: this site has none (press Run the check now once, which seals what was answered)"
+		)
 	r = who["approver"].listing(SEAL)
 	say(r.status_code == 403, f"an approver lists the audit seal: {r.status_code}")
 	r = who["stock"].resource(REQUEST, "perm-r1")
@@ -290,13 +298,20 @@ try:
 		frappe.db.get_value(REQUEST, "perm-r1", "status") == "pending",
 		"after all that the request is still pending, untouched",
 	)
-	seal_row = who["manager"].send("PUT", "/api/resource/" + urllib.parse.quote(SEAL) + "/1", digest="0")
-	say(
-		seal_row.status_code in (403, 417),
-		f"even a manager cannot change a seal row ({seal_row.status_code})",
-	)
-	seal_gone = who["manager"].send("DELETE", "/api/resource/" + urllib.parse.quote(SEAL) + "/1")
-	say(seal_gone.status_code in (403, 417), f"or delete one ({seal_gone.status_code})")
+	if SEAL_ROW:
+		seal_row = who["manager"].send(
+			"PUT", "/api/resource/" + urllib.parse.quote(SEAL) + f"/{SEAL_ROW}", digest="0"
+		)
+		say(
+			seal_row.status_code in (403, 417),
+			f"even a manager cannot change a seal row ({seal_row.status_code})",
+		)
+		seal_gone = who["manager"].send(
+			"DELETE", "/api/resource/" + urllib.parse.quote(SEAL) + f"/{SEAL_ROW}"
+		)
+		say(seal_gone.status_code in (403, 417), f"or delete one ({seal_gone.status_code})")
+	else:
+		print("  SKIP  a manager changes and deletes a seal row: this site has none")
 
 	print("4. The other records")
 	for doctype, name in ((ALERT, "perm-a1"), (PROPOSAL, "perm-p1")):
@@ -343,6 +358,46 @@ try:
 		"and cannot open the other warehouse's request by its name",
 	)
 	say(p.form(REQUEST, "perm-r2").status_code == 200, "but can open their own")
+
+	print(
+		"6. The Run the check now button, the status of the check and the flow of a request (Group 2, F4 and F3)"
+	)
+	press = "/api/method/ai_munimji.api.run_check_now"
+	for key in everyone - {"manager"}:
+		got = who[key].send("POST", press)
+		say(
+			got.status_code == 403,
+			f"{key}: pressing Run the check now is refused ({got.status_code}) and nothing is queued",
+		)
+	say(
+		who["viewer"].get(press).status_code in (403, 405),
+		"and the button's method does not answer a GET of a viewer",
+	)
+	if frappe.get_cached_doc(SETTINGS).enabled:
+		print(
+			"  SKIP  the manager's press is not sent: Watch stock is on here, and it would start a real check of this site's stock (tests/test_check_now.py presses it with the queue replaced)"
+		)
+	else:
+		got = who["manager"].send("POST", press)
+		say(
+			got.status_code == 200 and got.json()["message"]["status"] == "off",
+			f"manager: pressing it is not refused ({got.status_code}); Watch stock is off here, so nothing is queued and the answer says so",
+		)
+	status = "/api/method/ai_munimji.api.check_status"
+	for key in everyone:
+		got = who[key].get(status)
+		say(
+			got.status_code == (200 if key == "manager" else 403),
+			f"{key}: the status of the check answers {got.status_code}",
+		)
+	for key in everyone:
+		got = who[key].get(
+			"/api/method/ai_munimji.api.flow", approval_id="perm-r2"
+		)  # the one the approver of step 5 is limited to
+		say(
+			got.status_code == (200 if key in readers else 403),
+			f"{key}: the flow of a request answers {got.status_code}",
+		)
 finally:
 	cleanup()
 	forget_people()

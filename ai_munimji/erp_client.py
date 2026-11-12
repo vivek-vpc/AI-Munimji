@@ -50,6 +50,13 @@ from ai_munimji.stores import locks
 
 FINISHED = ["Completed", "Closed", "Cancelled", "Delivered"]
 CONSUMPTION_VOUCHERS = ["Delivery Note", "Sales Invoice"]
+ITEM_FIELDS = ["name", "item_name", "item_group", "stock_uom", "lead_time_days", "creation"]
+# An item's history starts at the earlier of its creation and its first stock movement. The stock rules read at most this many days back (the engine's limit of "history_days"), so an
+# item created longer ago than that starts before the window whatever its first movement was, and the movement is not looked for (tests/test_erp_client_scale.py pins the number to the engine's).
+HISTORY_LIMIT_DAYS = 1100
+FIRST_MOVEMENT_CACHE = "ai_munimji:first_movement"  # in Frappe's cache: item -> the day of its first stock movement, kept once it is known (it can only change if an earlier entry is back-dated)
+LOOKUP_CHUNK = 200  # items per query for the first movement and for reading items
+CONSUMPTION_CHUNK = 50  # items per query for the usage: the database adds up a chunk's movements in a temporary table, and measured at 5 million entries a chunk of 200 costs two to three times as much per item as one of 50 (docs/SCALE_MEASUREMENTS.md)
 # the fields of a rule that depend on addresses or items, which cannot be judged without the order's own addresses (as in the REST client)
 UNJUDGEABLE_RULE_FIELDS = [
 	"billing_city", "billing_county", "billing_state", "billing_zipcode", "billing_country",
@@ -206,12 +213,29 @@ class FrappeERPClient:
 
 	# ------------------------------------------------------------------ StockERP
 	def list_items(self) -> list[ItemInfo]:
-		rows = self._list(
-			"Item",
-			["name", "item_name", "item_group", "stock_uom", "lead_time_days", "creation"],
-			[["is_stock_item", "=", 1], ["disabled", "=", 0]],
+		rows = self._list("Item", ITEM_FIELDS, [["is_stock_item", "=", 1], ["disabled", "=", 0]])
+		return self._item_infos(rows)
+
+	def get_items(self, item_codes: Sequence[str]) -> list[ItemInfo]:
+		"""Only these items (the stock ones that are not disabled), for a look at one item or a few: it reads their rows and their first stock movement, not the whole list."""
+		rows: list[dict] = []
+		for chunk in chunks(sorted(set(item_codes)), LOOKUP_CHUNK):
+			rows += self._list(
+				"Item", ITEM_FIELDS, [["is_stock_item", "=", 1], ["disabled", "=", 0], ["name", "in", chunk]]
+			)
+		return self._item_infos(rows)
+
+	def _item_infos(self, rows: list[dict]) -> list[ItemInfo]:
+		today = date.today()
+		oldest = today.toordinal() - HISTORY_LIMIT_DAYS
+		# the first movement matters only for an item created within the window the rules read (see HISTORY_LIMIT_DAYS)
+		first = self._first_movements(
+			[
+				r["name"]
+				for r in rows
+				if (created := to_date(r.get("creation"))) is None or created.toordinal() > oldest
+			]
 		)
-		first = self._first_movements()
 		out = []
 		for r in rows:
 			starts = [d for d in (to_date(r.get("creation")), first.get(r["name"])) if d]
@@ -227,20 +251,38 @@ class FrappeERPClient:
 			)
 		return out
 
-	def _first_movements(self) -> dict[str, date]:
-		"""The day of each item's first stock ledger entry (an item's history starts there if that is earlier than its creation). Unknown, not guessed, if the ledger is closed to this user."""
-		rows = self._optional(
-			_("When each item's stock history begins"),
-			"Stock Ledger Entry",
-			["item_code", {"MIN": "posting_date", "as": "first_date"}],
-			[["is_cancelled", "=", 0]],
-			group_by="item_code",
-		)
-		return {
-			r["item_code"]: d
-			for r in rows or []
-			if r.get("item_code") and (d := to_date(r.get("first_date")))
+	def _first_movements(self, item_codes: Sequence[str]) -> dict[str, date]:
+		"""The day of each of these items' first stock ledger entry (an item's history starts there if that is earlier than its creation). Unknown, not guessed, if the ledger is closed to
+		this user. The ledger is asked only for the items whose first movement is not known yet, `LOOKUP_CHUNK` at a time, and the answer is kept: an item's first movement does not change
+		(unless an entry is back-dated before it, which `bench clear-cache` makes the app notice). An item with no movement yet is asked about again next time."""
+		wanted = sorted(set(item_codes))
+		if not wanted:
+			return {}
+		if not frappe.has_permission("Stock Ledger Entry", "read"):
+			self.notes.append(
+				_("{0} could not be read: {1} is not open to this user.").format(
+					_("When each item's stock history begins"), "Stock Ledger Entry"
+				)
+			)
+			return {}
+		kept = {
+			(k.decode() if isinstance(k, bytes) else k): v
+			for k, v in (frappe.cache.hgetall(FIRST_MOVEMENT_CACHE) or {}).items()
 		}
+		found = {code: d for code in wanted if (d := to_date(kept.get(code)))}
+		for chunk in chunks([c for c in wanted if c not in found], LOOKUP_CHUNK):
+			rows = self._optional(
+				_("When each item's stock history begins"),
+				"Stock Ledger Entry",
+				["item_code", {"MIN": "posting_date", "as": "first_date"}],
+				[["item_code", "in", chunk], ["is_cancelled", "=", 0]],
+				group_by="item_code",
+			)
+			for r in rows or []:
+				if r.get("item_code") and (d := to_date(r.get("first_date"))):
+					found[r["item_code"]] = d
+					frappe.cache.hset(FIRST_MOVEMENT_CACHE, r["item_code"], d.isoformat())
+		return found
 
 	def list_warehouses(self) -> list[str]:
 		rows = self._list("Warehouse", ["name", "is_group", "disabled"], [["disabled", "=", 0]])
@@ -353,8 +395,10 @@ class FrappeERPClient:
 	def get_consumption(
 		self, item_codes: Sequence[str], start: date, end: date, warehouses: Sequence[str] | None = None
 	) -> dict[str, list[DailyUsage]]:
+		"""What left the stock each day, per item: the database adds up each item's movements of a day (one row per item and day, however many movements there were), through get_list so
+		that the person's permissions apply. What is read grows with the items and the days they were used, not with the number of movements."""
 		per_day: dict[str, dict[date, float]] = defaultdict(lambda: defaultdict(float))
-		for chunk in chunks(item_codes, 50):
+		for chunk in chunks(item_codes, CONSUMPTION_CHUNK):
 			filters: list = [
 				["item_code", "in", chunk],
 				["actual_qty", "<", 0],
@@ -367,13 +411,14 @@ class FrappeERPClient:
 				filters.append(["warehouse", "in", list(warehouses)])
 			for r in self._list(
 				"Stock Ledger Entry",
-				["item_code", "posting_date", "actual_qty"],
+				["item_code", "posting_date", {"SUM": "actual_qty", "as": "used"}],
 				filters,
-				order_by="posting_date asc",
+				order_by="item_code asc, posting_date asc",
+				group_by="item_code, posting_date",
 			):
 				d = to_date(r["posting_date"])
 				if d is not None:
-					per_day[r["item_code"]][d] += -float(r["actual_qty"])
+					per_day[r["item_code"]][d] += -float(r["used"])
 		return {code: [DailyUsage(d, q) for d, q in sorted(days.items())] for code, days in per_day.items()}
 
 	# ------------------------------------------------------------------ PurchasingERP: vendors

@@ -48,6 +48,31 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
   The clean-up of old logs runs once a day while "Keep logs for (days)" is a positive number. With 0 it does not run, so nothing is cleaned up by itself, the records with a fixed period (task records, vendor messages, the ids of handled messages) included; it can still be run by hand.
 * **Searching the requests** narrows them in the database and then applies the engine's rules to what is left; over many thousands of requests that is slower than SQLite's scan.
 
+## The stock check on a large site
+
+The numbers are in [SCALE_MEASUREMENTS.md](SCALE_MEASUREMENTS.md): a site of 30,000 items and 5 million stock ledger entries. What to know:
+
+* **A run works in batches of 200 items and commits after each.** It reads and analyses the items first (which writes nothing, so it holds no lock), then raises the requests, worst first; while it raises requests
+  (and, later, proposals) a batch is also ended after half a second, whatever it has done by then. At the end of every batch it commits, renews its lease and writes how far it has got in its Job Run (`Munimji Job Run`, "How far it got"). So a person who answers a request the run is replacing waits for the batch under way, not for
+  the whole run; a failure takes back one batch, and the run, started again, acts on each item once (the alerts it already raised are found, not raised again).
+* **The run is queued on the long queue with a timeout of six hours**, not run by the scheduler's own queue, which ends a job after 300 seconds. Your site needs a worker for the `long` queue (Frappe's own
+  setup has one). A run that is queued or running is not queued a second time, and the lease keeps two runs from working at once. A run whose lease was taken by another stops, and says so in the log.
+* **Memory grows with the number of items**: a run keeps the figures of each item that needs a request, and four numbers for each item whose stock is fine, until it has been through all of them.
+* **The first run after the cache is cleared reads the whole ledger once**: an item's first stock movement (which can make its history start earlier than its creation) is looked up once and kept in Frappe's cache,
+  for items created within the last 1,100 days. A ledger entry that is back-dated before an item's first one is noticed only after `bench clear-cache`.
+* **A schedule that can start the check less than 15 minutes after the last start is refused** on the Settings page, with a sentence saying so. Every check reads all the stock. A page saved by an earlier version
+  with such a schedule is not followed: the job runs at the default time (0 6 * * *) and the log says so, until someone saves a schedule the page accepts.
+* **The audit sweep seals at most 500 requests and 500 settings changes at a time**, and a run sweeps up to 50 times, so a backlog is cleared over several runs and a sweep with nothing new reads a handful of rows.
+  A request carries the flag `sealed` (the app's own column) once its entry is in the chain; a site restored from a backup that predates the flag is put right by the first sweeps, and nothing is sealed twice.
+* **The daily clean-up of the logs removes at most 5,000 records a run, oldest first, in batches of 100 with a commit after each**, so a first backlog is cleared over several days instead of failing every day. Frappe queues one background job for every document that is deleted and refuses to queue more than `max_queued_jobs` (500 by default), so the clean-up waits (up to 30 seconds) for your workers to take the jobs of the last batches, and ends its run if they have not: it goes on at the next run. A site whose workers are always busy clears a backlog slowly, and says nothing.
+
+## After an approval: the vendor comparison and the flow
+
+* **The vendors are compared within about a minute of approving a reorder, in the background.** The answer queues a job on the long queue once it is committed; the job runs as Administrator in the system mode (it reads the tax figures, which a person's session may not), under the same lease as the stock check, for that one reorder. Your site needs a worker for the `long` queue.
+* **If the job cannot take the lease, the next scheduled check compares the vendors.** That is the case while a stock check is running, and when the queue cannot be reached or Watch stock is off. The sentence the person reads after the answer says so, and the Flow block of the reorder request says what is still waited for. The scheduled check makes no second purchase request for a reorder the job has made.
+* **The Flow block asks again every 5 seconds, for up to 3 minutes,** while the purchase request is being made; after that the page has to be reloaded.
+* **"Run the check now" uses the settings as last saved,** refuses while a check is queued or running, and may be pressed by a Munimji Manager or a System Manager only. A check queued by it and one queued by the scheduler are the same job: only one of them waits in the queue.
+
 ## Taxes
 
 * Reading **Tax Rules needs the Accounts Manager role**; a Purchase User does not have it, and the app adds no permission rows to ERPNext. The scheduled job runs as Administrator, reads the tax setup, and keeps the figures with the request. A person who changes the quantity or the vendor gets a recalculation from those kept figures.

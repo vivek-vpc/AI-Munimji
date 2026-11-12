@@ -79,6 +79,8 @@ def fields_of(table) -> list[dict]:
 	out = []
 	if table.doctype == APPROVAL:
 		# the form's first thing is the request in words, drawn from the stored JSON by the form's script (munimji_approval_request.js); the columns come after it
+		# the Flow block (reorder request -> purchase request -> Draft Purchase Order, flow.py), put there by the form's script from ai_munimji.api.flow
+		out.append({"fieldname": "flow", "fieldtype": "HTML", "label": "Flow"})
 		out.append({"fieldname": "reasoning", "fieldtype": "HTML", "label": "Why this request"})
 	if table.numbered:
 		out.append(
@@ -208,11 +210,15 @@ BEGIN, END = "<!-- stores-table:begin -->", "<!-- stores-table:end -->"
 def doc_table() -> str:
 	"""The table of docs/STORES.md: one row per DocType, from the same specs the files are made from."""
 	lines = [
-		"| DocType | Engine table | Kept | Columns (derived ones in brackets) | JSON | Rights | For a person's screen |",
+		"| DocType | Engine table | Kept | Columns (derived ones in round brackets, the app's own in square brackets) | JSON | Rights | For a person's screen |",
 		"|---|---|---|---|---|---|---|",
 	]
 	for table in specs.TABLES:
-		columns = [f"({c.name})" if c.derived else c.name for c in table.cols if c.kind != "json"]
+		columns = [
+			f"({c.name})" if c.derived else f"[{c.name}]" if c.internal else c.name
+			for c in table.cols
+			if c.kind != "json"
+		]
 		if table.numbered:
 			columns.insert(0, table.key[0])
 		jsons = [c.name for c in table.cols if c.kind == "json"] or ["none"]

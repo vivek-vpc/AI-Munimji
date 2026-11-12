@@ -5,7 +5,9 @@
 2. Every method that a browser or an API client can call (`@frappe.whitelist`) checks the caller's permission as its FIRST statement, and none is open to guests.
 3. `ignore_permissions=True` (and `flags.ignore_permissions = True`, and `frappe.set_user`) is allowed in the install and uninstall hooks only, which create and remove the app's own roles
    and records from the command line, and in `schedule.py`, which keeps the stock check's one scheduled job in step with the Settings page (a Munimji Manager may save that page but holds no
-   right on Frappe's job records). Nowhere else: not in the ERP client, not in a button, not in a job.
+   right on Frappe's job records). Nowhere else: not in the ERP client, not in a button, not in a job. One narrow exception, a decision of Group 2 (F1, F4): `frappe.set_user("Administrator")`
+   and nothing else, in the two entry points of `jobs.py` that Frappe queues in the name of the person who queued them (the vendor comparison queued by an approver's answer, the stock check
+   queued by a manager's button). The system mode is Administrator's alone, and a queued job runs as whoever queued it, so each of the two becomes Administrator in the worker, as its first act.
 4. The ERP client's system mode, `FrappeERPClient(system=True)`, and the stores' system mode, `frappe_core_stores(system=True)`, are built in the scheduled job module only
    (`jobs.system_erp()`, `jobs.system_stores()`).
 5. The ERP client reads through `frappe.get_list` and the document APIs only: no `frappe.db` call at all, no `get_all`, no cached read (those do not apply the person's permissions).
@@ -29,6 +31,8 @@ LIFECYCLE_MODULES = {"ai_munimji/install.py", "ai_munimji/uninstall.py"}
 # The one module besides those that writes with ignore_permissions: the stock check's job record, set from the Settings page (schedule.py says why).
 SCHEDULE_MODULES = {"ai_munimji/schedule.py"}
 BYPASS_MODULES = LIFECYCLE_MODULES | SCHEDULE_MODULES
+# The functions that may call frappe.set_user("Administrator") (rule 3): jobs queued in the name of a person, which must run in the system mode.
+QUEUED_AS_ADMINISTRATOR = {"ai_munimji/jobs.py": {"run_stock_check_now", "run_vendor_comparison"}}
 ERP_CLIENT_MODULE = "ai_munimji/erp_client.py"
 STORE_PREFIX = "ai_munimji/stores/"
 STORE_EXCEPTIONS = {
@@ -141,9 +145,30 @@ def _raw_sql_problem(call: ast.Call, filename: str) -> str | None:
 	return None
 
 
+def _administrator_entries(tree: ast.AST, filename: str) -> set[int]:
+	"""The ids of the calls `frappe.set_user("Administrator")` (that literal and no other) inside the functions that may make one in this file (QUEUED_AS_ADMINISTRATOR)."""
+	allowed: set[int] = set()
+	for function in ast.walk(tree):
+		if isinstance(function, ast.FunctionDef) and function.name in QUEUED_AS_ADMINISTRATOR.get(
+			filename, ()
+		):
+			for call in ast.walk(function):
+				if (
+					isinstance(call, ast.Call)
+					and _frappe_call_name(call) == "set_user"
+					and len(call.args) == 1
+					and not call.keywords
+					and isinstance(call.args[0], ast.Constant)
+					and call.args[0].value == "Administrator"
+				):
+					allowed.add(id(call))
+	return allowed
+
+
 class Found:
 	def __init__(self):
 		self.problems: list[str] = []
+		self.administrator_entries = 0
 		self.raw_sql_calls = 0
 		self.whitelisted: list[str] = []
 		self.get_all_calls = 0
@@ -154,6 +179,7 @@ class Found:
 def scan_source(source: str, filename: str) -> Found:
 	found = Found()
 	tree = ast.parse(source, filename)
+	queued_as_administrator = _administrator_entries(tree, filename)
 	for node in ast.walk(tree):
 		if isinstance(node, ast.Call) and _is_get_all(node):
 			found.get_all_calls += 1
@@ -166,7 +192,9 @@ def scan_source(source: str, filename: str) -> Found:
 				any(k.arg == "ignore_permissions" and _not_false(k.value) for k in node.keywords)
 				or _frappe_call_name(node) == "set_user"
 			)
-			if bypass:
+			if id(node) in queued_as_administrator:
+				found.administrator_entries += 1
+			elif bypass:
 				found.ignore_permissions += 1
 				if filename not in BYPASS_MODULES:
 					found.problems.append(
@@ -238,7 +266,7 @@ def scan_source(source: str, filename: str) -> Found:
 class TestTheReadsRule(unittest.TestCase):
 	def test_the_app_follows_the_rules(self):
 		problems, whitelisted, scanned = [], [], []
-		get_all_in_jobs = system_clients_in_jobs = bypasses_in_hooks = 0
+		get_all_in_jobs = system_clients_in_jobs = bypasses_in_hooks = administrator_entries = 0
 		get_all_anywhere = 0
 		raw_sql_by_module: dict[str, int] = {}
 		for path in scan.python_files():
@@ -250,6 +278,7 @@ class TestTheReadsRule(unittest.TestCase):
 			get_all_anywhere += found.get_all_calls
 			if found.raw_sql_calls:
 				raw_sql_by_module[name] = found.raw_sql_calls
+			administrator_entries += found.administrator_entries
 			if name in SCHEDULED_JOB_MODULES:
 				get_all_in_jobs += found.get_all_calls
 				system_clients_in_jobs += found.system_clients
@@ -267,6 +296,11 @@ class TestTheReadsRule(unittest.TestCase):
 			system_clients_in_jobs,
 			2,
 			"the scheduled job module builds the system-mode client and the system-mode stores, one place each, and the scan sees both",
+		)
+		self.assertEqual(
+			administrator_entries,
+			2,
+			"the vendor comparison and the stock check queued by the button each become Administrator, once, and the scan sees both",
 		)
 		self.assertGreaterEqual(
 			bypasses_in_hooks,
@@ -350,6 +384,41 @@ class TestTheReadsRule(unittest.TestCase):
 			"import frappe\nfrappe.get_doc({}).insert()\n",
 		):
 			self.assertEqual(scan_source(source, "ai_munimji/api.py").problems, [], source)
+
+	def test_the_scan_allows_set_user_administrator_only_in_the_two_queued_entry_points(self):
+		entry = (
+			"import frappe\n"
+			"def run_vendor_comparison(work_order_id):\n"
+			"\tfrappe.set_user('Administrator')\n"
+			"def run_stock_check_now():\n"
+			'\tfrappe.set_user("Administrator")\n'
+		)
+		found = scan_source(entry, "ai_munimji/jobs.py")
+		self.assertEqual((found.problems, found.administrator_entries), ([], 2))
+		for source, why in (
+			(
+				"import frappe\ndef run_stock_check():\n\tfrappe.set_user('Administrator')\n",
+				"another function of jobs.py",
+			),
+			("import frappe\nfrappe.set_user('Administrator')\n", "at the top level of jobs.py"),
+			(
+				"import frappe\ndef run_stock_check_now():\n\tfrappe.set_user('someone@example.com')\n",
+				"another user",
+			),
+			(
+				"import frappe\ndef run_stock_check_now():\n\tfrappe.set_user(user)\n",
+				"a user that is not a literal",
+			),
+			(
+				"import frappe\ndef run_stock_check_now():\n\tfrappe.set_user('Administrator')\n\tfrappe.get_doc({}).insert(ignore_permissions=True)\n",
+				"ignore_permissions beside it",
+			),
+		):
+			self.assertTrue(scan_source(source, "ai_munimji/jobs.py").problems, why)
+		for module in ("ai_munimji/api.py", "ai_munimji/erp_client.py", "ai_munimji/stores/core.py"):
+			self.assertTrue(
+				scan_source(entry, module).problems, f"{module}: the function names are the jobs module's"
+			)
 
 	def test_the_scan_notices_the_system_client_built_anywhere_but_the_job_module(self):
 		system = (

@@ -5,6 +5,11 @@
  "engine": "InnoDB",
  "field_order": [
   "enabled",
+  "check_section",
+  "check_status",
+  "run_check_now",
+  "flow_section",
+  "flow_help",
   "rules_section",
   "min_qty",
   "min_days_cover",
@@ -38,6 +43,34 @@
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Watch stock"
+  },
+  {
+   "description": "When the stock check last ran, how far it got and how many requests it made. The check also runs by itself at the time set under “Check stock at” below.",
+   "fieldname": "check_section",
+   "fieldtype": "Section Break",
+   "label": "The stock check"
+  },
+  {
+   "fieldname": "check_status",
+   "fieldtype": "HTML",
+   "label": "Last check"
+  },
+  {
+   "description": "Starts the stock check at once, for the Munimji Managers and System Managers. It uses the settings as last saved. Not while a check is already waiting or running.",
+   "fieldname": "run_check_now",
+   "fieldtype": "Button",
+   "label": "Run the check now"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "flow_section",
+   "fieldtype": "Section Break",
+   "label": "How a request flows"
+  },
+  {
+   "fieldname": "flow_help",
+   "fieldtype": "HTML",
+   "label": "How a request flows"
   },
   {
    "description": "Munimji asks for a purchase when either rule below says stock is running low.",
@@ -88,7 +121,7 @@
   },
   {
    "default": "0 6 * * *",
-   "description": "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest.",
+   "description": "A schedule in cron form: minute, hour, day, month, weekday. 0 6 * * * is every day at 6 in the morning, in this site's time zone. ERPNext's scheduler runs a job every 4 minutes at the soonest, and the check reads all your stock, so a schedule that can start it less than 15 minutes after the last start is refused.",
    "fieldname": "check_cron",
    "fieldtype": "Data",
    "label": "Check stock at"
@@ -206,7 +239,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-09 09:00:00.000000",
+ "modified": "2026-11-11 16:00:01.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",

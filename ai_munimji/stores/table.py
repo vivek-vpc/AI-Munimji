@@ -12,7 +12,7 @@ from typing import Any
 import frappe
 from frappe import _
 
-from ai_munimji.stores import convert, locks
+from ai_munimji.stores import convert, locks, missing
 from ai_munimji.stores.specs import BY_ENGINE, Col, Table
 
 Row = dict[str, Any]
@@ -33,6 +33,7 @@ class DocTable:
 		self.project = project
 		self.has_nulls = any(c.null for c in self.spec.cols)
 		self.columns = {c.name: c for c in self.spec.cols}
+		self.internal = {c.name for c in self.spec.cols if c.internal}
 		self.key = self.spec.key[0]
 		extra = [self.key] if self.spec.numbered else []
 		extra += ["row_json"] if self.spec.json_row else []
@@ -103,6 +104,8 @@ class DocTable:
 		if self.spec.numbered:
 			values[self.key] = int(row[self.key])
 		for col in self.spec.cols:
+			if col.internal:
+				continue  # the app's own bookkeeping beside the row: a write of the row leaves it as it is
 			raw = derived.get(col.name) if col.derived else row.get(col.name)
 			values[col.name], empty = self._into(col, raw, zone)
 			if empty and col.null:
@@ -125,7 +128,7 @@ class DocTable:
 		elif not self.spec.hashed:
 			row[self.key] = get("name")
 		for col in self.spec.cols:
-			if not col.derived:
+			if not (col.derived or col.internal):
 				row[col.name] = self._out(col, get(col.name), col.name in empties)
 		return row
 
@@ -155,6 +158,7 @@ class DocTable:
 		try:
 			doc = frappe.get_doc(self.doctype, name, for_update=True)
 		except frappe.DoesNotExistError:
+			missing.not_there()
 			return None
 		new = fn(self.row(doc))
 		if new is None:
@@ -164,6 +168,32 @@ class DocTable:
 		doc.flags.ignore_links = True
 		doc.save()
 		return new
+
+	def set_internal(self, name: str, **values: Any) -> bool:
+		"""Under a row lock, set the app's own columns (`internal` in the spec) of the record, and nothing else. The engine's row is not touched, so a digest over it does not change.
+		False when there is no such record."""
+		unknown = set(values) - self.internal
+		if unknown:
+			raise KeyError(f"{self.doctype} has no internal column {sorted(unknown)}")
+		try:
+			doc = frappe.get_doc(self.doctype, name, for_update=True)
+		except frappe.DoesNotExistError:
+			missing.not_there()
+			return False
+		for key, value in values.items():
+			doc.set(key, self._into(self.columns[key], value, convert.site_zone())[0])
+		doc.flags.munimji_store = True
+		doc.flags.ignore_links = True
+		doc.save()
+		return True
+
+	def internal_values(self, name: str) -> dict[str, Any] | None:
+		"""The app's own columns of a record, as the signed-in person may read them (the engine's row has none of them), or None when there is no such record."""
+		self.need("read")
+		rows = frappe.get_list(
+			self.doctype, fields=sorted(self.internal), filters={"name": name}, limit_page_length=1
+		)
+		return dict(rows[0]) if rows else None
 
 	def put(self, row: Row) -> bool:
 		"""Make the record, or replace what is there. True when it was made."""
@@ -180,6 +210,7 @@ class DocTable:
 		try:
 			doc = frappe.get_doc(self.doctype, name, for_update=True)
 		except frappe.DoesNotExistError:
+			missing.not_there()
 			return False
 		doc.flags.munimji_store = True
 		doc.delete()
@@ -191,6 +222,7 @@ class DocTable:
 		try:
 			doc = frappe.get_doc(self.doctype, name)
 		except frappe.DoesNotExistError:
+			missing.not_there()
 			return None
 		doc.check_permission("read")
 		return self.row(doc)

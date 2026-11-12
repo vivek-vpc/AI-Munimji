@@ -12,20 +12,22 @@ screens need: real columns to filter and sort by, and the engine's own text kept
 
 Roles: **V** Munimji Viewer, **A** Munimji Approver, **M** Munimji Manager, **S** System Manager. "Adm" is Administrator, which is how Frappe runs the scheduled job. Rights: r read, w write, c create,
 d delete, x report and export, a approve. A table with no row for a role gives that role nothing. **Kept** says how a row is held: *columns* means the columns are the record and the
-engine's own JSON text is a read-only JSON field; *json row* means the whole engine row is kept as exact JSON, with copies of only the columns that find and expire rows.
+engine's own JSON text is a read-only JSON field; *json row* means the whole engine row is kept as exact JSON, with copies of only the columns that find and expire rows. A column in square brackets
+is **the app's own**, not part of the engine's row: it is never in a row the engine reads or writes and a write of the row leaves it as it is. There are three: `sealed` on a request and on a settings change
+(set when its entry is appended to the audit seal, so that the sweep reads only what is new), and `progress` on a Job Run (how far a long run has got).
 
 <!-- stores-table:begin -->
-| DocType | Engine table | Kept | Columns (derived ones in brackets) | JSON | Rights | For a person's screen |
+| DocType | Engine table | Kept | Columns (derived ones in round brackets, the app's own in square brackets) | JSON | Rights | For a person's screen |
 |---|---|---|---|---|---|---|
-| Munimji Approval Request | `approvals` | columns | kind, status, (title), (severity), (item_code), (warehouse), (qty), (supplier), (answer), (approver), created_at, expires_at, decided_at, last_reminder_at, reminder_count, ref_type, ref_id, status_note, (search_text) | request_json, decision_json | V rx; A rwcxa; M rwcxa; S rwcxa | yes |
+| Munimji Approval Request | `approvals` | columns | kind, status, (title), (severity), (item_code), (warehouse), (qty), (supplier), (answer), (approver), created_at, expires_at, decided_at, last_reminder_at, reminder_count, ref_type, ref_id, status_note, (search_text), [sealed] | request_json, decision_json | V rx; A rwcxa; M rwcxa; S rwcxa | yes |
 | Munimji Approval Delivery | `deliveries` | columns | id, approval_id, recipient_id, channel, address, status, external_id, error, attempts, sent_at | none | V r; A r; M r; S r | no |
 | Munimji Audit Seal | `audit_chain` | columns | seq, at, source, ref_id, event, digest, prev, hash | none | M r; S r | no |
 | Munimji Settings Override | `settings_overrides` | columns | scope_type, scope_key, updated_by, updated_at | data_json | V r; A r; M rwcd; S rwcd | yes |
-| Munimji Settings Change | `settings_audit` | columns | id, ts, actor, scope_type, scope_key, field | old_json, new_json | M rc; S r | no |
+| Munimji Settings Change | `settings_audit` | columns | id, ts, actor, scope_type, scope_key, field, [sealed] | old_json, new_json | M rc; S r | no |
 | Munimji Work Order | `work_orders` | columns | type, status, (item_code), source, created_at, updated_at | payload_json | V rx; A rwcx; M rwcx; S rwcx | yes |
 | Munimji Agent Task | `agent_tasks` | json row | agent, task, status, approval_id, asked_by, started_at, finished_at, provider, model, remote, prompt_tokens, output_tokens, llm_seconds | the whole row (`row_json`) | A c; M rc; S r | no |
 | Munimji Tool Call | `tool_calls` | json row | id, at, actor, tool, task_id, ok | the whole row (`row_json`) | A c; M rc; S r | no |
-| Munimji Job Run | `job_runs` | json row | last_start, last_end | the whole row (`row_json`) | M r; S r | no |
+| Munimji Job Run | `job_runs` | json row | last_start, last_end, [progress], [requests_made] | the whole row (`row_json`) | M r; S r | no |
 | Munimji Inbound Seen | `inbound_seen` | json row | channel, external_id, seen_at | the whole row (`row_json`) | M r; S r | no |
 | Munimji Stock Alert | `alerts` | columns | item_code, kind, severity, status, created_at, updated_at, approval_id, snoozed_until, suppress_until, cooldown_until, run_id, status_note, reasoning_text | analysis_json | V rx; A rwcx; M rwcx; S rwcx | yes |
 | Munimji Stock Notice | `stock_notices` | columns | item_code, level, status, created_at, updated_at, approval_id, snoozed_until | none | V rx; A rwcx; M rwcx; S rwcx | yes |

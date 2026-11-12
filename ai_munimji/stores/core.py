@@ -320,7 +320,18 @@ class FrappeApprovalStore(_Store):
 
 
 # ---------------------------------------------------------------------------------------------------------------------- the seal
+CLOSED_NOT_SEALED = [
+	["status", "!=", "pending"],
+	["sealed", "=", 0],
+]  # a closed request that is not in the chain yet (see FrappeAuditStore)
+SEAL_BATCH = 500  # the most closed requests one sweep hands the engine: what is left waits for the next sweep, so the cost of a run never depends on a backlog
+
+
 class FrappeAuditStore(_Store):
+	"""The seal's storage. What the sweep reads depends on what is NEW, not on the size of the history: a closed request carries the flag `sealed` (the app's own column, set when its
+	entry is appended), and the sweep asks for the closed requests that do not have it, oldest first, SEAL_BATCH at a time. The newest settings change that is sealed is the last
+	settings entry of the chain, because settings changes are sealed in the order of their numbers."""
+
 	def __init__(self, ctx: Context) -> None:
 		super().__init__(ctx)
 		self.s = ctx.table("audit_chain")
@@ -349,6 +360,7 @@ class FrappeAuditStore(_Store):
 				"hash": hash_,
 			}
 		)
+		(self.a if source == "approval" else self.c).set_internal(ref_id, sealed=1)
 
 	def entries(self) -> list[Row]:
 		return self.s.find(order_by="seq asc")
@@ -359,26 +371,48 @@ class FrappeAuditStore(_Store):
 		)
 		return rows[0]["at"] if rows else None
 
-	def _unsealed(self) -> list[Row]:
-		sealed = {r["ref_id"] for r in self.s.select(["ref_id"], [["source", "=", "approval"]])}
-		closed = self.a.select(["decided_at", "created_at"], [["status", "!=", "pending"]])
-		todo = [r for r in closed if r["name"] not in sealed]
-		todo.sort(key=lambda r: (r["decided_at"] or r["created_at"] or "", r["name"]))
-		return todo
-
 	def unsealed_approvals(self) -> list[Row]:
-		return [row for r in self._unsealed() if (row := self.a.get(r["name"])) is not None]
+		"""The next SEAL_BATCH closed requests that are not sealed, oldest first. A request whose flag is missing although the chain holds its entry (a site restored from a backup that
+		predates the flag) is found out here, flagged, and not sealed twice."""
+		out: list[Row] = []
+		# The database cuts the batch by creation time (a function in an order-by is not allowed through get_list), the exact order of the Protocol (when it was answered, or created if it
+		# was not; then the id) is applied to the batch. With no more than SEAL_BATCH waiting, which is every ordinary day, that is the whole order, as in the other stores.
+		wanted = self.a.select(
+			["decided_at", "created_at"],
+			CLOSED_NOT_SEALED,
+			order_by="created_at asc, name asc",
+			limit=SEAL_BATCH,
+		)
+		wanted.sort(key=lambda r: (r["decided_at"] or r["created_at"] or "", r["name"]))
+		for r in wanted:
+			if self.sealed_at("approval", r["name"]) is not None:
+				self.a.set_internal(r["name"], sealed=1)
+				continue
+			row = self.a.get(r["name"])
+			if row is not None:
+				out.append(row)
+		return out
 
 	def unsealed_count(self) -> int:
-		return len(self._unsealed())
+		return self.a.count(CLOSED_NOT_SEALED)
 
 	def last_sealed_setting(self) -> int:
-		return max(
-			(int(r["ref_id"]) for r in self.s.select(["ref_id"], [["source", "=", "setting"]])), default=0
-		)
+		"""The highest number of a settings change that is sealed: found from the newest changes down, so it costs what is new, not the length of the history."""
+		rows = self.c.select(["id"], [["sealed", "=", 1]], order_by="id desc", limit=1)
+		return int(rows[0]["id"]) if rows else 0
 
 	def settings_after(self, setting_id: int) -> list[Row]:
-		return self.c.find([["id", ">", setting_id]], order_by="id asc")
+		"""The settings changes after `setting_id` that are not sealed, oldest first, at most SEAL_BATCH. A change whose flag is missing although the chain holds its entry (see
+		`unsealed_approvals`) is flagged and left out."""
+		out: list[Row] = []
+		for row in self.c.find(
+			[["id", ">", setting_id], ["sealed", "=", 0]], order_by="id asc", limit=SEAL_BATCH
+		):
+			if self.sealed_at("setting", str(row["id"])) is not None:
+				self.c.set_internal(str(row["id"]), sealed=1)
+				continue
+			out.append(row)
+		return out
 
 	def current_approval(self, ref_id: str) -> Row | None:
 		return self.a.get(ref_id)
@@ -474,6 +508,10 @@ class FrappeWorkOrderStore(_Store):
 
 	def set_status(self, wo_id: str, status: str, now: str) -> None:
 		self.w.change(wo_id, lambda r: {**r, "status": status, "updated_at": now})
+
+	def with_source(self, source: str) -> list[Row]:
+		"""The work orders made from this source ("inventory_alert:<id>"), newest first. Not part of the engine's contract: the flow block of a request follows a reorder to its work order with it."""
+		return self.w.find([["source", "=", source]], order_by="created_at desc, creation desc")
 
 
 # ---------------------------------------------------------------------------------------------------------------------- the agents' log
@@ -696,15 +734,18 @@ class FrappeAgentLogStore(_Store):
 				failed += 1
 		return failed
 
-	def prune(self, cutoff: str) -> int:
+	def prune(self, cutoff: str, tool_calls: bool = True) -> int:
+		"""Clear the trace of every task older than `cutoff` (the task stays) and, unless `tool_calls` is False, delete the tool calls older than it. The clean-up of the logs (retention.py) passes
+		False: it deletes tool calls itself, oldest first and a capped number a run, and the engine's own all-at-once deletion would undo the cap."""
 		cleared = 0
 		for r in self.t.find([["started_at", "<", self.t.at(cutoff)]]):
 			if r["trace_json"] is not None and self.t.change(
 				r["id"], lambda row: {**row, "trace_json": None}
 			):
 				cleared += 1
-		for name in self.c.names([["at", "<", self.c.at(cutoff)]]):
-			self.c.remove(name)
+		if tool_calls:
+			for name in self.c.names([["at", "<", self.c.at(cutoff)]]):
+				self.c.remove(name)
 		return cleared
 
 
@@ -747,6 +788,18 @@ class FrappeJobRunStore(_Store):
 
 	def all(self) -> list[Row]:
 		return self.j.find(order_by="name asc")
+
+	def progress(self, job: str, text: str) -> None:
+		"""Where a long run has got to, in words (the app's own column: it is not part of the engine's row). Says nothing for a job that never started."""
+		self.j.set_internal(job, progress=text)
+
+	def app_columns(self, job: str) -> dict | None:
+		"""How far the run got and how many requests it made (`progress`, `requests_made`), as the signed-in person may read them; None when the job never ran."""
+		return self.j.internal_values(job)
+
+	def requests_made(self, job: str, count: int) -> None:
+		"""How many requests the run made, once it has finished (the app's own column, like `progress`): the Settings page says it next to when the run was."""
+		self.j.set_internal(job, requests_made=count)
 
 
 # ---------------------------------------------------------------------------------------------------------------------- the ids of inbound messages

@@ -14,7 +14,8 @@
   "field",
   "details_section",
   "old_json",
-  "new_json"
+  "new_json",
+  "sealed"
  ],
  "fields": [
   {
@@ -77,12 +78,20 @@
    "fieldtype": "JSON",
    "label": "After",
    "read_only": 1
+  },
+  {
+   "fieldname": "sealed",
+   "fieldtype": "Check",
+   "label": "Sealed",
+   "read_only": 1,
+   "search_index": 1,
+   "hidden": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-07 12:00:00.000000",
+ "modified": "2026-11-07 12:00:01.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "Munimji Settings Change",
