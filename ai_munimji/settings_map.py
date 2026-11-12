@@ -48,7 +48,16 @@ BY_FIELD = {m.fieldname: m for m in MAPPED}
 
 # Fields of the page that the engine knows nothing about. `enabled` is the pack's on/off switch (the standalone keeps it in settings.yaml under packs.enabled, and the pack manifest, in
 # the engine, says enabled_by_default: true); `fallback_supplier` is a link to an ERPNext Supplier, which only ERPNext can check.
-APP_ONLY = ("enabled", "fallback_supplier", "keep_logs_days")
+APP_ONLY = (
+	"enabled",
+	"fallback_supplier",
+	"keep_logs_days",
+	"telegram_enabled",
+	"telegram_bot_token",
+	"telegram_mode",
+	"telegram_webhook_secret",
+	"telegram_bot_username",
+)
 # The ONE setting where the app deliberately differs from the standalone service: the stock monitor is OFF until a person has reviewed the thresholds and switches it on, so that nothing
 # starts creating requests on a customer's live stock at install (docs/NAMES.md). The standalone service keeps the manifest's default, which is on.
 ENABLED_DEFAULT = 0
@@ -267,6 +276,22 @@ def fill_missing(doc) -> None:
 			doc.set(fieldname, default)
 
 
+def telegram_problems(doc) -> list[str]:
+	"""Why Telegram cannot be switched on with what the page holds (nothing while it is off). The token is a Password field: a value that is only asterisks is the one already kept."""
+	if not doc.get("telegram_enabled"):
+		return []
+	from ai_munimji.telegram import config
+
+	typed = str(doc.get("telegram_bot_token") or "").strip()
+	if not typed.strip("*") and not config.token():
+		return [
+			_(
+				"“{0}” is needed to switch Telegram on: create a bot with @BotFather in Telegram and paste its token"
+			).format(_("Bot token"))
+		]
+	return []
+
+
 def validate(doc) -> None:
 	"""Refuse the settings with every reason at once. The rules are the engine's; see the top of this module for the two small differences."""
 	fill_missing(doc)
@@ -282,5 +307,6 @@ def validate(doc) -> None:
 		bad_cron = cron_problem(values["system"]["check_cron"])
 		if bad_cron:
 			found.append(bad_cron)
+	found += telegram_problems(doc)
 	if found:
 		frappe.throw(found, title=_("These settings cannot be saved"), as_list=True)

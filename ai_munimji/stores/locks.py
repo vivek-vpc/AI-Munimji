@@ -29,7 +29,7 @@ from ai_munimji.stores.specs import TABLES
 
 LOCK = "Munimji Lock"
 MAKING = ("Purchase Order", "Material Request", "Stock Entry")  # the documents the app makes from a request
-LEASES = ("stock_check",)
+LEASES = ("stock_check", "telegram_poll", "telegram_outbox")
 
 
 def _hash(text: str) -> str:

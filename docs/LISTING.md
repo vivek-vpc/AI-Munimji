@@ -69,7 +69,7 @@ AI Munimji watches the stock in your ERPNext site and, when an item is running l
 **What it will not do**
 - It never approves anything by itself. A person answers every request.
 - It never submits a document. It creates drafts. An approver can later change the quantity of, or cancel, an order made from a request.
-- It sends nothing out of your site and calls no AI model in this version.
+- By default it sends nothing out of your site and calls no AI model. If a manager switches on the optional Telegram connection, requests are also sent to the Telegram chats of the people who connected one (`docs/TELEGRAM.md`, `docs/PRIVACY.md`).
 
 **How a request flows**
 1. **Reorder request.** The stock check looks at every item. For each one that is running low it makes a Reorder request and tells the people who may approve.
@@ -95,7 +95,8 @@ Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Mu
 |---|---|
 | Creates drafts, never submits; an approver can change or cancel an order made from a request | `ai_munimji/erp_client.py`, the order tests |
 | Two answers from low stock to an order (reorder request, then purchase request about a minute after the reorder is approved) | the browser round trip |
-| Nothing leaves the site, no model in 0.1 | `docs/PRIVACY.md`, the outbound-block tests |
+| Nothing leaves the site unless a manager switches Telegram on; no model | `docs/PRIVACY.md`, `docs/TELEGRAM.md`, the outbound-block tests (tests/test_nothing_leaves.py names the one exception) |
+| Optional: requests arrive in Telegram with buttons and are answered there, with the answering person’s own rights | `docs/TELEGRAM.md`, the Telegram tests |
 | Stock monitor off after install | `docs/INSTALL.md`, the settings tests |
 | First answer wins | the approval tests |
 | The purchase request lists why other suppliers lost | the form on a real request |

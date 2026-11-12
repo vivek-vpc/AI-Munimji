@@ -28,6 +28,7 @@ def make_schedule():
 	settings = frappe.get_single("AI Munimji Settings")
 	schedule.sync(bool(settings.enabled), settings.check_cron)
 	schedule.sync_clean_up(settings.keep_logs_days)
+	schedule.sync_telegram(bool(settings.telegram_enabled))
 
 
 def check_database():

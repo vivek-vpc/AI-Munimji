@@ -2,12 +2,15 @@
 
 1. `frappe.get_all` ignores permissions. It is allowed in the scheduled job module only, which runs as the system on purpose. Everywhere else a read goes through `frappe.get_list`, or
    through a document whose permission was checked.
-2. Every method that a browser or an API client can call (`@frappe.whitelist`) checks the caller's permission as its FIRST statement, and none is open to guests.
+2. Every method that a browser or an API client can call (`@frappe.whitelist`) checks the caller's permission as its FIRST statement, and none is open to guests, with one exception: Telegram's
+   webhook (GUEST_ENDPOINTS), whose first statement proves that the call came from Telegram (a secret, compared in constant time) before it reads, claims or writes anything.
 3. `ignore_permissions=True` (and `flags.ignore_permissions = True`, and `frappe.set_user`) is allowed in the install and uninstall hooks only, which create and remove the app's own roles
    and records from the command line, and in `schedule.py`, which keeps the stock check's one scheduled job in step with the Settings page (a Munimji Manager may save that page but holds no
    right on Frappe's job records). Nowhere else: not in the ERP client, not in a button, not in a job. One narrow exception, a decision of Group 2 (F1, F4): `frappe.set_user("Administrator")`
    and nothing else, in the two entry points of `jobs.py` that Frappe queues in the name of the person who queued them (the vendor comparison queued by an approver's answer, the stock check
    queued by a manager's button). The system mode is Administrator's alone, and a queued job runs as whoever queued it, so each of the two becomes Administrator in the worker, as its first act.
+   Telegram adds four more places, each a named function and nothing else in its module (NAMED_BYPASS): its three jobs become Administrator as their first act, its webhook is Administrator while it
+   hands over an update it has verified and Guest again after, `as_user` is the person a chat is connected to (and back), and `_write` makes that person's link as the bot.
 4. The ERP client's system mode, `FrappeERPClient(system=True)`, and the stores' system mode, `frappe_core_stores(system=True)`, are built in the scheduled job module only
    (`jobs.system_erp()`, `jobs.system_stores()`).
 5. The ERP client reads through `frappe.get_list` and the document APIs only: no `frappe.db` call at all, no `get_all`, no cached read (those do not apply the person's permissions).
@@ -33,6 +36,25 @@ SCHEDULE_MODULES = {"ai_munimji/schedule.py"}
 BYPASS_MODULES = LIFECYCLE_MODULES | SCHEDULE_MODULES
 # The functions that may call frappe.set_user("Administrator") (rule 3): jobs queued in the name of a person, which must run in the system mode.
 QUEUED_AS_ADMINISTRATOR = {"ai_munimji/jobs.py": {"run_stock_check_now", "run_vendor_comparison"}}
+# Telegram (docs/PRIVACY.md) adds four places that act as someone other than the signed-in person, each a named function and nothing else in its module:
+#   the queued jobs become Administrator as their first act (the same reason as the two above: a queued job runs as whoever queued it, and the system mode is Administrator's alone);
+#   the webhook is Administrator while it hands an update over, after it has proved the call came from Telegram, and Guest again after;
+#   `as_user` is the person a chat is connected to, and back: a press is that person's own answer, with their rights;
+#   `_write` makes the person's Telegram link as the bot (the person's own session is not the one that is running, and nobody creates a link for someone else).
+NAMED_BYPASS = {
+	"ai_munimji/telegram/jobs.py": {"deliver_new", "housekeeping", "poll"},
+	"ai_munimji/telegram/webhook.py": {"receive"},
+	"ai_munimji/telegram/inbound.py": {"as_user"},
+	"ai_munimji/telegram/links.py": {"_write"},
+}
+NAMED_BYPASS_CALLS = {  # how many calls each module makes inside those functions: set_user (once in each of the three jobs, twice in the webhook and in as_user) and ignore_permissions (twice)
+	"ai_munimji/telegram/jobs.py": 3,
+	"ai_munimji/telegram/webhook.py": 2,
+	"ai_munimji/telegram/inbound.py": 2,
+	"ai_munimji/telegram/links.py": 2,
+}
+# The one method that a stranger can call, and what it must do first: prove that Telegram is calling (a secret compared in constant time) before it reads, claims or writes anything.
+GUEST_ENDPOINTS = {"ai_munimji/telegram/webhook.py": {"receive"}}
 ERP_CLIENT_MODULE = "ai_munimji/erp_client.py"
 STORE_PREFIX = "ai_munimji/stores/"
 STORE_EXCEPTIONS = {
@@ -165,9 +187,35 @@ def _administrator_entries(tree: ast.AST, filename: str) -> set[int]:
 	return allowed
 
 
+def _named_bypass_calls(tree: ast.AST, filename: str) -> set[int]:
+	"""The ids of the calls (frappe.set_user(...), anything with ignore_permissions=True) inside the functions that may make one in this file (NAMED_BYPASS)."""
+	allowed: set[int] = set()
+	for function in ast.walk(tree):
+		if isinstance(function, ast.FunctionDef) and function.name in NAMED_BYPASS.get(filename, ()):
+			for call in ast.walk(function):
+				if isinstance(call, ast.Call) and (
+					_frappe_call_name(call) == "set_user"
+					or any(k.arg == "ignore_permissions" and _not_false(k.value) for k in call.keywords)
+				):
+					allowed.add(id(call))
+	return allowed
+
+
+def _checks_secret(statement: ast.stmt) -> bool:
+	"""Is the statement a call of `verify_secret()`, the function that raises unless Telegram's secret header is right?"""
+	return (
+		isinstance(statement, ast.Expr)
+		and isinstance(statement.value, ast.Call)
+		and isinstance(statement.value.func, ast.Name)
+		and statement.value.func.id == "verify_secret"
+	)
+
+
 class Found:
 	def __init__(self):
 		self.problems: list[str] = []
+		self.named_bypass_calls = 0
+		self.guest_endpoints: list[str] = []
 		self.administrator_entries = 0
 		self.raw_sql_calls = 0
 		self.whitelisted: list[str] = []
@@ -180,6 +228,7 @@ def scan_source(source: str, filename: str) -> Found:
 	found = Found()
 	tree = ast.parse(source, filename)
 	queued_as_administrator = _administrator_entries(tree, filename)
+	named = _named_bypass_calls(tree, filename)
 	for node in ast.walk(tree):
 		if isinstance(node, ast.Call) and _is_get_all(node):
 			found.get_all_calls += 1
@@ -194,6 +243,8 @@ def scan_source(source: str, filename: str) -> Found:
 			)
 			if id(node) in queued_as_administrator:
 				found.administrator_entries += 1
+			elif id(node) in named:
+				found.named_bypass_calls += 1
 			elif bypass:
 				found.ignore_permissions += 1
 				if filename not in BYPASS_MODULES:
@@ -245,9 +296,12 @@ def scan_source(source: str, filename: str) -> Found:
 					if keyword.arg == "allow_guest" and not (
 						isinstance(keyword.value, ast.Constant) and keyword.value.value is False
 					):
-						found.problems.append(
-							f"{filename}:{node.lineno}: {node.name} is open to guests (allow_guest)"
-						)
+						if node.name in GUEST_ENDPOINTS.get(filename, ()):
+							found.guest_endpoints.append(f"{filename}:{node.name}")
+						else:
+							found.problems.append(
+								f"{filename}:{node.lineno}: {node.name} is open to guests (allow_guest)"
+							)
 				body = list(node.body)
 				if (
 					body
@@ -256,7 +310,8 @@ def scan_source(source: str, filename: str) -> Found:
 					and isinstance(body[0].value.value, str)
 				):
 					body = body[1:]  # the docstring
-				if not body or not _checks_permission(body[0]):
+				guest = node.name in GUEST_ENDPOINTS.get(filename, ())
+				if not body or not (_checks_permission(body[0]) or (guest and _checks_secret(body[0]))):
 					found.problems.append(
 						f"{filename}:{node.lineno}: {node.name} is whitelisted but does not check the caller's permission as its first statement"
 					)
@@ -267,6 +322,8 @@ class TestTheReadsRule(unittest.TestCase):
 	def test_the_app_follows_the_rules(self):
 		problems, whitelisted, scanned = [], [], []
 		get_all_in_jobs = system_clients_in_jobs = bypasses_in_hooks = administrator_entries = 0
+		named_calls: dict[str, int] = {}
+		guests: list[str] = []
 		get_all_anywhere = 0
 		raw_sql_by_module: dict[str, int] = {}
 		for path in scan.python_files():
@@ -279,6 +336,9 @@ class TestTheReadsRule(unittest.TestCase):
 			if found.raw_sql_calls:
 				raw_sql_by_module[name] = found.raw_sql_calls
 			administrator_entries += found.administrator_entries
+			guests += found.guest_endpoints
+			if found.named_bypass_calls:
+				named_calls[name] = found.named_bypass_calls
 			if name in SCHEDULED_JOB_MODULES:
 				get_all_in_jobs += found.get_all_calls
 				system_clients_in_jobs += found.system_clients
@@ -302,6 +362,16 @@ class TestTheReadsRule(unittest.TestCase):
 			2,
 			"the vendor comparison and the stock check queued by the button each become Administrator, once, and the scan sees both",
 		)
+		self.assertEqual(
+			named_calls,
+			NAMED_BYPASS_CALLS,
+			"Telegram's jobs, its webhook, its person-switch and its link are the only other places that act as someone else, and the scan sees each",
+		)
+		self.assertEqual(
+			guests,
+			["ai_munimji/telegram/webhook.py:receive"],
+			"the webhook is the one method open to guests, and the scan sees it",
+		)
 		self.assertGreaterEqual(
 			bypasses_in_hooks,
 			3,
@@ -320,6 +390,7 @@ class TestTheReadsRule(unittest.TestCase):
 			| SCHEDULE_MODULES
 			| STORE_EXCEPTIONS
 			| set(RAW_SQL)
+			| set(NAMED_BYPASS)
 			| {ERP_CLIENT_MODULE}
 		):
 			self.assertTrue(
@@ -419,6 +490,63 @@ class TestTheReadsRule(unittest.TestCase):
 			self.assertTrue(
 				scan_source(entry, module).problems, f"{module}: the function names are the jobs module's"
 			)
+
+	def test_the_scan_lets_telegram_act_as_someone_else_only_in_its_named_functions(self):
+		inside = (
+			("ai_munimji/telegram/jobs.py", "def poll():\n\tfrappe.set_user('Administrator')\n"),
+			(
+				"ai_munimji/telegram/webhook.py",
+				"def receive():\n\tfrappe.set_user('Administrator')\n\tfrappe.set_user('Guest')\n",
+			),
+			("ai_munimji/telegram/inbound.py", "def as_user(user):\n\tfrappe.set_user(user)\n"),
+			(
+				"ai_munimji/telegram/links.py",
+				"def _write(user):\n\tfrappe.get_doc({}).insert(ignore_permissions=True)\n",
+			),
+		)
+		for module, body in inside:
+			found = scan_source("import frappe\n" + body, module)
+			self.assertEqual((found.problems, found.named_bypass_calls > 0), ([], True), module)
+		for module, body in (
+			("ai_munimji/telegram/jobs.py", "def other():\n\tfrappe.set_user('Administrator')\n"),
+			("ai_munimji/telegram/inbound.py", "def answer(user):\n\tfrappe.set_user(user)\n"),
+			(
+				"ai_munimji/telegram/links.py",
+				"def redeem():\n\tfrappe.get_doc({}).insert(ignore_permissions=True)\n",
+			),
+			("ai_munimji/telegram/api.py", "def connect():\n\tfrappe.set_user('Administrator')\n"),
+			(
+				"ai_munimji/telegram/outbox.py",
+				"def as_user(user):\n\tfrappe.set_user(user)\n",
+			),  # the name is the inbound module's
+			("ai_munimji/api.py", "def receive():\n\tfrappe.set_user('Guest')\n"),
+		):
+			self.assertTrue(scan_source("import frappe\n" + body, module).problems, f"{module}: {body}")
+
+	def test_the_scan_lets_the_webhook_be_open_to_guests_and_nothing_else_and_only_after_it_has_checked_the_secret(
+		self,
+	):
+		webhook = "ai_munimji/telegram/webhook.py"
+		good = "import frappe\n@frappe.whitelist(allow_guest=True, methods=['POST'])\ndef receive():\n\tverify_secret()\n\treturn 1\n"
+		found = scan_source(good, webhook)
+		self.assertEqual((found.problems, found.guest_endpoints), ([], [f"{webhook}:receive"]))
+		for source, module, why in (
+			(good, "ai_munimji/api.py", "the same function in another module"),
+			(good.replace("receive", "another"), webhook, "another function of the webhook module"),
+			(
+				good.replace("\tverify_secret()\n", "\tx = 1\n\tverify_secret()\n"),
+				webhook,
+				"the secret is not the first thing checked",
+			),
+			(good.replace("\tverify_secret()\n", "\tframe = 1\n"), webhook, "the secret is never checked"),
+			(good.replace("verify_secret()", "other_check()"), webhook, "a check that is not the secret's"),
+			(
+				"import frappe\n@frappe.whitelist(allow_guest=True)\ndef f():\n\tverify_secret()\n",
+				"ai_munimji/api.py",
+				"verify_secret is not a permission check elsewhere",
+			),
+		):
+			self.assertTrue(scan_source(source, module).problems, f"{module}: {why}")
 
 	def test_the_scan_notices_the_system_client_built_anywhere_but_the_job_module(self):
 		system = (

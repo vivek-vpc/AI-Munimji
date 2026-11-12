@@ -9,6 +9,7 @@ from ai_munimji import settings_map
 from ai_munimji.settings_map import APP_ONLY, BY_FIELD, EVENT_FIELDS, EVENTS_FIELD, MAPPED, engine_name
 
 DOCTYPE = "AI Munimji Settings"
+PASSWORDS = {"telegram_bot_token", "telegram_webhook_secret"}
 ROOT = Path(__file__).resolve().parents[2]
 LAYOUT = (
 	"Section Break",
@@ -413,14 +414,16 @@ class TestTheSettingsAreTheEnginesSettings(IntegrationTestCase):
 			"saving the page must not switch the monitor on",
 		)
 
-	def test_the_page_holds_no_secret(self):
-		# Version 0.1 has none. A Password field would need the proof that its value is neither in the table nor in the version log (the spike did it once, in the report);
-		# this test fails the day one is added, so that the proof is written then.
+	def test_the_page_holds_no_secret_but_telegrams_two(self):
+		# The only Password fields are Telegram's: the bot token a Munimji Manager pastes, and the secret that Telegram sends with every call to the webhook. The proof that neither is in the
+		# table, in the version log, in an error or on a page is tests/test_telegram_links.py (TestTheTokenIsNowhereAPersonCanRead): a third Password field fails here until it is added to
+		# PASSWORDS and that proof covers it.
 		for doctype in (DOCTYPE, "Munimji Calendar Event"):
-			passwords = [df.fieldname for df in frappe.get_meta(doctype).fields if df.fieldtype == "Password"]
+			passwords = {df.fieldname for df in frappe.get_meta(doctype).fields if df.fieldtype == "Password"}
 			self.assertEqual(
 				passwords,
-				[],
-				f"{doctype} has a Password field: add the test that its value is not logged first",
+				PASSWORDS if doctype == DOCTYPE else set(),
+				f"{doctype} has a Password field that is not Telegram's: add the test that its value is not logged first",
 			)
-		self.assertEqual(frappe.db.sql("SELECT COUNT(*) FROM `__Auth` WHERE doctype = %s", DOCTYPE)[0][0], 0)
+		kept = {row[0] for row in frappe.db.sql("SELECT fieldname FROM `__Auth` WHERE doctype = %s", DOCTYPE)}
+		self.assertLessEqual(kept, PASSWORDS)

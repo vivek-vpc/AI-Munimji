@@ -73,6 +73,15 @@ before_uninstall = "ai_munimji.uninstall.before_uninstall"
 # A controller hook can only DENY (frappe/permissions.py: has_controller_permissions). It is called with the keywords doc, ptype, user, debug.
 has_permission = {
 	"Munimji Approval Request": "ai_munimji.permissions.has_permission",
+	"Munimji Telegram Link": "ai_munimji.permissions.link_has_permission",
+}
+permission_query_conditions = {
+	"Munimji Telegram Link": "ai_munimji.permissions.link_query_conditions",
+}
+
+# A user who is deleted takes their Telegram link with them (their chat id is personal data).
+doc_events = {
+	"User": {"on_trash": "ai_munimji.telegram.links.on_user_trash"},
 }
 
 # Deleting
@@ -104,6 +113,7 @@ ignore_links_on_delete = [
 	"Munimji Stock Alert",
 	"Munimji Stock Notice",
 	"Munimji Stock Transfer",
+	"Munimji Telegram Link",
 	"Munimji Tool Call",
 	"Munimji Vendor Message",
 	"Munimji Vendor Reply",

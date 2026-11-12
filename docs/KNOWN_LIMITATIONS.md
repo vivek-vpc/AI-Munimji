@@ -40,7 +40,7 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
   * a **dry run** (see what the check would do, without making anything);
   * a **stock monitor view** (a report of every item and why it is or is not low);
   * an **inbox** beyond the standard list view of Munimji Approval Request: the AI Munimji home page is shortcuts to the standard lists, with a count on three of them (no charts, no dashboard);
-  * **reminders and expiry**: a request waits until someone answers it; none is reminded or closed by the clock, though the records carry the columns for it;
+  * **expiry**: a request waits until someone answers it; none is closed by the clock, though the records carry the columns for it. **Reminders** are sent on Telegram only, to the people who were sent the request; with Telegram off nobody is reminded;
   * **e-mail notifications**: the one notification is in the Desk bell, to the role Munimji Approver, once per request; a request that is changed is a new request and is announced again;
   * a **volume test** of the stores with many thousands of records;
   * **sealing at the moment of the answer**: the job seals what was answered at its next run (above).
@@ -72,6 +72,19 @@ The numbers are in [SCALE_MEASUREMENTS.md](SCALE_MEASUREMENTS.md): a site of 30,
 * **If the job cannot take the lease, the next scheduled check compares the vendors.** That is the case while a stock check is running, and when the queue cannot be reached or Watch stock is off. The sentence the person reads after the answer says so, and the Flow block of the reorder request says what is still waited for. The scheduled check makes no second purchase request for a reorder the job has made.
 * **The Flow block asks again every 5 seconds, for up to 3 minutes,** while the purchase request is being made; after that the page has to be reloaded.
 * **"Run the check now" uses the settings as last saved,** refuses while a check is queued or running, and may be pressed by a Munimji Manager or a System Manager only. A check queued by it and one queued by the scheduler are the same job: only one of them waits in the queue.
+
+## Telegram
+
+* **Telegram is off until a Munimji Manager switches it on, and nothing is sent while it is off.** With it on, the text of each request goes to Telegram (`docs/PRIVACY.md`).
+* **It needs a worker.** A request is sent by a job on the `short` queue after the stock check (or the answer that made it) has committed, usually within seconds; a site with no worker sends nothing, and the housekeeping job (every ten minutes) is the safety net. Polling mode also needs a worker on the `long` queue, always. Webhook mode needs a public HTTPS address.
+* **A person who connects is sent the requests made from then on, not the ones already waiting** (a flood of old messages would bury the one that matters). Those stay in the Desk. The comparison is by the second.
+* **Tidying up the chats after a Desk answer is tried once, with a short timeout** (a person is waiting for the page). If Telegram is slow or down the answer stands, the Desk says nothing about it, and a chat may keep buttons that now say “Already answered” when pressed. After three failed calls in a row the site leaves Telegram alone for a minute.
+* **A question the bot asked (“How many?”) is remembered for ten minutes in the site’s cache.** If the cache is emptied, press the button again.
+* **No AI chat.** What a person types is understood only as the answer to the bot’s own question, or a number in reply to an order request. Anything else gets one sentence. The standalone service’s chat about stock, vendors and orders is not part of the app.
+* **One private chat per person.** Groups and channels are not supported; connecting another chat moves the link and tells the old chat.
+* **The bot’s words are in English** and are not translated.
+* **A connected person who is disabled, or who no longer holds the Munimji Approver role, stops being sent requests and cannot answer through their chat** at once; the link stays until it is deleted.
+* **Answers from Telegram are recorded as `telegram`** in the decision, the audit seal and the Draft Purchase Order’s approver note (“<person> via telegram”).
 
 ## Taxes
 

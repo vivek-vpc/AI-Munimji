@@ -20,7 +20,7 @@ is **the app's own**, not part of the engine's row: it is never in a row the eng
 | DocType | Engine table | Kept | Columns (derived ones in round brackets, the app's own in square brackets) | JSON | Rights | For a person's screen |
 |---|---|---|---|---|---|---|
 | Munimji Approval Request | `approvals` | columns | kind, status, (title), (severity), (item_code), (warehouse), (qty), (supplier), (answer), (approver), created_at, expires_at, decided_at, last_reminder_at, reminder_count, ref_type, ref_id, status_note, (search_text), [sealed] | request_json, decision_json | V rx; A rwcxa; M rwcxa; S rwcxa | yes |
-| Munimji Approval Delivery | `deliveries` | columns | id, approval_id, recipient_id, channel, address, status, external_id, error, attempts, sent_at | none | V r; A r; M r; S r | no |
+| Munimji Approval Delivery | `deliveries` | columns | id, approval_id, recipient_id, channel, address, status, external_id, error, attempts, sent_at | none | V r; A rc; M rc; S r | no |
 | Munimji Audit Seal | `audit_chain` | columns | seq, at, source, ref_id, event, digest, prev, hash | none | M r; S r | no |
 | Munimji Settings Override | `settings_overrides` | columns | scope_type, scope_key, updated_by, updated_at | data_json | V r; A r; M rwcd; S rwcd | yes |
 | Munimji Settings Change | `settings_audit` | columns | id, ts, actor, scope_type, scope_key, field, [sealed] | old_json, new_json | M rc; S r | no |

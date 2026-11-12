@@ -57,13 +57,17 @@ There are two answers on the way from low stock to an order.
 6. **Review and submit the draft** in ERPNext as you normally would. The app never submits it. An approver can later change the quantity of, or cancel, an order made from a request.
 7. **The audit seal** over the history is added at the next run of the scheduled job, and the job runs only while Watch stock is ticked.
 
+## Telegram (if your manager has switched it on)
+
+You can get the requests in a Telegram chat, with buttons, and answer there. Open **AI Munimji** → **Telegram**, press **Connect Telegram**, open the link it shows where you use Telegram and press **Start**. From then on the requests made after that arrive in your chat. Pressing a button is your own answer, with your own rights, exactly as in the Desk; the other place is tidied up, and the first answer wins. **Change quantity** and **Change vendor** ask a question: type the answer, or reply to the order request with a number. Disconnect from the same list whenever you want. The steps for a manager, what is sent to Telegram and what to do if the bot is silent are in `docs/TELEGRAM.md`.
+
 ## Taxes in a request
 
 The scheduled check reads your tax setup as Administrator and keeps the figures with the request. If a request shows "Taxes are not included in these totals", the app could not read tax data, and every total is before tax. If ERPNext applies no tax for that supplier, the request says so in different words.
 
 ## What is not in version 0.1
 
-A dry run, a stock monitor report, reminders and expiry, e-mail notifications, supplier follow-up messages and the AI features. See `docs/KNOWN_LIMITATIONS.md`. Requests wait until someone answers them.
+A dry run, a stock monitor report, expiry, e-mail notifications, supplier follow-up messages and the AI features (the AI chat in Telegram too). Reminders exist only on Telegram. See `docs/KNOWN_LIMITATIONS.md`. Requests wait until someone answers them.
 
 ## If something does not work
 

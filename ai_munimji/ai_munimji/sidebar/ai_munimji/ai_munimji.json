@@ -199,9 +199,26 @@
    "open_in_new_tab": 0,
    "show_arrow": 0,
    "type": "Link"
+  },
+  {
+   "added": 0,
+   "child": 0,
+   "collapsible": 1,
+   "filters": "",
+   "hidden": 0,
+   "icon": "send",
+   "indent": 0,
+   "is_default_module": 0,
+   "keep_closed": 0,
+   "label": "Telegram",
+   "link_to": "Munimji Telegram Link",
+   "link_type": "DocType",
+   "open_in_new_tab": 0,
+   "show_arrow": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-11-10 18:49:09.585585",
+ "modified": "2026-11-12 19:30:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji",

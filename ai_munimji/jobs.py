@@ -42,9 +42,14 @@ def system_stores():
 	return frappe_core_stores(system=True)
 
 
-def system_services(clock=None, company: str | None = None) -> wiring.Services:
-	"""The engine's services as the scheduled job runs them: it reads ERPNext as the system-mode client and keeps its records in the system-mode stores."""
-	return wiring.build(system_erp(company), system_stores(), clock)
+def system_services(clock=None, company: str | None = None, telegram: bool = False) -> wiring.Services:
+	"""The engine's services as the scheduled job runs them: it reads ERPNext as the system-mode client and keeps its records in the system-mode stores.
+
+	`telegram`: with Telegram on, the services can write to people by message. Only the jobs whose business is sending pass it (telegram/jobs.py); the stock check does not, so that it never calls
+	Telegram while it holds rows locked (it asks for a delivery instead: telegram/outbox.py)."""
+	return wiring.build(
+		system_erp(company), system_stores(), clock, router=wiring.telegram_router() if telegram else None
+	)
 
 
 def commit() -> None:

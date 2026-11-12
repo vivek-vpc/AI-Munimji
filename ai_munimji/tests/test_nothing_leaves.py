@@ -1,8 +1,8 @@
-"""Version 0.1 sends nothing out of the site and calls no model (docs/PRIVACY.md says so). This is the static half of the proof: no module of the app imports a network, mail or model
-library, and none calls Frappe's mail or outbound-request functions. The runtime half, with sockets, HTTP and mail cut off while the job and the whole approval flow run, is
+"""The app sends nothing out of the site and calls no model unless a Munimji Manager switches Telegram on (docs/PRIVACY.md says so). This is the static half of the proof: no module of the app
+imports a network, mail or model library, and none calls Frappe's mail or outbound-request functions, except the one named below. The runtime half, with sockets, HTTP and mail cut off while the job and the whole approval flow run, is
 tests/world/test_nothing_leaves.py.
 
-An exception is a decision: name the module in EXCEPTIONS with the reason. There is none.
+An exception is a decision: name the module in EXCEPTIONS with the reason. There is one: the transport of Telegram.
 """
 
 import ast
@@ -11,7 +11,12 @@ import unittest
 
 from ai_munimji.tests import scan
 
-EXCEPTIONS: dict[str, str] = {}
+EXCEPTIONS: dict[str, str] = {
+	"ai_munimji/telegram/transport.py": "the one module that talks to Telegram: only while a Munimji Manager has switched Telegram on and given it a bot token, and only to the address in telegram/config.py "
+	"(api.telegram.org, or the one a site's own configuration names, which no page can). It imports requests and nothing else that reaches out; docs/PRIVACY.md says what is sent."
+}
+# The web addresses written in the app's Python, and nothing else: Telegram's, and a link to it that a person is given (never called by the app).
+ADDRESSES = {"https://api.telegram.org", "https://t.me/{bot}?start={code}"}
 
 # a module is forbidden if the import names it or something inside it (urllib.request, but not urllib.parse)
 NETWORK = {
@@ -185,3 +190,53 @@ class TestNothingIsImportedOrCalledThatCouldSendAnything(unittest.TestCase):
 		):
 			self.assertTrue(BROWSER.search(line), line)
 		self.assertFalse(BROWSER.search("frappe.call({method: 'ai_munimji.api.answer'})"))
+
+
+class TestTelegramIsTheOnlyWayOut(unittest.TestCase):
+	"""The exception is as small as it can be: one module, one library, two addresses."""
+
+	def test_only_the_transport_imports_a_network_library_and_only_requests(self):
+		importers = {}
+		for path in scan.python_files():
+			tree = ast.parse(path.read_text(encoding="utf-8"), str(path))
+			names = set()
+			for node in ast.walk(tree):
+				if isinstance(node, ast.Import):
+					names |= {a.name for a in node.names}
+				elif isinstance(node, ast.ImportFrom) and node.module:
+					names.add(node.module)
+			network = {n for n in names if _inside(n, NETWORK)}
+			if network:
+				importers[scan.relative(path)] = network
+		self.assertEqual(importers, {"ai_munimji/telegram/transport.py": {"requests"}})
+
+	def test_the_only_web_addresses_written_in_the_apps_python_are_telegrams(self):
+		found = set()
+		for path in scan.python_files():
+			tree = ast.parse(path.read_text(encoding="utf-8"), str(path))
+			parts = {
+				id(part) for node in ast.walk(tree) if isinstance(node, ast.JoinedStr) for part in node.values
+			}  # the pieces of an f-string are read with it, not alone
+			for node in ast.walk(tree):
+				if (
+					isinstance(node, ast.Constant)
+					and id(node) not in parts
+					and isinstance(node.value, str)
+					and re.match(r"https?://", node.value)
+				):
+					found.add(node.value)
+				elif isinstance(
+					node, ast.JoinedStr
+				):  # an f-string: its fixed parts, with {name} where a value goes
+					text = "".join(
+						p.value if isinstance(p, ast.Constant) else "{" + ast.unparse(p.value) + "}"
+						for p in node.values
+					)
+					if re.match(r"https?://", text):
+						found.add(text)
+		self.assertEqual(found, ADDRESSES)
+
+	def test_the_transport_is_given_no_address_of_its_own(self):
+		source = (scan.ROOT / "ai_munimji/telegram/transport.py").read_text(encoding="utf-8")
+		self.assertNotRegex(source, r"https?://")
+		self.assertIn("allow_redirects=False", source, "a redirect is refused: the token is in every address")
