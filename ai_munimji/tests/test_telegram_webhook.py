@@ -169,13 +169,13 @@ class TestPolling(TelegramCase):
 			else None,
 		).start()
 
-	def run_the_loop(self, wanted):
+	def run_the_loop(self, wanted, slot=None):
 		frappe.set_user("Administrator")
 		with (
 			mock.patch.object(telegram_jobs, "wanted", side_effect=wanted),
 			mock.patch.object(telegram_jobs.time, "sleep"),
 		):
-			return telegram_jobs.poll()
+			return telegram_jobs.poll(**({"slot": slot} if slot else {}))
 
 	def test_the_loop_handles_what_telegram_has_waiting_as_the_webhook_would(self):
 		self.telegram.updates = [
@@ -248,6 +248,27 @@ class TestPolling(TelegramCase):
 		self.assertEqual(len(queued), 1)
 		self.assertEqual(queued[0].kwargs["queue"], "long")
 
+	def test_the_successor_never_has_the_job_id_of_the_loop_that_queues_it(self):
+		"""Frappe does not queue a job whose id is queued or running (`deduplicate`), and the loop that queues its successor is itself still running. A successor with its own id was dropped,
+		polling stopped at the end of every loop, and the housekeeping started it again minutes later: a button pressed in between waited that long. The two loops take turns at two ids."""
+
+		def successor_after(slot):
+			self.enqueued.reset_mock()
+			self.run_the_loop([True, False, True], slot=slot)
+			(queued,) = [
+				c for c in self.enqueued.call_args_list if c.args and c.args[0] == telegram_jobs.POLL
+			]
+			return queued.kwargs
+
+		after_a, after_b = successor_after("a"), successor_after("b")
+		self.assertEqual(after_a["job_id"], telegram_jobs.poll_job_id("b"))
+		self.assertEqual(after_b["job_id"], telegram_jobs.poll_job_id("a"))
+		self.assertNotEqual(after_a["job_id"], telegram_jobs.poll_job_id("a"))
+		self.assertEqual(
+			(after_a["slot"], after_b["slot"]), ("b", "a"), "the successor is told which id it holds"
+		)
+		self.assertTrue(after_a["deduplicate"] and after_b["deduplicate"])
+
 	def test_two_loops_do_not_run_at_once(self):
 		frappe.set_user("Administrator")
 		locks.lease.return_value = False
@@ -256,12 +277,40 @@ class TestPolling(TelegramCase):
 		self.assertEqual(out, {"ran": False, "why": "another poller is running"})
 		self.assertEqual(self.telegram.calls, [])
 
+	def test_the_housekeeping_uses_the_other_id_when_a_loop_that_died_still_holds_the_first(self):
+		"""A worker killed in the middle of a loop (a deploy, a restart) leaves its job registered as running until the queue notices, and Frappe, which answers nothing, refuses to queue a
+		job under that id. The housekeeping then tries the other id, so that polling is back at its next run and not when the dead job has been cleaned up."""
+		frappe.set_user("Administrator")
+		ids = lambda: [  # noqa: E731
+			c.kwargs["job_id"]
+			for c in self.enqueued.call_args_list
+			if c.args and c.args[0] == telegram_jobs.POLL
+		]
+		with mock.patch.object(locks, "held", return_value=False):
+			self.enqueued.reset_mock()
+			self.enqueued.side_effect = [None, mock.Mock()]
+			self.assertEqual(telegram_jobs.ensure_poller(), "queued")
+			self.assertEqual(ids(), [telegram_jobs.poll_job_id("a"), telegram_jobs.poll_job_id("b")])
+			self.enqueued.reset_mock()
+			self.enqueued.side_effect = [None, None]
+			self.assertEqual(
+				telegram_jobs.ensure_poller(),
+				"waiting",
+				"both ids are taken: it says so and does nothing more",
+			)
+
 	def test_the_housekeeping_starts_a_loop_only_when_one_is_wanted_and_none_runs(self):
 		frappe.set_user("Administrator")
 		with mock.patch.object(locks, "held", return_value=True):
 			self.assertEqual(telegram_jobs.ensure_poller(), "running")
 		with mock.patch.object(locks, "held", return_value=False):
 			self.assertEqual(telegram_jobs.ensure_poller(), "queued")
+			started = [c for c in self.enqueued.call_args_list if c.args and c.args[0] == telegram_jobs.POLL]
+			self.assertEqual(
+				(started[-1].kwargs["job_id"], started[-1].kwargs["slot"]),
+				(telegram_jobs.poll_job_id("a"), "a"),
+				"a loop the housekeeping starts holds the first id, so that its own successor has the other",
+			)
 			self.switch_telegram(True, mode="Webhook")
 			self.assertEqual(telegram_jobs.ensure_poller(), "not wanted")
 			self.switch_telegram(False)

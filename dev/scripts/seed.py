@@ -43,8 +43,10 @@ if not frappe.is_setup_complete():
 	print("setup wizard completed")
 
 if not frappe.db.exists("Supplier", SUPPLIER):
+	# newer ERPNext refuses a group ("All Supplier Groups") for a supplier, as it always did for a customer: any supplier group that is not a group will do
+	supplier_group = frappe.db.get_value("Supplier Group", {"is_group": 0}, "name", order_by="name asc")
 	frappe.get_doc(
-		{"doctype": "Supplier", "supplier_name": SUPPLIER, "supplier_group": "All Supplier Groups"}
+		{"doctype": "Supplier", "supplier_name": SUPPLIER, "supplier_group": supplier_group}
 	).insert()
 
 for code, (name, quantity) in ITEMS.items():

@@ -31,6 +31,13 @@ def nudge(_record=None) -> None:
 	frappe.enqueue(JOB, queue="short", job_id=JOB_ID, deduplicate=True, enqueue_after_commit=True)
 
 
+def waiting_in_order(approvals) -> list:
+	"""The waiting requests in the order they were made. The store lists the newest first and, among requests made in the same second, the older one first (an alert and the reorder it
+	suggests come from one check, within a second of each other). Sorting stably on the time alone gives oldest first and keeps those ties as they were made; reversing the list instead would
+	turn the ties around, and the reorder would reach the chat before the alert."""
+	return sorted(approvals.list(status="pending", limit=WAITING), key=lambda record: record.created_at)
+
+
 def deliver_pending(services) -> int:
 	"""Send every waiting request to every connected person who has not been sent it (and was connected before it was made). Returns how many messages were sent. `services` are the system-mode services
 	built with Telegram in the router (jobs.system_services(telegram=True))."""
@@ -39,7 +46,7 @@ def deliver_pending(services) -> int:
 	if "telegram" not in router.channels:
 		return 0
 	sent = 0
-	for record in reversed(approvals.list(status="pending", limit=WAITING)):  # oldest first
+	for record in waiting_in_order(approvals):
 		already = {(d["recipient_id"], d["channel"]) for d in approvals.store.deliveries(record.id)}
 		for recipient, channels in router.targets():
 			if links.connected_since(recipient.id) > iso(record.created_at):
@@ -61,7 +68,7 @@ def remind(services) -> list[str]:
 	settings = approvals.system_settings()
 	now = approvals.clock()
 	reminded = []
-	for record in approvals.list(status="pending", limit=WAITING):
+	for record in waiting_in_order(approvals):
 		if record.reminder_count >= settings.max_reminders or record.kind in approvals.no_reminder_kinds:
 			continue
 		if now - (record.last_reminder_at or record.created_at) < timedelta(

@@ -41,8 +41,23 @@ class InProcessWriter:
 		self.create(doctype, doc)
 		return "created"
 
+	@staticmethod
+	def not_a_group(doctype, doc):
+		"""The engine's loader puts its suppliers in "All Supplier Groups", which is a group; newer ERPNext refuses a group for a supplier (as it always did for a customer). The loader is
+		changed in the next engine release; until then any supplier group that is not a group will do."""
+		if doctype == "Supplier" and frappe.db.get_value(
+			"Supplier Group", doc.get("supplier_group"), "is_group"
+		):
+			return {
+				**doc,
+				"supplier_group": frappe.db.get_value(
+					"Supplier Group", {"is_group": 0}, "name", order_by="name asc"
+				),
+			}
+		return doc
+
 	def create(self, doctype, doc):
-		made = frappe.get_doc({**doc, "doctype": doctype}).insert()
+		made = frappe.get_doc({**self.not_a_group(doctype, doc), "doctype": doctype}).insert()
 		self.stats[f"{doctype}: created"] += 1
 		return made.name
 
