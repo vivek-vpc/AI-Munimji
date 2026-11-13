@@ -37,6 +37,7 @@ Day to day:
 python dev/scripts/make_doctypes.py     # write the DocType files and the table of docs/STORES.md from ai_munimji/stores/specs.py (--check changes nothing)
 .\dev\permissions-http.ps1             # who sees and answers what, asked over HTTP as five real people (starts the bench if it is not running)
 .\dev\world-tests.ps1                   # the Frappe client and the stores on real data (the contract world must be loaded: -Load)
+.\dev\telegram-e2e.ps1                 # a request from the stock check to a Draft Purchase Order through Telegram, over HTTP, against a pretend Telegram (-Browser also drives the Settings page and the Connect dialog)
 .\dev\scripts\bench_tests.ps1 <module>   # one module of the app's tests on the test site, with a short verdict
 .\dev\destroy.ps1                     # remove containers, network and the two volumes of this project (asks first)
 ```
@@ -84,6 +85,7 @@ stops if the site's name does not start with `scale`):
 | `check-uninstall.sh`, `scripts/snapshot.py`, `scripts/diff_snapshots.py`, `scripts/check_coexistence.py`, `scripts/standalone_fields.py` | the uninstall check, with a site that already has the standalone service's fields |
 | `verify-all.ps1` | all of it from nothing |
 | `roundtrip.ps1`, `browser/round-trip.cjs`, `scripts/seed.py`, `scripts/reset_demo.py` | the end-to-end trial of the placeholder below |
+| `telegram-e2e.ps1`, `scripts/telegram_e2e.py`, `scripts/fake_telegram.py`, `scripts/telegram_ui_setup.py`, `browser/telegram-ui.cjs` | the Telegram connection tried without a bot or the internet: a pretend Telegram (`fake_telegram.py`) on a local port, a site that is told to call it, and the walk through it. With a real bot in polling mode, give the development bench two workers for the `long` queue (`bench worker --queue long`, twice): `bench start` runs one worker for every queue, and the polling loop keeps it busy |
 | `demo.ps1`, `browser/demo-flow.cjs`, `scripts/seed_demo_flow.py` | the flow of a request on demo data, to follow in the browser: the data, the walkthrough, and (`-Run`) the same walk in the headless browser with the time of each step |
 | `images.lock` | the image digests that were really used (written by `up.ps1`) |
 | `timings.log` | how long each step took (not in git) |

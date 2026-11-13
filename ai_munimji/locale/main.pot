@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Munimji VERSION\n"
 "Report-Msgid-Bugs-To: vivek.vpc1985@gmail.com\n"
-"POT-Creation-Date: 2026-11-12 09:46+0000\n"
-"PO-Revision-Date: 2026-11-12 09:46+0000\n"
+"POT-Creation-Date: 2026-11-13 05:57+0000\n"
+"PO-Revision-Date: 2026-11-13 05:57+0000\n"
 "Last-Translator: vivek.vpc1985@gmail.com\n"
 "Language-Team: vivek.vpc1985@gmail.com\n"
 "MIME-Version: 1.0\n"
@@ -68,12 +68,6 @@ msgstr ""
 msgid "A request for an item that has no supplier of its own goes to this one."
 msgstr ""
 
-#. Description of the 'A request expires after (hours)' (Int) field in DocType
-#. 'AI Munimji Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:185
-msgid "A request nobody answers is closed after this long. It is never approved on its own."
-msgstr ""
-
 #. Description of the 'Check stock at' (Data) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:133
@@ -83,7 +77,7 @@ msgstr ""
 #. Description of the 'Send stock alerts' (Check) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:210
-msgid "A short note inside this site when stock is low, before any purchase is asked for. Nothing is sent out of the site."
+msgid "A short note inside this site when stock is low, before any purchase is asked for. It leaves the site only if Telegram is on: then it also goes to the chats of the people who connected one."
 msgstr ""
 
 #: ai_munimji/api.py:127
@@ -1274,6 +1268,12 @@ msgstr ""
 msgid "Not allowed"
 msgstr ""
 
+#. Description of the 'A request expires after (hours)' (Int) field in DocType
+#. 'AI Munimji Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:185
+msgid "Not applied in this version: a request waits until someone answers it. It is never approved on its own."
+msgstr ""
+
 #: ai_munimji/ai_munimji/doctype/munimji_approval_request/munimji_approval_request.js:196
 msgid "Not done"
 msgstr ""
@@ -1363,12 +1363,6 @@ msgstr ""
 #. Label of the ok (Check) field in DocType 'Munimji Tool Call'
 #: ai_munimji/ai_munimji/doctype/munimji_tool_call/munimji_tool_call.json:59
 msgid "Ok"
-msgstr ""
-
-#. Description of the 'Remind after (hours)' (Int) field in DocType 'AI Munimji
-#. Settings'
-#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:192
-msgid "One reminder goes to the approvers if there is still no answer after this long."
 msgstr ""
 
 #: ai_munimji/ai_munimji/doctype/munimji_telegram_link/munimji_telegram_link_list.js:60
@@ -1566,6 +1560,12 @@ msgstr ""
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:195
 msgid "Remind after (hours)"
+msgstr ""
+
+#. Description of the 'Remind after (hours)' (Int) field in DocType 'AI Munimji
+#. Settings'
+#: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:192
+msgid "Reminders go out on Telegram only: a person who was sent the request there is reminded if there is still no answer after this long. With Telegram off nobody is reminded."
 msgstr ""
 
 #. Label of the reminder_count (Int) field in DocType 'Munimji Approval
@@ -2544,7 +2544,7 @@ msgstr ""
 #. Description of the 'Keep logs for (days)' (Int) field in DocType 'AI Munimji
 #. Settings'
 #: ai_munimji/ai_munimji/doctype/ai_munimji_settings/ai_munimji_settings.json:306
-msgid "What the agents did, the chat log and the ids of handled messages older than this are deleted by the clean-up. 0 keeps them all. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age."
+msgid "What the agents did and the chat log older than this are deleted by the clean-up. 0 keeps them all and stops the clean-up. The same clean-up removes the ids of handled Telegram messages after two weeks. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age."
 msgstr ""
 
 #: ai_munimji/flow.py:256

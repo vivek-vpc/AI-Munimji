@@ -1,6 +1,6 @@
-# AI Munimji: listing (draft v2, 9 Nov 2026)
+# AI Munimji: listing (draft v3, 13 Nov 2026)
 
-**Nothing here has been released.** Rewritten after Claude Code compared the first draft with the code, and after I read Frappe's new registry (`github.com/frappe/marketplace`, README and docs, 9 Nov 2026). Re-check every claim against the app at the release commit. Items in [square brackets] are for you to fill in.
+**Nothing here has been released.** Rewritten after Claude Code compared the first draft with the code, and after I read Frappe's new registry (`github.com/frappe/marketplace`, README and docs, 9 Nov 2026). Draft v3 adds the optional Telegram connection to the description, the claims, the screenshots and the video. Re-check every claim against the app at the release commit. Items in [square brackets] are for you to fill in.
 
 ## 1. How the listing is submitted: the registry
 
@@ -65,11 +65,13 @@ AI Munimji watches the stock in your ERPNext site and, when an item is running l
 - Lets an approver approve, change the quantity or the vendor, or dismiss it. The first answer wins; a later one is told who answered first.
 - On approval, creates a **draft** Purchase Order under the approver's own login, with the request's reference and the approver recorded on it.
 - Keeps a record of every request and decision, with a tamper-evident seal over the history.
+- **Optional: answer in Telegram.** A manager can switch on a Telegram connection. Each request then also arrives, with buttons, in the Telegram chat of every person who connected one (a person connects with one tap on a link). A press is that person's own answer, with their own rights: the Draft Purchase Order is made in their name, ERPNext refuses what it would refuse them in the Desk, and the first answer wins. Reminders go to the same chat. It works with a public HTTPS site (webhook) or on a site Telegram cannot reach (polling).
 
 **What it will not do**
 - It never approves anything by itself. A person answers every request.
 - It never submits a document. It creates drafts. An approver can later change the quantity of, or cancel, an order made from a request.
-- By default it sends nothing out of your site and calls no AI model. If a manager switches on the optional Telegram connection, requests are also sent to the Telegram chats of the people who connected one (`docs/TELEGRAM.md`, `docs/PRIVACY.md`).
+- By default it sends nothing out of your site and calls no AI model. If a manager switches on the optional Telegram connection, requests are also sent to the Telegram chats of the people who connected one (`docs/TELEGRAM.md`, `docs/PRIVACY.md`). Nothing is ever sent to a vendor, and the bot has no AI model: it does not answer questions about your stock and cannot order anything by itself.
+- It does not move stock between warehouses, send e-mail, or remind anyone in the Desk (reminders exist on Telegram only).
 
 **How a request flows**
 1. **Reorder request.** The stock check looks at every item. For each one that is running low it makes a Reorder request and tells the people who may approve.
@@ -78,14 +80,15 @@ AI Munimji watches the stock in your ERPNext site and, when an item is running l
 
 Timing: the stock check runs at the time set under Check stock at, or when a manager presses Run the check now on the Settings page. The vendor comparison starts right after a reorder is approved and takes about a minute; if a stock check is running at that moment, the next scheduled check makes it.
 
-Who sees what: Viewers see the requests. Approvers also answer them and make the draft order. Managers also change the settings and run the check.
+Who sees what: Viewers see the requests. Approvers also answer them and make the draft order. Managers also change the settings and run the check. People who connect Telegram see the requests sent to their own chat and answer there with their own rights; a Manager switches Telegram on and sees every connection.
 
 **Which roles**
 Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Munimji Manager. What a person can see of your stock and orders is still decided by ERPNext's own roles.
 
 **Good to know**
 - The stock monitor is **off** after installation. Review the thresholds on the AI Munimji Settings page, then switch it on.
-- Version 0.1 covers stock monitoring, supplier comparison and approval. Reminders and expiry, e-mail notifications, a stock monitor report and the supplier follow-up features are not part of this version.
+- **Telegram is optional and off after installation.** Switching it on needs a bot made with @BotFather and its token, and either a public HTTPS address (webhook) or two workers for the `long` queue (polling). With it on, the text of each request (items, quantities, vendor names with prices, delivery times and totals, the reasons) goes to Telegram, which keeps it under its own policy; the bot token is kept encrypted and never shown. What leaves the site, and what does not: `docs/PRIVACY.md`.
+- The version covers stock monitoring, supplier comparison and approval, in the Desk and, optionally, on Telegram. Expiry of requests, reminders in the Desk, e-mail notifications, moving stock between warehouses, an AI chat, a stock monitor report and the supplier follow-up features are not part of it (`docs/KNOWN_LIMITATIONS.md`).
 - Works with Frappe and ERPNext version 16.
 - Free and open source under GPL-3.0-or-later.
 
@@ -96,7 +99,11 @@ Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Mu
 | Creates drafts, never submits; an approver can change or cancel an order made from a request | `ai_munimji/erp_client.py`, the order tests |
 | Two answers from low stock to an order (reorder request, then purchase request about a minute after the reorder is approved) | the browser round trip |
 | Nothing leaves the site unless a manager switches Telegram on; no model | `docs/PRIVACY.md`, `docs/TELEGRAM.md`, the outbound-block tests (tests/test_nothing_leaves.py names the one exception) |
-| Optional: requests arrive in Telegram with buttons and are answered there, with the answering person’s own rights | `docs/TELEGRAM.md`, the Telegram tests |
+| Optional: requests arrive in Telegram with buttons and are answered there, with the answering person’s own rights | `docs/TELEGRAM.md`, the Telegram tests (`tests/test_telegram_*.py`), `dev/telegram-e2e.ps1` |
+| Telegram is off after install, and nothing is sent while it is off | `docs/PRIVACY.md`, `tests/test_telegram_flow.py` ("switched off means nothing leaves") |
+| The webhook is the only method open to guests and refuses any call without Telegram's secret | `tests/test_rules.py`, `tests/test_telegram_webhook.py` |
+| The bot token is kept encrypted and is never shown, logged or put in a message or an error | `docs/PRIVACY.md`, `tests/test_telegram_links.py`, `tests/world/test_nothing_leaves.py` |
+| Reminders exist on Telegram only; nothing is sent to a vendor; the bot has no AI model | `docs/KNOWN_LIMITATIONS.md`, `docs/TELEGRAM.md` |
 | Stock monitor off after install | `docs/INSTALL.md`, the settings tests |
 | First answer wins | the approval tests |
 | The purchase request lists why other suppliers lost | the form on a real request |
@@ -118,10 +125,13 @@ Use fictional items and suppliers. No real names, addresses or e-mail addresses.
 7. The request after approval, with the draft order's number shown on it.
 8. The draft Purchase Order, showing the request reference and the approver.
 9. The AI Munimji home page (the shortcuts, with the count of requests waiting) and, if you like, the apps screen with the AI Munimji tile.
+10. AI Munimji Settings, the **Telegram** section: the switch, the mode, and the status after "Connect the bot". **The Bot token field stays empty or shows only dots.**
+11. The **Connect Telegram** dialog with its link. **Blur the one-time code.**
+12. A request in a Telegram chat, with its buttons, and the same request after it was answered (the buttons gone, the outcome under it). Use a bot made for the screenshot, a fictional person and fictional items; no real chat number, name or token.
 
-Each image: at least 1280 px wide, light theme, no browser toolbars, a short caption.
+Each image: at least 1280 px wide, light theme, no browser toolbars, a short caption. Check each one for a bot token, a chat number, an e-mail address or a real company name before it is used.
 
-## 5. Demo video (about 100 seconds; optional for the registry, useful on the page)
+## 5. Demo video (about 100 seconds, about 115 with the optional Telegram step; optional for the registry, useful on the page)
 
 | Time | On screen | Say |
 |---|---|---|
@@ -133,9 +143,12 @@ Each image: at least 1280 px wide, light theme, no browser toolbars, a short cap
 | 1:00 | Supplier comparison | "It picked this supplier, and explains why each other supplier was not chosen." |
 | 1:15 | Change quantity, Approve | "The approver can change the quantity. Approving creates a draft order." |
 | 1:30 | The draft Purchase Order | "ERPNext gets a draft with the request and approver recorded. A person still reviews and submits it." |
-| 1:40 | Title card | "AI Munimji. Open source, for ERPNext 16." |
+| 1:40 | (optional) A phone showing the same request in Telegram, a press of Create order | "Optionally, the request also arrives in Telegram. The press is the approver's own answer, with their own rights." |
+| 1:55 | Title card | "AI Munimji. Open source, for ERPNext 16." |
 
 ## 6. Publishing steps (registry)
+
+For the release that adds Telegram, the extra checks are item 8 of `docs/RELEASE_CHECKLIST.md`, and the engine to publish first is the one that holds the Telegram channel (0.1.3 or later, already on PyPI); the steps below are otherwise the same.
 
 1. Engine first: tag `engine-v0.1.1` in `erpnext-ai-agents`, approve the publish, check the package on PyPI.
 2. App release commit (Claude Code, per `docs/RELEASE_CHECKLIST.md`): exact engine pin `ai-munimji-engine==0.1.1`, version 0.1.1, "not released" wording changed, logo added at `docs/img/`. CI green on that commit.
