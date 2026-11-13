@@ -46,6 +46,8 @@ is **the app's own**, not part of the engine's row: it is never in a row the eng
 | Munimji Lock | `locks` | columns | holder, until, counter | none | A wc; M wc | no |
 <!-- stores-table:end -->
 
+**One more DocType, which is not an engine store: Munimji Telegram Link** (the app's own, for the optional Telegram connection, [TELEGRAM.md](TELEGRAM.md)). One record for each person who connected a chat: the Frappe user, the Telegram chat number, whether messages are wanted, and when it was made. It is made by the app when a person presses Start on the bot's link, never by hand, and it is deleted with the user. A Munimji Approver sees and changes only their own link; a Munimji Manager and a System Manager see and delete every link (`ai_munimji/tests/test_permissions.py`). **Munimji Inbound Seen** (above) holds the ids of the Telegram messages already handled, so that none is handled twice; the clean-up removes them after two weeks.
+
 The names of the records are the engine's own ids. Ids that come from outside (a message id, a cache key) or are made of several columns are named by a hash of them, in lowercase hex, because
 the database compares names ignoring case and a message id is case-sensitive. The numbered tables (the seal, the settings changes, the tool calls, the deliveries) get their numbers 1, 2, 3 ...
 from a counter record, so a number is taken back with the transaction that took it, as SQLite's are.

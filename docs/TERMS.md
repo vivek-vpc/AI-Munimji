@@ -1,10 +1,10 @@
 # AI Munimji: Terms of Service
 
-Version 0.1 · Draft of 9 Nov 2026 · Plain-language terms for a free, open-source app. This is not legal advice. Have it reviewed, and fill in the governing law, before you rely on it.
+Version 0.1 · Draft of 13 Nov 2026 (Telegram added) · Plain-language terms for a free, open-source app. This is not legal advice. Have it reviewed before you rely on it.
 
 ## 1. What these terms cover
 
-AI Munimji ("the app") is free, open-source software for ERPNext, published by [your name] ("the publisher"). By installing or using it you agree to these terms.
+AI Munimji ("the app") is free, open-source software for ERPNext, published by Vivek Chaudhari ("the publisher"). By installing or using it you agree to these terms.
 
 ## 2. Licence
 
@@ -19,6 +19,7 @@ The app is provided **"as is"**, without any warranty, as the licence says. It p
 - A person must review and approve every request. The app never approves anything and never submits a document.
 - You are responsible for every purchase order you create or submit from a draft the app prepared, and for checking stock, prices, suppliers, quantities and taxes before you do.
 - You are responsible for the users, roles and data on your site.
+- If you switch on the optional Telegram connection, you are responsible for the bot (keeping its token secret, who connects a chat to it) and for deciding whether your business data, and your staff's use of Telegram for it, is allowed to go through that service.
 
 ## 5. Limit of liability
 
@@ -30,11 +31,11 @@ Support is on a best-effort basis through the public issue page. There is no ser
 
 ## 7. Your data
 
-The app runs inside your site and sends nothing out of it in version 0.1. See the Privacy Policy.
+By default the app runs inside your site and sends nothing out of it. If a Munimji Manager switches on the optional Telegram connection, the text of each request is sent to the Telegram chats of the people who connected one. Telegram is a separate service that the publisher does not run and does not control: it is covered by Telegram's own terms and privacy policy, and the publisher is not responsible for it, for its availability, or for what it does with the messages. See the Privacy Policy.
 
 ## 8. Names
 
-"AI Munimji" is the name of this app. "ERPNext" and "Frappe" belong to their owners, and this app is not made or endorsed by them. The app is not affiliated with any other product that uses a similar name.
+"AI Munimji" is the name of this app. "ERPNext", "Frappe" and "Telegram" belong to their owners, and this app is not made or endorsed by them. The app is not affiliated with any other product that uses a similar name.
 
 ## 9. Changes and ending
 
@@ -42,8 +43,9 @@ The publisher may change these terms or stop developing the app. Changes are pub
 
 ## 10. Governing law
 
-[Fill in: the law and place that apply to you as the publisher, after advice.]
+These terms are governed by the laws of India. The courts at Pune, Maharashtra, India have jurisdiction over any dispute about them, except where the law of a user’s own country gives that user the right to bring a claim elsewhere.
 
 ## Contact
 
-[Your name] · vivek.vpc1985@gmail.com
+Vivek Chaudhari · vivek.vpc1985@gmail.com
+

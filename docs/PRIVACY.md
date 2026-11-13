@@ -1,15 +1,15 @@
 # AI Munimji: Privacy Policy
 
-Version 0.1 · Draft of 12 Nov 2026 (Telegram added) · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
+Version 0.1 · Draft of 13 Nov 2026 (Telegram added) · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
 
 ## In short
 
-AI Munimji runs inside your own ERPNext site. By default it **sends no data out of your site**, makes **no calls to any outside service**, and uses **no AI model**. It does not collect usage statistics, and it sets no cookies of its own. There is one optional exception, **Telegram**: a Munimji Manager can switch it on, it is off until then, and what it sends is listed under “What leaves your site”.
+AI Munimji runs inside your own ERPNext site. By default it **sends no data out of your site** and makes **no calls to any outside service**. It uses **no AI model**, with Telegram on or off. It does not collect usage statistics, and it sets no cookies of its own. There is one optional exception, **Telegram**: a Munimji Manager can switch it on, it is off until then, and what it sends is listed under “What leaves your site”.
 
 ## Who is who
 
 - **You** (the site owner) decide what the app is used for and are responsible for the data on your site.
-- **The publisher** of the app is [your name], contact vivek.vpc1985@gmail.com. The publisher does not receive any data from your site.
+- **The publisher** of the app is Vivek Chaudhari, contact vivek.vpc1985@gmail.com. The publisher does not receive any data from your site.
 - **Frappe Cloud** (if you use it) hosts your site and is covered by its own policy. AI Munimji does not change that.
 
 ## What the app reads
@@ -29,9 +29,9 @@ In your site's own database, as DocTypes (the full table is in `docs/STORES.md`)
 - purchase requests and proposals: the item, quantity, chosen supplier, the reasons for the choice, costs and the tax figures used;
 - the decisions: who answered, when, and what they decided;
 - a tamper-evident seal over that history (added by the next run of the scheduled job);
-- a log of what the app did (kept for 90 days by default; the setting is "Keep logs for (days)");
+- a log of what the app did (kept for 90 days by default; the setting is "Keep logs for (days)"; the other records the clean-up removes follow fixed periods, listed under "Keeping and deleting data");
 - its own settings;
-- if Telegram is switched on: the bot token and a secret for Telegram’s calls (both in Password fields, encrypted), and for each person who connected a chat a Munimji Telegram Link (the user, the chat number and the date). The ids of the Telegram messages already handled are kept for seven days so that none is handled twice.
+- if Telegram is switched on: the bot token and a secret for Telegram’s calls (both in Password fields, encrypted), and for each person who connected a chat a Munimji Telegram Link (the user, the chat number and the date). The ids of the Telegram messages already handled are kept for two weeks, so that none is handled twice, and then removed by the daily clean-up (below).
 
 Seven read-only custom fields are added to Purchase Order, Material Request and Stock Entry. They hold the request's reference and who approved it; Material Request also has a note field.
 
@@ -49,8 +49,9 @@ Draft documents, created under the approver's own login. The app **never submits
 **With Telegram switched on** (AI Munimji Settings, “Send requests on Telegram”, by a Munimji Manager, with a bot token the manager made with @BotFather), the site talks to Telegram (`api.telegram.org`) and nobody else:
 - each request that needs an answer is sent as a message to the Telegram chat of every person who connected one and may answer requests. The message carries the request’s text: the item, the quantity, the warehouse, the vendors that were compared with their prices, delivery times and totals, the reasons, and the tax figures where the request shows them, with its buttons;
 - reminders, the outcome of an answer (who answered, for example “by anna@example.com via telegram”, and the number of the draft Purchase Order made) and what a person types in the chat (a quantity, a vendor, yes or no) pass through Telegram too;
-- Telegram keeps those messages under its own policy, and an ordinary bot chat is not end-to-end encrypted. Anyone who can read that chat on a person’s devices, or who holds the bot token, can read them;
-- Telegram tells the site each button press and message, with the sender’s chat number. The site keeps the chat number of people who connected one. A stranger who writes to the bot is answered, at most once every half minute, with their own number and nothing else;
+- Telegram is a separate service that the publisher does not run. It keeps those messages under its own terms and privacy policy (https://telegram.org/privacy), and an ordinary bot chat is not end-to-end encrypted. Anyone who can read that chat on a person’s devices, or who holds the bot token, can read them;
+- no AI model reads the chat on either side. What a person types is understood only as the answer to a question the bot asked, or a number in reply to an order request; anything else gets one sentence saying where to go;
+- Telegram tells the site each button press and message, with the sender’s chat number. In **webhook** mode Telegram calls a public address of your site (`/api/method/ai_munimji.telegram.webhook.receive`); a call without the secret that only Telegram and your site hold is refused before anything else happens. In **polling** mode the site only calls Telegram, and no address of your site has to be public. The site keeps the chat number of people who connected one. A stranger who writes to the bot is answered, at most once every half minute, with their own number and nothing else;
 - the bot token is sent to Telegram in the address of each call, as Telegram requires. It is never shown on a page, written in a log, put in a message or put in an error;
 - a person can disconnect at any time (the Disconnect button, or deleting their Munimji Telegram Link), and switching Telegram off stops every message. Messages already in Telegram stay there; only the person can delete them.
 
@@ -64,9 +65,10 @@ Only people on your site with the app's roles (Munimji Viewer, Approver, Manager
 
 ## Keeping and deleting data
 
-- Logs older than the setting "Keep logs for (days)" (90 by default) are removed by a clean-up that runs once a day on your site's scheduler. It runs while that setting is a positive number; with 0 it does not run and every log is kept. You can also run it by hand: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it.
+- Logs older than the setting "Keep logs for (days)" (90 by default) are removed by a clean-up that runs once a day on your site's scheduler. It runs while that setting is a positive number; with 0 it does not run and every log is kept. You can also run it by hand: `bench --site <site> execute ai_munimji.retention.clean_up`. Requests, proposals, alerts and the audit seal are never removed by it. The same clean-up removes, after fixed periods, the ids of handled Telegram messages (two weeks), cached answers (half a year) and task records and vendor messages (a year); with the setting at 0 it does not run and none of them is removed.
 - If you uninstall the app, its DocTypes and the data in them are removed with it. Database columns that Frappe cannot drop stay in the database, and any Purchase Orders already made stay. See the uninstall notes.
 - Deleting a user deletes their Telegram link. Disconnecting stops the messages; it cannot remove messages already in Telegram.
+- Uninstalling the app removes its DocTypes with their records, the Telegram links included. It does not touch Telegram: the bot, its token and (in webhook mode) the webhook address stay there. Before you uninstall, switch Telegram off, clear the Bot token field and revoke the token with @BotFather (`docs/UNINSTALL.md`).
 - Export anything you need to keep before you uninstall.
 
 ## Your rights
@@ -79,4 +81,5 @@ Changes to this policy are published in the repository with a new date. The chan
 
 ## Contact
 
-[Your name] · vivek.vpc1985@gmail.com · [link to the repository's issue page]
+Vivek Chaudhari · vivek.vpc1985@gmail.com · https://github.com/vivek-vpc/AI-Munimji/issues · https://github.com/vivek-vpc/erpnext-ai-agents/issues/
+

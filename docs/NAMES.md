@@ -8,7 +8,8 @@ The names of the app and of what it adds to a site, written down once. A name th
 | Title | AI Munimji |
 | Module | AI Munimji |
 | Settings page (Single DocType) | AI Munimji Settings |
-| Other DocTypes | Munimji Approval Request, Munimji Calendar Event (a table inside the settings) |
+| Other DocTypes | Munimji Approval Request, Munimji Telegram Link (one per person who connected a Telegram chat), Munimji Calendar Event (a table inside the settings); the engine's other records are listed in [STORES.md](STORES.md) |
+| Telegram (optional) | the section **Telegram** of AI Munimji Settings (the switch is "Send requests on Telegram"); the webhook method `ai_munimji.telegram.webhook.receive`; the scheduled job `ai_munimji.telegram.jobs.housekeeping`; the polling job `ai_munimji.telegram.jobs.poll` |
 | Roles | Munimji Viewer, Munimji Approver, Munimji Manager |
 | Permission Type | `approve` on Munimji Approval Request |
 | The rules package | `ai-munimji-engine` (import name `ai_munimji_engine`) |

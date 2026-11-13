@@ -4,6 +4,14 @@ What changed in the app for someone who installs it or builds on it. 0.1.0 (9 No
 
 ## Unreleased
 
+### Changed: the documents and the Settings page say what Telegram changes
+
+Found by reading every public text against the code once Telegram was in. The old claims that were no longer true as written (“sends nothing out of the site”, “no secrets”, “no message”, “reminders go to the approvers”) now say “by default” or name Telegram, and the pages that had nothing about Telegram got it.
+
+* **The privacy policy, the terms and the support page** name Telegram as a separate service the publisher does not run, say what goes to it and what does not, that no AI model is involved, that the ids of handled Telegram messages are kept for two weeks (not seven days), and what to do about a bot token that leaks. The publisher’s name, contact, links and governing law are filled in.
+* **README, user guide, listing, installation, known limits, uninstall, backup and restore, names, stores, security notes, release checklist and the development README** say what Telegram needs (a worker; two workers for the `long` queue in polling mode; a public HTTPS address in webhook mode; outgoing HTTPS to `api.telegram.org`), how to connect when `t.me` is blocked (send the bot `/start` and the code), what to do before an uninstall (switch it off, clear the token, revoke it) and before a restored copy runs (switch it off), and that stock transfers cannot be asked for yet. The user guide says how to run the stock check several times a day.
+* **Three descriptions on the Settings page were wrong and are corrected:** “A request expires after (hours)” said a request is closed after that long (nothing closes a request in this version), “Remind after (hours)” said the approvers are reminded (only people on Telegram are), and “Send stock alerts” said nothing leaves the site (with Telegram on the alert goes to the chats). The description of “Keep logs for (days)” no longer says that it sets how long handled message ids are kept (two weeks, fixed). `locale/main.pot` is regenerated.
+
 ### Fixed: in polling mode a button pressed between two polling loops waited for minutes
 
 Found on the first real use. The polling loop runs for about nine minutes and queues its successor as it ends, but it queued it under the job id it was itself still running under, and Frappe does not queue a job whose id is queued or running (`deduplicate`). The successor was silently dropped, so after every loop there was a gap of 7 to 11 minutes until the housekeeping (every 10 minutes) started a new one; a press made in the gap waited for it. The loops now take turns at two job ids (`telegram/jobs.py: queue_the_loop`), each told which it holds, so a successor is always accepted. `tests/test_telegram_webhook.py` pins that the successor never has the id of the loop that queues it.

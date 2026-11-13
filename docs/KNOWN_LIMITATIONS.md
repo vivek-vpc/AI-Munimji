@@ -14,7 +14,7 @@ The rules in `ai-munimji-engine` ask the ERP through one interface (the "port").
 | `last_purchase_dates` | When each item was last bought, for the same report | As above |
 | `get_item_alternatives` | Item Alternative records, to suggest a substitute | Substitutes are not part of version 0.1 |
 | `get_supplier_contact` | A supplier's e-mail and phone | Personal data; only needed to write to a supplier, which version 0.1 does not do |
-| `send_email` | Sending a message | Version 0.1 sends nothing out of the site |
+| `send_email` | Sending an e-mail (to a supplier, for instance) | Version 0.1 sends no e-mail and writes to no supplier. By default it sends nothing out of the site; the optional Telegram connection (below) carries requests to your own people, never to a supplier |
 
 `get_documents` reads Purchase Order, Material Request and Purchase Receipt (the documents the stock rules look at). Asked for any other DocType it raises the same error.
 
@@ -42,6 +42,7 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
   * an **inbox** beyond the standard list view of Munimji Approval Request: the AI Munimji home page is shortcuts to the standard lists, with a count on three of them (no charts, no dashboard);
   * **expiry**: a request waits until someone answers it; none is closed by the clock, though the records carry the columns for it. **Reminders** are sent on Telegram only, to the people who were sent the request; with Telegram off nobody is reminded;
   * **e-mail notifications**: the one notification is in the Desk bell, to the role Munimji Approver, once per request; a request that is changed is a new request and is announced again;
+  * **moving stock between warehouses**: the app cannot be asked for a stock transfer, from the Desk or from Telegram (the transfer records exist and the ERP client can make a draft Stock Entry, but no rule asks for one in version 0.1). Make a Material Transfer in ERPNext;
   * a **volume test** of the stores with many thousands of records;
   * **sealing at the moment of the answer**: the job seals what was answered at its next run (above).
 
@@ -76,12 +77,15 @@ The numbers are in [SCALE_MEASUREMENTS.md](SCALE_MEASUREMENTS.md): a site of 30,
 ## Telegram
 
 * **Telegram is off until a Munimji Manager switches it on, and nothing is sent while it is off.** With it on, the text of each request goes to Telegram (`docs/PRIVACY.md`).
-* **It needs a worker.** A request is sent by a job on the `short` queue after the stock check (or the answer that made it) has committed, usually within seconds; a site with no worker sends nothing, and the housekeeping job (every ten minutes) is the safety net. Polling mode also needs a worker on the `long` queue, always. Webhook mode needs a public HTTPS address.
+* **It needs a worker.** A request is sent by a job on the `short` queue after the stock check (or the answer that made it) has committed, usually within seconds; a site with no worker sends nothing, and the housekeeping job (every ten minutes) is the safety net. Polling mode also keeps one worker of the `long` queue busy nearly all the time (the loop runs for about nine minutes and starts the next as it ends), so give it at least two workers for that queue: the stock check and the vendor comparison are `long` jobs too and would wait behind the loop. Webhook mode needs a public HTTPS address.
 * **A person who connects is sent the requests made from then on, not the ones already waiting** (a flood of old messages would bury the one that matters). Those stay in the Desk. The comparison is by the second.
 * **Tidying up the chats after a Desk answer is tried once, with a short timeout** (a person is waiting for the page). If Telegram is slow or down the answer stands, the Desk says nothing about it, and a chat may keep buttons that now say “Already answered” when pressed. After three failed calls in a row the site leaves Telegram alone for a minute.
 * **A question the bot asked (“How many?”) is remembered for ten minutes in the site’s cache.** If the cache is emptied, press the button again.
 * **No AI chat.** What a person types is understood only as the answer to the bot’s own question, or a number in reply to an order request. Anything else gets one sentence. The standalone service’s chat about stock, vendors and orders is not part of the app.
 * **One private chat per person.** Groups and channels are not supported; connecting another chat moves the link and tells the old chat.
+* **Nothing is ever sent to a supplier**, on Telegram or otherwise: the chats are for the people on your site who answer requests. The bot token is a password: whoever holds it can read and send in the bot’s chats, so keep it out of tickets and chats and revoke it with @BotFather if it leaks.
+* **Some networks block `t.me`**, the address the Connect link uses. The bot is still reachable from the Telegram app: send it `/start` and the code from the end of the link (`docs/TELEGRAM.md`).
+* **Restoring a backup on another server needs the site’s `encryption_key`**, or the stored bot token cannot be read and has to be entered again. A restored copy that keeps Telegram switched on shares the bot with the original (`docs/BACKUP_RESTORE.md`).
 * **The bot’s words are in English** and are not translated.
 * **A connected person who is disabled, or who no longer holds the Munimji Approver role, stops being sent requests and cannot answer through their chat** at once; the link stays until it is deleted.
 * **Answers from Telegram are recorded as `telegram`** in the decision, the audit seal and the Draft Purchase Order’s approver note (“<person> via telegram”).

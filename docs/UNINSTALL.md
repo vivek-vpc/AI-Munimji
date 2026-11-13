@@ -6,10 +6,18 @@ bench --site <your site> uninstall-app ai_munimji
 
 `bench uninstall-app` takes a backup of the site first, unless you pass `--no-backup`; keep it if the requests or the settings matter, because they are deleted with the app. `--dry-run` lists the DocTypes that would be deleted. To remove the app from the bench as well: `bench remove-app ai_munimji`.
 
+## If you used Telegram: do this first
+
+The uninstall cannot reach Telegram, and Telegram keeps what it was given. Before you uninstall:
+
+1. In AI Munimji Settings, untick **Send requests on Telegram**, clear the **Bot token** field and save. Messages stop at once, and the polling loop (if you used polling) ends within a minute.
+2. In Telegram, open `@BotFather`, choose the bot and revoke its token (`/revoke`), or delete the bot. In webhook mode Telegram keeps calling your site's webhook address until you do; once the app is gone those calls fail, and revoking the token ends them.
+3. Tell the people who connected a chat. Their links are deleted with the app, but the messages already in their chats stay there; only they can delete them.
+
 ## What goes
 
-* **With the app itself** (Frappe removes these): the DocTypes AI Munimji Settings, Munimji Approval Request and Munimji Calendar Event, **with every record in them** (so the settings and all requests are deleted), the module, the app's home page (a Workspace) and sidebar, and the app's entry.
-* **Removed by the app's own uninstall step** (`before_uninstall`): the three roles Munimji Viewer, Munimji Approver and Munimji Manager, and their assignment to users; the seven Custom Fields `custom_agent_ref` and `custom_agent_approved_by` (on Purchase Order, Material Request and Stock Entry) and `custom_agent_note` (on Material Request); the "approve" permission type; the scheduled job and the Scheduler Event it hangs on; the app's Dock record (the rail behind its tile on the apps screen) with any arrangement of it that the site or a person made; and the notification to the Approvers. On a bench in developer mode Frappe also deletes the app's exported Workspace and Sidebar files from the app's folder; `git checkout` brings them back.
+* **With the app itself** (Frappe removes these): the app's DocTypes (AI Munimji Settings, Munimji Approval Request, Munimji Calendar Event, Munimji Telegram Link and the others listed in [STORES.md](STORES.md)), **with every record in them** (so the settings, all requests and all Telegram links are deleted), the module, the app's home page (a Workspace) and sidebar, and the app's entry.
+* **Removed by the app's own uninstall step** (`before_uninstall`): the three roles Munimji Viewer, Munimji Approver and Munimji Manager, and their assignment to users; the seven Custom Fields `custom_agent_ref` and `custom_agent_approved_by` (on Purchase Order, Material Request and Stock Entry) and `custom_agent_note` (on Material Request); the "approve" permission type; the scheduled jobs (the stock check, the daily clean-up of the logs and the Telegram housekeeping) and the Scheduler Events they hang on; the app's Dock record (the rail behind its tile on the apps screen) with any arrangement of it that the site or a person made; and the notification to the Approvers. On a bench in developer mode Frappe also deletes the app's exported Workspace and Sidebar files from the app's folder; `git checkout` brings them back.
 
 ## What stays
 

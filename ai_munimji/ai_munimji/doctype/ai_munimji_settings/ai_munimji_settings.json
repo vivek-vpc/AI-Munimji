@@ -182,14 +182,14 @@
   },
   {
    "default": "72",
-   "description": "A request nobody answers is closed after this long. It is never approved on its own.",
+   "description": "Not applied in this version: a request waits until someone answers it. It is never approved on its own.",
    "fieldname": "approval_expiry_hours",
    "fieldtype": "Int",
    "label": "A request expires after (hours)"
   },
   {
    "default": "24",
-   "description": "One reminder goes to the approvers if there is still no answer after this long.",
+   "description": "Reminders go out on Telegram only: a person who was sent the request there is reminded if there is still no answer after this long. With Telegram off nobody is reminded.",
    "fieldname": "reminder_after_hours",
    "fieldtype": "Int",
    "label": "Remind after (hours)"
@@ -207,7 +207,7 @@
   },
   {
    "default": "1",
-   "description": "A short note inside this site when stock is low, before any purchase is asked for. Nothing is sent out of the site.",
+   "description": "A short note inside this site when stock is low, before any purchase is asked for. It leaves the site only if Telegram is on: then it also goes to the chats of the people who connected one.",
    "fieldname": "stock_alerts",
    "fieldtype": "Check",
    "label": "Send stock alerts"
@@ -303,7 +303,7 @@
   },
   {
    "default": "90",
-   "description": "What the agents did, the chat log and the ids of handled messages older than this are deleted by the clean-up. 0 keeps them all. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age.",
+   "description": "What the agents did and the chat log older than this are deleted by the clean-up. 0 keeps them all and stops the clean-up. The same clean-up removes the ids of handled Telegram messages after two weeks. Requests, purchase proposals, alerts, work orders and the audit seal are never deleted by it, whatever their age.",
    "fieldname": "keep_logs_days",
    "fieldtype": "Int",
    "label": "Keep logs for (days)"
@@ -313,7 +313,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2026-11-12 18:30:00.000000",
+ "modified": "2026-11-13 12:30:00.000000",
  "modified_by": "Administrator",
  "module": "AI Munimji",
  "name": "AI Munimji Settings",
