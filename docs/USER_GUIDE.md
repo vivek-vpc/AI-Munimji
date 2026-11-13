@@ -1,6 +1,6 @@
 # AI Munimji: User guide
 
-Version 0.1 · Draft of 13 Nov 2026 (Telegram added). For ERPNext version 16. Check each step against the app before you publish this page.
+Version 0.2 · Draft of 13 Nov 2026 (Telegram added). For ERPNext version 16. Check each step against the app before you publish this page.
 
 ## What it is
 
@@ -66,7 +66,7 @@ You can get the requests in a Telegram chat, with buttons, and answer there. Ope
 
 The scheduled check reads your tax setup as Administrator and keeps the figures with the request. If a request shows "Taxes are not included in these totals", the app could not read tax data, and every total is before tax. If ERPNext applies no tax for that supplier, the request says so in different words.
 
-## What is not in version 0.1
+## What is not in version 0.2
 
 A dry run, a stock monitor report, expiry, e-mail notifications, supplier follow-up messages, moving stock between warehouses (make a Material Transfer in ERPNext) and the AI features (the AI chat in Telegram too). Reminders exist only on Telegram. See `docs/KNOWN_LIMITATIONS.md`. Requests wait until someone answers them.
 

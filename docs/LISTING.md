@@ -37,7 +37,7 @@ Two files go into the registry pull request:
   "name": "ai_munimji",
   "releases": [
     {
-      "version": "0.1.1",
+      "version": "0.2.0",
       "branch": "main",
       "commit": "[the full 40-character SHA of the release commit]",
       "frappe_core": "[copied exactly from pyproject.toml: [tool.bench.frappe-dependencies].frappe]",
@@ -148,11 +148,11 @@ Each image: at least 1280 px wide, light theme, no browser toolbars, a short cap
 
 ## 6. Publishing steps (registry)
 
-For the release that adds Telegram, the extra checks are item 8 of `docs/RELEASE_CHECKLIST.md`, and the engine to publish first is the one that holds the Telegram channel (0.1.3 or later, already on PyPI); the steps below are otherwise the same.
+The first version to submit is 0.2.0. The tag `v0.1.1` was made on 10 Nov 2026 but that release is not submitted: it has neither Telegram nor the fixes of the production-readiness review, and the pages this listing links to describe both. The extra checks for Telegram are item 8 of `docs/RELEASE_CHECKLIST.md`.
 
-1. Engine first: tag `engine-v0.1.1` in `erpnext-ai-agents`, approve the publish, check the package on PyPI.
-2. App release commit (Claude Code, per `docs/RELEASE_CHECKLIST.md`): exact engine pin `ai-munimji-engine==0.1.1`, version 0.1.1, "not released" wording changed, logo added at `docs/img/`. CI green on that commit.
-3. Make `AI-Munimji` public. Check that the logo URL, the documentation page and the licence open in a private browser window.
+1. Engine first: done. The engine 0.1.3 (the Telegram channel, tag `engine-v0.1.3`) is on PyPI; the app pins it exactly.
+2. App release commit (per `docs/RELEASE_CHECKLIST.md`): `__version__` 0.2.0, the changelog heading, the exact engine pin `ai-munimji-engine==0.1.3`, the wording above. CI green on that commit, then the tag `v0.2.0` on it.
+3. The repository is public (since 10 Nov 2026). Check again that the logo URL, the documentation page and the licence open in a private browser window.
 4. Run the registry's check locally against the release commit (clone `frappe/marketplace`, see its `docs/marketplace-check`). Fix what it finds.
 5. Fork `frappe/marketplace`, add the two files above, open the pull request. Read the check's comment on it; comment `/rereview` to run it again.
 6. If it passes, a new app merges on its own. If it is labelled `held-for-review`, read the reason in the Auto-merge Registry run.

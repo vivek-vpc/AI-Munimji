@@ -1,20 +1,20 @@
-# Known limitations of version 0.1
+# Known limitations of version 0.2
 
-These are the limits of version 0.1.1 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
+These are the limits of version 0.2.0 as it stands. Each one is either tested to fail in a clear way, or is a fact about what ERPNext lets a person read.
 
 ## What the ERP client does not do yet
 
-The rules in `ai-munimji-engine` ask the ERP through one interface (the "port"). `ai_munimji/erp_client.py` answers 16 of the port's 23 methods from the site's own data, in process, as the person who is signed in. The other seven are **left out of version 0.1**. Each raises `NotSupportedInThisVersion` ("… is not supported in this version of AI Munimji."), one test per method (`ai_munimji/tests/world/test_not_supported.py`), so a feature that needs one fails in plain words and never returns a made-up answer.
+The rules in `ai-munimji-engine` ask the ERP through one interface (the "port"). `ai_munimji/erp_client.py` answers 16 of the port's 23 methods from the site's own data, in process, as the person who is signed in. The other seven are **left out of version 0.2**. Each raises `NotSupportedInThisVersion` ("… is not supported in this version of AI Munimji."), one test per method (`ai_munimji/tests/world/test_not_supported.py`), so a feature that needs one fails in plain words and never returns a made-up answer.
 
 | Method | What it would read or do | Why it is left out |
 |---|---|---|
-| `get_receipt_lines` | Goods receipt lines, to check deliveries and invoices | The delivery and invoice checks are not part of version 0.1 |
-| `get_stock_counts` | Stock counts (Stock Reconciliation), to plan cycle counts | Cycle counts are not part of version 0.1 |
-| `get_stock_values` | The value of the stock on hand, to find slow stock | The slow-stock report is not part of version 0.1 |
+| `get_receipt_lines` | Goods receipt lines, to check deliveries and invoices | The delivery and invoice checks are not part of version 0.2 |
+| `get_stock_counts` | Stock counts (Stock Reconciliation), to plan cycle counts | Cycle counts are not part of version 0.2 |
+| `get_stock_values` | The value of the stock on hand, to find slow stock | The slow-stock report is not part of version 0.2 |
 | `last_purchase_dates` | When each item was last bought, for the same report | As above |
-| `get_item_alternatives` | Item Alternative records, to suggest a substitute | Substitutes are not part of version 0.1 |
-| `get_supplier_contact` | A supplier's e-mail and phone | Personal data; only needed to write to a supplier, which version 0.1 does not do |
-| `send_email` | Sending an e-mail (to a supplier, for instance) | Version 0.1 sends no e-mail and writes to no supplier. By default it sends nothing out of the site; the optional Telegram connection (below) carries requests to your own people, never to a supplier |
+| `get_item_alternatives` | Item Alternative records, to suggest a substitute | Substitutes are not part of version 0.2 |
+| `get_supplier_contact` | A supplier's e-mail and phone | Personal data; only needed to write to a supplier, which version 0.2 does not do |
+| `send_email` | Sending an e-mail (to a supplier, for instance) | Version 0.2 sends no e-mail and writes to no supplier. By default it sends nothing out of the site; the optional Telegram connection (below) carries requests to your own people, never to a supplier |
 
 `get_documents` reads Purchase Order, Material Request and Purchase Receipt (the documents the stock rules look at). Asked for any other DocType it raises the same error.
 
@@ -35,14 +35,14 @@ The engine's records are DocTypes ([STORES.md](STORES.md)). What that means in p
 * **An Item, Warehouse, Supplier or Purchase Order that a record points at can be deleted** in ERPNext: the app's records are history and keep the name as text (`ignore_links_on_delete` in
   `hooks.py`). Renaming one updates the records. A fallback supplier that the Settings page still names is not deleted.
 * **The follow-up stores** (messages to vendors and their replies, delivery chases, receipt checks, quote rounds, stock transfers, cycle counts, the assistant's answers and chat log) have
-  their DocTypes, their tests and their permissions, but the rules that use them are not part of version 0.1, so nothing writes to them yet and no screen shows them.
-* **Deferred on purpose, not built in version 0.1:**
+  their DocTypes, their tests and their permissions, but the rules that use them are not part of version 0.2, so nothing writes to them yet and no screen shows them.
+* **Deferred on purpose, not built in version 0.2:**
   * a **dry run** (see what the check would do, without making anything);
   * a **stock monitor view** (a report of every item and why it is or is not low);
   * an **inbox** beyond the standard list view of Munimji Approval Request: the AI Munimji home page is shortcuts to the standard lists, with a count on three of them (no charts, no dashboard);
   * **expiry**: a request waits until someone answers it; none is closed by the clock, though the records carry the columns for it. **Reminders** are sent on Telegram only, to the people who were sent the request; with Telegram off nobody is reminded;
   * **e-mail notifications**: the one notification is in the Desk bell, to the role Munimji Approver, once per request; a request that is changed is a new request and is announced again;
-  * **moving stock between warehouses**: the app cannot be asked for a stock transfer, from the Desk or from Telegram (the transfer records exist and the ERP client can make a draft Stock Entry, but no rule asks for one in version 0.1). Make a Material Transfer in ERPNext;
+  * **moving stock between warehouses**: the app cannot be asked for a stock transfer, from the Desk or from Telegram (the transfer records exist and the ERP client can make a draft Stock Entry, but no rule asks for one in version 0.2). Make a Material Transfer in ERPNext;
   * a **volume test** of the stores with many thousands of records;
   * **sealing at the moment of the answer**: the job seals what was answered at its next run (above).
 

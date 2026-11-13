@@ -31,6 +31,7 @@ Day to day:
 .\dev\exec.ps1 bench start            # web on http://development.localhost:8000 (Administrator / admin), realtime on 9000
 .\dev\exec.ps1 bash /workspace/ai_munimji/dev/gate.sh      # the app's tests, bandit, pip-audit (the checks before a commit)
 .\dev\exec.ps1 bash /workspace/ai_munimji/dev/check-uninstall.sh      # install, migrate twice, uninstall, install again, on a new site (about 5 minutes)
+.\dev\exec.ps1 bash /workspace/ai_munimji/dev/check-upgrade.sh        # the code of an earlier tag (v0.1.1 unless you name another) on a new site, then the working tree and `bench migrate` twice: what a person had is kept (about 5 minutes)
 .\dev\verify-all.ps1 -Fresh           # everything from nothing, with a timing table (about 25 minutes)
 .\dev\down.ps1                        # stop the containers, keep the data
 .\dev\precommit.ps1                    # the repository's formatters and linters (ruff, prettier, eslint) on the files git shows as changed
@@ -83,6 +84,7 @@ stops if the site's name does not start with `scale`):
 | `build-engine-wheel.ps1`, `install-engine.sh` | get the engine into the bench: the one place that knows how (README, "The engine") |
 | `gate.sh`, `run-tests.sh`, `semgrep.ps1` | the checks; `gate.sh` audits the engine's dependencies as installed |
 | `check-uninstall.sh`, `scripts/snapshot.py`, `scripts/diff_snapshots.py`, `scripts/check_coexistence.py`, `scripts/standalone_fields.py` | the uninstall check, with a site that already has the standalone service's fields |
+| `check-upgrade.sh`, `scripts/upgrade_seed.py`, `scripts/upgrade_state.py`, `scripts/check_upgrade_compare.py` | the upgrade check: an earlier version installed and used, then the working tree and `bench migrate`; the compare script lists what is required and says PASS or FAIL for each |
 | `verify-all.ps1` | all of it from nothing |
 | `roundtrip.ps1`, `browser/round-trip.cjs`, `scripts/seed.py`, `scripts/reset_demo.py` | the end-to-end trial of the placeholder below |
 | `telegram-e2e.ps1`, `scripts/telegram_e2e.py`, `scripts/fake_telegram.py`, `scripts/telegram_ui_setup.py`, `browser/telegram-ui.cjs` | the Telegram connection tried without a bot or the internet: a pretend Telegram (`fake_telegram.py`) on a local port, a site that is told to call it, and the walk through it. With a real bot in polling mode, give the development bench two workers for the `long` queue (`bench worker --queue long`, twice): `bench start` runs one worker for every queue, and the polling loop keeps it busy |

@@ -1,6 +1,6 @@
 # AI Munimji: Terms of Service
 
-Version 0.1 · Draft of 13 Nov 2026 (Telegram added) · Plain-language terms for a free, open-source app. This is not legal advice. Have it reviewed before you rely on it.
+Version 0.2 · Draft of 13 Nov 2026 (Telegram added) · Plain-language terms for a free, open-source app. This is not legal advice. Have it reviewed before you rely on it.
 
 ## 1. What these terms cover
 
