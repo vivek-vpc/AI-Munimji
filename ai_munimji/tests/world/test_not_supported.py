@@ -1,4 +1,4 @@
-"""The part of the port that version 0.1 leaves out says so, in words, one method at a time (docs/KNOWN_LIMITATIONS.md lists them). It needs no data: it runs anywhere the app does."""
+"""The part of the port that this version leaves out says so, in words, one method at a time (docs/KNOWN_LIMITATIONS.md lists them). It needs no data: it runs anywhere the app does."""
 
 import ast
 import inspect

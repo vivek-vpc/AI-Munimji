@@ -1,4 +1,4 @@
-"""The runtime half of the proof that version 0.1 sends nothing out of the site (docs/PRIVACY.md; the static half is tests/test_nothing_leaves.py).
+"""The runtime half of the proof that the app sends nothing out of the site while Telegram is off (docs/PRIVACY.md; the static half is tests/test_nothing_leaves.py).
 
 The scheduled job and the whole approval flow run with the outside world cut off: a connection to any address that is not on the site's own private network fails loudly, so do the HTTP
 libraries and every way Frappe has of making a request, and so does Frappe's mail. The site's own database and cache (private addresses, or a unix socket) stay reachable. The flow must

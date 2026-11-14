@@ -1,6 +1,6 @@
 # AI Munimji: Privacy Policy
 
-Version 0.1 · Draft of 13 Nov 2026 (Telegram added) · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
+Version 0.2 · Draft of 13 Nov 2026 (Telegram added) · This is a plain-language policy written for an open-source app. It is not legal advice; have it reviewed before you rely on it for a public listing.
 
 ## In short
 

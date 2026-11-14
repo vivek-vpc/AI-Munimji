@@ -1,8 +1,19 @@
 # Changelog
 
-What changed in the app for someone who installs it or builds on it. 0.1.0 (9 Nov 2026) was the first version; it was made but not tagged or submitted, and 0.1.1 is the version to install. The entries under 0.1.0 are how it was built up, phase by phase.
+What changed in the app for someone who installs it or builds on it. 0.1.0 (9 Nov 2026) was made but never tagged or submitted; 0.1.1 (10 Nov 2026) was the first version that was tagged; 0.2.0 (13 Nov 2026) is the version to install. The entries under 0.1.0 are how it was built up, phase by phase.
 
-## Unreleased
+## 0.2.0 (13 Nov 2026)
+
+What is new since 0.1.1, in the order a person meets it:
+
+* **Telegram, optional and off by default.** Requests arrive in the Telegram chat of the people who connected one, with buttons, and are answered there as that person, with their own rights. It needs the engine 0.1.3 (`pyproject.toml` pins it). What it sends, what it needs and its limits: `docs/PRIVACY.md`, `docs/TELEGRAM.md`, `docs/KNOWN_LIMITATIONS.md`.
+* **The stock check and the answers hold up on a large site.** Measured on 30,000 items and 5.3 million stock ledger entries (`docs/SCALE_MEASUREMENTS.md`): the check works in batches and no longer locks rows for the whole run. This needs the engine 0.1.2 or later.
+* **A request is easier to follow:** the Flow block, the sentence after every answer that says what happens next, and the vendors compared within about a minute of approving a reorder.
+* **Three descriptions on the Settings page were wrong and are corrected** (expiry, reminders, stock alerts), and every public text now says what Telegram changes.
+* **An upgrade check:** `dev/check-upgrade.sh` installs an earlier tag on a new site, sets what a person would have set, then runs the working tree and `bench migrate` twice, and fails if anything the person had is changed or lost, if Telegram is on, or if a second migrate changes anything.
+* **Upgrading from 0.1.1:** get the new code and run `bench migrate`. It adds the Telegram settings, the Munimji Telegram Link DocType and the Telegram housekeeping job (stopped while Telegram is off). Nothing is switched on by the upgrade: the Watch stock switch, the stock check's schedule and your settings stay as they were, and Telegram is off.
+
+The details are below.
 
 ### Changed: the documents and the Settings page say what Telegram changes
 

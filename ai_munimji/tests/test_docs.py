@@ -163,7 +163,7 @@ STALE = (
 
 
 class TestTheReleaseWording(unittest.TestCase):
-	"""Version 0.1.1 is the version that is released. The files that describe the app to a person no longer say that it is in development or not released (the release commit,
+	"""Version 0.2.0 is the version that is released. The files that describe the app to a person no longer say that it is in development or not released (the release commit,
 	docs/RELEASE_CHECKLIST.md), and the version is the same everywhere it is written."""
 
 	def test_no_file_that_describes_the_app_says_it_is_in_development_or_not_released(self):
@@ -180,7 +180,7 @@ class TestTheReleaseWording(unittest.TestCase):
 
 		from ai_munimji import __version__
 
-		self.assertEqual(__version__, "0.1.1")
+		self.assertEqual(__version__, "0.2.0")
 		self.assertIn(f"## {__version__} (", (ROOT / "CHANGELOG.md").read_text(encoding="utf-8"))
 		pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
 		self.assertIn(

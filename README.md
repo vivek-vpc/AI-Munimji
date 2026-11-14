@@ -1,6 +1,6 @@
 # AI Munimji
 
-A Frappe app for ERPNext v16 that watches stock and prepares draft purchase orders for a person to approve. This is version 0.1.1: it covers stock monitoring, supplier comparison and approval, and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) lists what it does not do yet. It has been run only on Frappe 16.55.2 and ERPNext 16.54.0 (earlier checks were on 16.53.0), in a development container and in CI.
+A Frappe app for ERPNext v16 that watches stock and prepares draft purchase orders for a person to approve. This is version 0.2.0: it covers stock monitoring, supplier comparison and approval, in the Desk and, optionally, on Telegram, and [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) lists what it does not do yet. It has been run only on Frappe 16.55.2 and ERPNext 16.54.0 (earlier checks were on 16.53.0), in a development container and in CI.
 
 The rules the app is built to:
 
@@ -9,7 +9,7 @@ The rules the app is built to:
 * ERPNext receives **draft** documents, with the approver recorded and the request's reference in a field. The app never submits one. An approver can later change the quantity of, or cancel, an order made from a request.
 * Every method a browser can call checks the caller's permission first, and only the scheduled job reads with `frappe.get_all`. The one method open to guests is Telegram's webhook, whose first statement refuses any call without Telegram's secret, and the few places that act as someone else are named. A test enforces all of this (`ai_munimji/tests/test_rules.py`).
 
-## What is in version 0.1.1
+## What is in version 0.2.0
 
 | | |
 |---|---|
@@ -18,10 +18,11 @@ The rules the app is built to:
 | Seven read-only fields on Purchase Order, Material Request and Stock Entry | the same fields the standalone service writes, so either product recognises the other's orders ([docs/NAMES.md](docs/NAMES.md)) |
 | An uninstall that is tested | [docs/UNINSTALL.md](docs/UNINSTALL.md) |
 | The engine's records as DocTypes | 25 of them: requests, purchase proposals, alerts, work orders, the audit seal and the rest; who may do what to each, how a value is kept, the locks and the clean-up are in [docs/STORES.md](docs/STORES.md) |
-| The stock check on a schedule | a job that the Settings page switches on and off and sets the time of; off until a person ticks Watch stock |
+| The stock check on a schedule | a job that the Settings page switches on and off and sets the time of; off until a person ticks Watch stock. It works in batches and was measured on a site of 30,000 items and 5.3 million stock ledger entries ([docs/SCALE_MEASUREMENTS.md](docs/SCALE_MEASUREMENTS.md)) |
+| The flow of a request | a Flow block on each request (reorder request, purchase request, draft Purchase Order), the vendors compared within about a minute of approving a reorder, and a sentence after every answer that says what happens next |
 | The approval form | the request in words, drawn from what the engine stored (the stock, why this vendor, why the others were not chosen, cost, delivery, taxes, the order that approving makes), with the buttons Approve, Change quantity, Change vendor and Dismiss; the first answer wins and the second is told who answered first |
 | A notification | one in the Desk bell of each Approver when a request is made, once per request; no e-mail |
-| **Telegram** (optional, off by default; added after 0.1.1, so it arrives with the next release) | each request that needs an answer also arrives in the Telegram chat of the people who connected one, with buttons; a press is that person's own answer, with their own rights, and the first answer wins; reminders go there too. Webhook or polling; the bot token is kept encrypted and never shown. It has no AI model and does not answer questions about stock. What it sends: [docs/PRIVACY.md](docs/PRIVACY.md); the steps and the limits: [docs/TELEGRAM.md](docs/TELEGRAM.md) |
+| **Telegram** (optional, off by default; new in 0.2.0) | each request that needs an answer also arrives in the Telegram chat of the people who connected one, with buttons; a press is that person's own answer, with their own rights, and the first answer wins; reminders go there too. Webhook or polling; the bot token is kept encrypted and never shown. It has no AI model and does not answer questions about stock. What it sends: [docs/PRIVACY.md](docs/PRIVACY.md); the steps and the limits: [docs/TELEGRAM.md](docs/TELEGRAM.md) |
 | **Not built yet** | a dry run, a stock monitor view, an inbox beyond the standard list view, expiry, reminders in the Desk (they exist on Telegram), e-mail notifications, moving stock between warehouses; the list is in [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md) |
 
 To install it on a bench you run yourself, see [docs/INSTALL.md](docs/INSTALL.md), which also says which ERPNext roles a person needs to see stock and make orders.

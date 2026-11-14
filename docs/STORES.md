@@ -5,8 +5,8 @@ storage interfaces ("stores"). The standalone service keeps them in SQLite. This
 permissions say who may read and answer them, and they are backed up and migrated with the site. The code is `ai_munimji/stores/`; the engine's own 60 checks of a store
 (`ai_munimji_engine.testkit.stores`) run on it unchanged.
 
-Not part of version 0.1: the Desk screens (list views, the approval form with the reasoning, the inbox, notifications) and the real schedule of the job. The DocTypes carry what those
-screens need: real columns to filter and sort by, and the engine's own text kept whole.
+The Desk screens (the list views, the approval form with the reasoning, the notification) and the schedule of the stock check are built on these DocTypes; an inbox beyond the standard lists is not
+part of the app yet ([KNOWN_LIMITATIONS.md](KNOWN_LIMITATIONS.md)). The DocTypes carry what those screens need: real columns to filter and sort by, and the engine's own text kept whole.
 
 ## The 25 DocTypes
 
