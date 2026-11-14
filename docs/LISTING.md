@@ -114,7 +114,11 @@ Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Mu
 
 ## 4. Screenshots (`docs/img/listing/`)
 
-Eleven of the twelve pictures were taken on 14 Nov 2026 from a development site that runs the 0.2.0 code, with the six months of fictional history (vendors, customers and items are made up), by `dev/browser/listing-shots.cjs` and `dev/browser/listing-shots-telegram.cjs`. Each is 1440 px wide, in the light theme, and shows the page only (no browser toolbar). Telegram is the pretend one of `dev/scripts/fake_telegram.py` (a bot called "AI Munimji demo"), so no real bot, token or chat is on them. The one-time code of the Connect dialog is not shown on the page, only in the link behind the button. The people shown are "Administrator" and the demo approver; no e-mail address is on any picture. Look at each picture again if it is taken again.
+Pictures 1 to 11 were taken on 14 Nov 2026 from a development site that runs the 0.2.0 code, with the six months of fictional history (vendors, customers and items are made up), by `dev/browser/listing-shots.cjs` and `dev/browser/listing-shots-telegram.cjs`. Each is 1440 px wide, in the light theme, and shows the page only (no browser toolbar). Pictures 10 and 11 use the pretend Telegram of `dev/scripts/fake_telegram.py` (a bot called "AI Munimji demo"), so no real bot, token or chat is on them. The one-time code of the Connect dialog is not shown on the page, only in the link behind the button. The people shown are "Administrator" and the demo approver.
+
+Pictures 12a and 12b are screenshots of a real Telegram chat with a test bot, taken on 14 Nov 2026 by the owner of the bot, on a Frappe Cloud site with the same fictional data, and cropped to the chat. The chat shows the bot's display name only: no phone number, chat number, user name or token. The bot's reply to an answer names who answered by e-mail address (`docs/PRIVACY.md` says so), so in 12b that address is pixelated. The owner's other screenshots, which show the address, are not used.
+
+No e-mail address, token or chat number can be read on any of the twelve pictures. Look at each picture again if it is taken again.
 
 | # | File | Caption |
 |---|---|---|
@@ -129,7 +133,8 @@ Eleven of the twelve pictures were taken on 14 Nov 2026 from a development site 
 | 9 | `09-draft-purchase-order.png` | The Draft Purchase Order in ERPNext, with the Munimji request and who approved it, and from where. |
 | 10 | `10-telegram-settings.png` | The Telegram section of the Settings page after Connect the bot: the switch, the mode, the token as dots, the status. |
 | 11 | `11-connect-telegram.png` | The Connect Telegram dialog. |
-| 12 | *not taken yet* | A request in a real Telegram chat with its buttons, and the same request after it was answered (the buttons gone, the outcome under it). Taken by the owner of the bot, cropped to the chat alone, with fictional items and no chat number, name or token. |
+| 12a | `12a-telegram-request.png` | A purchase request in a Telegram chat, with its buttons: Create order, Remind in 2d, Reject, Requisition instead, Change quantity, Change vendor, Details. |
+| 12b | `12b-telegram-answered.png` | The answer in the same chat: what was recorded and the draft Purchase Order that was made (nothing has been sent to the vendor), with the buttons to change, cancel or keep it. |
 
 One small wording slip is visible on picture 1 ("1 drafts" for a single draft). It is in the app, not in the picture, and is listed in `docs/KNOWN_LIMITATIONS.md` with the other one found while the pictures were taken.
 
