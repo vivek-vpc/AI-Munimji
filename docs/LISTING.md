@@ -112,24 +112,26 @@ Three roles control the app's own pages: Munimji Viewer, Munimji Approver and Mu
 | Works with version 16 only | the `frappe_core` range in `pyproject.toml` |
 | Needs MariaDB with `innodb_snapshot_isolation` OFF for two simultaneous presses to wait their turn; the app warns when it is ON | `docs/INSTALL.md`, the Settings page |
 
-## 4. Screenshots to take (from the demo site, with the seed data)
+## 4. Screenshots (`docs/img/listing/`)
 
-Use fictional items and suppliers. No real names, addresses or e-mail addresses.
+Eleven of the twelve pictures were taken on 14 Nov 2026 from a development site that runs the 0.2.0 code, with the six months of fictional history (vendors, customers and items are made up), by `dev/browser/listing-shots.cjs` and `dev/browser/listing-shots-telegram.cjs`. Each is 1440 px wide, in the light theme, and shows the page only (no browser toolbar). Telegram is the pretend one of `dev/scripts/fake_telegram.py` (a bot called "AI Munimji demo"), so no real bot, token or chat is on them. The one-time code of the Connect dialog is not shown on the page, only in the link behind the button. The people shown are "Administrator" and the demo approver; no e-mail address is on any picture. Look at each picture again if it is taken again.
 
-1. AI Munimji Settings, with the stock monitor switched on.
-2. The list of requests (pending).
-3. The first request (the reorder).
-4. The purchase request: the stock, how long it lasts, the chosen supplier.
-5. The same request scrolled to **why the other suppliers were not chosen**.
-6. The Change quantity dialog.
-7. The request after approval, with the draft order's number shown on it.
-8. The draft Purchase Order, showing the request reference and the approver.
-9. The AI Munimji home page (the shortcuts, with the count of requests waiting) and, if you like, the apps screen with the AI Munimji tile.
-10. AI Munimji Settings, the **Telegram** section: the switch, the mode, and the status after "Connect the bot". **The Bot token field stays empty or shows only dots.**
-11. The **Connect Telegram** dialog with its link. **Blur the one-time code.**
-12. A request in a Telegram chat, with its buttons, and the same request after it was answered (the buttons gone, the outcome under it). Use a bot made for the screenshot, a fictional person and fictional items; no real chat number, name or token.
+| # | File | Caption |
+|---|---|---|
+| 1 | `01-home.png` | The AI Munimji home page: what needs you, and the past requests. |
+| 2 | `02-settings.png` | AI Munimji Settings, with Watch stock switched on and the stock check's last run. |
+| 3 | `03-requests-waiting.png` | The requests that wait for an answer. |
+| 4 | `04-reorder-request.png` | The reorder suggestion: the stock, how long it lasts, why it was raised. |
+| 5 | `05-purchase-request.png` | The purchase request the vendor comparison made: what is proposed and what it costs, the stock, why this vendor. |
+| 6 | `06-other-vendors-not-chosen.png` | The same kind of request, scrolled to **why the other vendors were not chosen** (four vendors compared). |
+| 7 | `07-change-quantity.png` | The Change quantity dialog: the vendors are checked again for the new quantity. |
+| 8 | `08-request-after-approval.png` | The request after Approve: the Draft Purchase Order's number is in the flow, and nothing has been sent to the vendor. |
+| 9 | `09-draft-purchase-order.png` | The Draft Purchase Order in ERPNext, with the Munimji request and who approved it, and from where. |
+| 10 | `10-telegram-settings.png` | The Telegram section of the Settings page after Connect the bot: the switch, the mode, the token as dots, the status. |
+| 11 | `11-connect-telegram.png` | The Connect Telegram dialog. |
+| 12 | *not taken yet* | A request in a real Telegram chat with its buttons, and the same request after it was answered (the buttons gone, the outcome under it). Taken by the owner of the bot, cropped to the chat alone, with fictional items and no chat number, name or token. |
 
-Each image: at least 1280 px wide, light theme, no browser toolbars, a short caption. Check each one for a bot token, a chat number, an e-mail address or a real company name before it is used.
+One small wording slip is visible on picture 1 ("1 drafts" for a single draft). It is in the app, not in the picture, and is listed in `docs/KNOWN_LIMITATIONS.md` with the other one found while the pictures were taken.
 
 ## 5. Demo video (about 100 seconds, about 115 with the optional Telegram step; optional for the registry, useful on the page)
 

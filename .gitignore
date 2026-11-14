@@ -15,6 +15,7 @@ dev/*.out
 dev/.cache/
 dev/browser/node_modules/
 dev/browser/*.png
+dev/browser/shots/
 
 # the engine wheel for the step 7 check is built in the other repository and not kept here
 dev/wheels/
